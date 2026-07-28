@@ -1,0 +1,6 @@
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "crarp.settings"
+python_files = ["test_*.py", "tests.py"]
+# Mantém "from risk_engine import ..." funcionando em test_risk_engine.py sem
+# editar o arquivo original: essa pasta entra direto no sys.path.
+pythonpath = ["avaliacoes/risk_engine_lib"]

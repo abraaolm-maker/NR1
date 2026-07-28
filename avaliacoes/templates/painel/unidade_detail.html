@@ -1,0 +1,89 @@
+{% extends "painel/_base.html" %}
+{% block titulo %}{{ unidade.nome }}{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+    <a class="voltar" href="{% url 'painel_avaliacoes:empresa_detail' unidade.empresa.pk %}" title="Voltar para {{ unidade.empresa.nome }}">&larr; Voltar</a>
+    <h1>{{ unidade.nome }}</h1>
+    <p class="subtitulo">GHEs, funções e ações desta unidade — {{ unidade.empresa.nome }}.</p>
+</div>
+
+<div class="cartao">
+    <p>{{ unidade.endereco|default:"Sem endereço cadastrado." }}</p>
+    <p>
+        <a href="{% url 'painel_avaliacoes:unidade_update' unidade.pk %}" class="botao secundario">Editar</a>
+        {% if eh_admin and tem_aplicacoes %}
+        <a href="{% url 'painel_relatorios:relatorio_create' unidade.pk %}" class="botao secundario">
+            Novo relatório desta unidade
+        </a>
+        <a href="{% url 'painel_avaliacoes:alertas_agregados' unidade.pk %}" class="botao secundario">
+            Alertas agregados
+        </a>
+        <a href="{% url 'painel_avaliacoes:semaforo_riscos' unidade.pk %}" class="botao secundario">
+            Semáforo de riscos
+        </a>
+        {% endif %}
+    </p>
+    {% if eh_admin and not tem_aplicacoes %}
+    <p style="font-size: 13px; color: #777;">
+        "Novo relatório" fica disponível depois que houver pelo menos uma Aplicação criada
+        (crie um GHE abaixo, depois uma Aplicação dentro dele).
+    </p>
+    {% endif %}
+</div>
+
+<div class="cartao">
+    <h2>GHEs (Grupos Homogêneos de Exposição)</h2>
+    <p style="font-size: 13px; color: #777;">
+        <strong>Comece aqui.</strong> Um GHE é o grupo de trabalhadores que vai responder o
+        questionário — obrigatório, é a partir dele que a avaliação de risco acontece. As
+        "Funções" no cartão abaixo são opcionais: servem só pra marcar, dentro de um GHE, quais
+        cargos exatos fazem parte dele (útil pra documentação/auditoria). Você pode criar e usar
+        um GHE inteiro sem cadastrar nenhuma Função.
+    </p>
+    <p><a href="{% url 'painel_avaliacoes:ghe_create' unidade.pk %}" class="botao">+ Novo GHE</a></p>
+    {% if ghes %}
+    <table>
+        <thead><tr><th>Nome</th><th>Setor</th><th></th></tr></thead>
+        <tbody>
+        {% for ghe in ghes %}
+            <tr>
+                <td>{{ ghe.nome }}</td>
+                <td>{{ ghe.setor|default:"—" }}</td>
+                <td><a href="{% url 'painel_avaliacoes:ghe_detail' ghe.pk %}" class="botao secundario pequeno">Ver</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Nenhum GHE cadastrado ainda.</p>
+    {% endif %}
+</div>
+
+<div class="cartao">
+    <h2>Funções <span style="font-weight: 400; font-size: 13px; color: #999;">(opcional)</span></h2>
+    <p style="font-size: 13px; color: #777;">
+        Não é um segundo cadastro separado dos GHEs acima — é um detalhe que você anexa a um GHE.
+        Cadastre aqui os cargos (ex.: "Auxiliar Administrativo", "Almoxarife") e depois, ao editar
+        um GHE, marque quais desses cargos participam dele. Só use isso se quiser documentar com
+        precisão quais cargos cada GHE cobre; do contrário, pode ignorar esta seção.
+    </p>
+    <p>
+        <a href="{% url 'painel_avaliacoes:funcao_create' unidade.pk %}" class="botao secundario">+ Nova função</a>
+    </p>
+    {% if funcoes %}
+    <table>
+        <thead><tr><th>Nome</th><th>Descrição</th></tr></thead>
+        <tbody>
+        {% for funcao in funcoes %}
+            <tr>
+                <td>{{ funcao.nome }}</td>
+                <td>{{ funcao.descricao|default:"—" }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Nenhuma função cadastrada ainda — opcional, usada pra marcar cargos participantes de um GHE.</p>
+    {% endif %}
+</div>
+{% endblock %}

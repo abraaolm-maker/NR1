@@ -1,0 +1,15 @@
+{% extends "avaliacoes/_base_questionario.html" %}
+
+{% block titulo %}Obrigado pela participação{% endblock %}
+
+{% block conteudo %}
+<h1>Obrigado pela sua participação!</h1>
+<p>
+    Suas respostas foram registradas com sucesso em {{ respondente.concluido_em }}.
+</p>
+<p>
+    Os resultados serão analisados de forma agregada e anônima, junto com as respostas
+    de outros colegas do seu grupo de trabalho, para identificar oportunidades reais de
+    melhoria no ambiente de trabalho.
+</p>
+{% endblock %}

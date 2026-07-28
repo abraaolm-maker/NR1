@@ -1,0 +1,58 @@
+{% extends "painel/_base.html" %}
+{% block titulo %}Relatórios{% endblock %}
+{% block conteudo %}
+<div class="cartao">
+    <h1>Relatórios</h1>
+    <p style="font-size: 13px; color: #777;">
+        Um relatório reúne uma ou mais coletas (Aplicações) encerradas de uma mesma
+        Unidade num único Inventário de Risco Psicossocial.
+    </p>
+</div>
+
+<div class="cartao" {% if aplicacoes_prontas %}style="border-color: var(--teal-100); background: var(--teal-50);"{% endif %}>
+    <h2 {% if aplicacoes_prontas %}style="color: var(--teal-700);"{% endif %}>
+        Prontas para relatório ({{ aplicacoes_prontas|length }})
+    </h2>
+    {% if aplicacoes_prontas %}
+    <table>
+        <thead><tr><th>GHE</th><th>Unidade</th><th>Concluída em</th><th></th></tr></thead>
+        <tbody>
+        {% for aplicacao in aplicacoes_prontas %}
+            <tr>
+                <td>{{ aplicacao.ghe.nome }}</td>
+                <td>{{ aplicacao.ghe.unidade.nome }} ({{ aplicacao.ghe.unidade.empresa.nome }})</td>
+                <td>{{ aplicacao.concluida_em|date:"d/m/Y" }}</td>
+                <td><a href="{% url 'painel_relatorios:relatorio_create' aplicacao.ghe.unidade.pk %}" class="botao pequeno">Criar relatório</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="font-size: 13px; color: #777;">
+        Nenhuma coleta encerrada sem relatório no momento. Encerre a coleta de uma
+        Aplicação (no detalhe da Aplicação) para ela aparecer aqui.
+    </p>
+    {% endif %}
+</div>
+
+<div class="cartao">
+    <h2>Todos os relatórios</h2>
+    {% if relatorios %}
+    <table>
+        <thead><tr><th>Unidade</th><th>Período</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+        {% for relatorio in relatorios %}
+            <tr>
+                <td>{{ relatorio.unidade }}</td>
+                <td>{{ relatorio.periodo_inicio }} – {{ relatorio.periodo_fim }}</td>
+                <td>{{ relatorio.get_status_display }}</td>
+                <td><a href="{% url 'painel_relatorios:relatorio_detail' relatorio.pk %}" class="botao secundario pequeno">Ver</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Nenhum relatório criado ainda.</p>
+    {% endif %}
+</div>
+{% endblock %}

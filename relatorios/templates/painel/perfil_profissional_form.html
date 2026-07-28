@@ -1,0 +1,16 @@
+{% extends "painel/_base.html" %}
+{% block titulo %}Meu perfil profissional{% endblock %}
+{% block conteudo %}
+<div class="cartao">
+    <h1>Meu perfil profissional</h1>
+    <p>
+        Esse registro (conselho + número) aparece no bloco de assinatura do PDF final quando você
+        assina um relatório (CLAUDE.md Seção 8.3, item 8).
+    </p>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Salvar" class="botao">
+    </form>
+</div>
+{% endblock %}

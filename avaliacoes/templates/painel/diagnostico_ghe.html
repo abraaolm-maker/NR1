@@ -1,0 +1,83 @@
+{% extends "painel/_base.html" %}
+{% block titulo %}Diagnóstico GHE — {{ aplicacao.ghe.nome }}{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+    <a class="voltar" href="{% url 'painel_avaliacoes:aplicacao_detail' aplicacao.pk %}" title="Voltar para {{ aplicacao.instrumento.nome }} — {{ aplicacao.ghe.nome }}">&larr; Voltar</a>
+    <h1>Diagnóstico GHE</h1>
+    <p class="subtitulo">{{ aplicacao.ghe.nome }} — uma linha por domínio, com prioridade P1/P2/P3 (ou AGRUPAR, se suprimido).</p>
+</div>
+
+<div class="cartao">
+    <details style="font-size: 12.5px; color: #777;">
+        <summary style="cursor: pointer;">Como a prioridade é calculada?</summary>
+        <p>
+            A Prioridade vem da prevalência de respondentes na faixa elevada — P1 (≥50%),
+            P2 (≥25%), P3 (abaixo disso) — não da matriz de severidade × probabilidade
+            (essa continua calculada internamente, ver "Resultados por domínio" no
+            detalhe da Aplicação, só que não define mais a prioridade deste diagnóstico).
+            "AGRUPAR" significa N abaixo do mínimo de confidencialidade — resultado
+            suprimido, não divulgar isoladamente.
+        </p>
+    </details>
+</div>
+
+{% if todos_agrupar %}
+<div class="cartao" style="border-color: var(--amber-100); background: var(--amber-100);">
+    <h2 style="color: var(--amber-700);">⚠ Todos os domínios estão suprimidos</h2>
+    <p style="color: var(--amber-700);">
+        Este GHE ainda não atingiu o mínimo de {{ n_minimo }} respostas — por
+        confidencialidade, nenhum resultado individual pode ser exibido. Amplie a coleta
+        deste grupo ou agregue-o a outro GHE de exposição equivalente antes de usar este
+        diagnóstico.
+    </p>
+</div>
+{% endif %}
+<div class="cartao">
+    {% if linhas %}
+    <div style="overflow-x: auto;">
+    <table>
+        <thead>
+            <tr>
+                <th>GHE</th>
+                <th>Domínio</th>
+                <th>N</th>
+                <th>Índice de risco (0–100)</th>
+                <th>% elevados</th>
+                <th>Classificação</th>
+                <th>Prioridade</th>
+                <th>Alerta protegido</th>
+                <th>Nota técnica</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for linha in linhas %}
+            <tr>
+                <td>{{ linha.ghe }}</td>
+                <td>{{ linha.dominio }}</td>
+                <td>{{ linha.n }}</td>
+                <td>{{ linha.escore|default:"—"|floatformat:1 }}</td>
+                <td>{% if linha.percentual_elevados is not None %}{{ linha.percentual_elevados|floatformat:0 }}%{% else %}—{% endif %}</td>
+                <td>{{ linha.classificacao }}</td>
+                <td>
+                    {% if linha.prioridade == "P1" %}
+                    <span class="badge critico">P1</span>
+                    {% elif linha.prioridade == "P2" %}
+                    <span class="badge moderado">P2</span>
+                    {% elif linha.prioridade == "P3" %}
+                    <span class="badge aceitavel">P3</span>
+                    {% else %}
+                    <span class="badge" style="color: var(--slate-500);">AGRUPAR</span>
+                    {% endif %}
+                </td>
+                <td>{{ linha.alerta_protegido|default:"—" }}</td>
+                <td style="font-size: 12px; color: var(--slate-600);">{{ linha.nota_tecnica }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% else %}
+    <p>Nenhum domínio calculado ainda — aparece automaticamente conforme os respondentes forem terminando.</p>
+    {% endif %}
+</div>
+{% endblock %}

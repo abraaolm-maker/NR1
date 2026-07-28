@@ -1,0 +1,23 @@
+{% extends "painel/_base.html" %}
+{% block titulo %}Nenhuma aplicação disponível{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+    <a class="voltar" href="{% url 'painel_avaliacoes:unidade_detail' unidade.pk %}" title="Voltar para {{ unidade.nome }}">&larr; Voltar</a>
+    <h1>Ainda não é possível criar um relatório</h1>
+    <p class="subtitulo">Um relatório precisa de pelo menos uma Aplicação já criada em {{ unidade.nome }}.</p>
+</div>
+
+<div class="cartao">
+    <p>
+        Antes de continuar, você precisa:
+    </p>
+    <ol>
+        <li>Criar um GHE (Grupo Homogêneo de Exposição) nesta unidade.</li>
+        <li>Criar uma Aplicação dentro desse GHE (escolher instrumento e critério).</li>
+        <li>Gerar links e coletar respostas dos trabalhadores.</li>
+    </ol>
+    <p>
+        <a href="{% url 'painel_avaliacoes:ghe_create' unidade.pk %}" class="botao">Criar GHE agora</a>
+    </p>
+</div>
+{% endblock %}

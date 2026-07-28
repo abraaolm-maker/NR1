@@ -1,0 +1,101 @@
+{% extends "painel/_base.html" %}
+{% block titulo %}{% if aplicacao %}Editar aplicação{% else %}Nova aplicação{% endif %}{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+    <a class="voltar" href="{% url 'painel_avaliacoes:ghe_detail' ghe.pk %}" title="Voltar para {{ ghe.nome }}">&larr; Voltar</a>
+    <h1>{% if aplicacao %}Editar aplicação{% else %}Nova aplicação{% endif %}</h1>
+    <p class="subtitulo">
+        {% if aplicacao %}Altere o instrumento, tipo ou critério desta aplicação.{% else %}Escolha o instrumento de coleta para o GHE {{ ghe.nome }}.{% endif %}
+    </p>
+</div>
+
+<div class="cartao">
+    <form method="post">
+        {% csrf_token %}
+
+        {# ---- Instrumento: decisão real #1 ---- #}
+        <p>
+            <label for="{{ form.instrumento.id_for_label }}">{{ form.instrumento.label }}:</label>
+            {{ form.instrumento }}
+            {% if form.instrumento.errors %}<span class="helptext" style="color:#c0392b;">{{ form.instrumento.errors|join:" " }}</span>{% endif %}
+            <span class="helptext" id="instrumento-ajuda-dinamica" style="display:block; margin-top:4px; color:#555;"></span>
+        </p>
+
+        {# ---- Tipo: decisão real #2, já vem pré-marcado em "Anônima" ---- #}
+        <p>
+            <label for="{{ form.tipo.id_for_label }}">{{ form.tipo.label }}:</label>
+            {{ form.tipo }}
+            {% if form.tipo.errors %}<span class="helptext" style="color:#c0392b;">{{ form.tipo.errors|join:" " }}</span>{% endif %}
+        </p>
+
+        {# ---- Critério de cálculo: informação, só vira decisão se houver mais de uma versão ---- #}
+        {% if form.total_criterios > 1 %}
+            <p id="criterio-resumo">
+                Critério: <strong>{{ form.criterio_padrao.codigo }} ({{ form.criterio_padrao.get_status_display }})</strong>
+                — <a href="#" onclick="document.getElementById('criterio-resumo').style.display='none'; document.getElementById('criterio-campo').style.display='block'; return false;">usar outra versão</a>
+            </p>
+            <p id="criterio-campo" style="display:none;">
+                <label for="{{ form.criterio_versao.id_for_label }}">{{ form.criterio_versao.label }}:</label>
+                {{ form.criterio_versao }}
+                {% if form.criterio_versao.errors %}<span class="helptext" style="color:#c0392b;">{{ form.criterio_versao.errors|join:" " }}</span>{% endif %}
+                <span class="helptext" style="display:block; margin-top:4px; color:#777;">{{ form.criterio_versao.help_text }}</span>
+            </p>
+        {% else %}
+            <p>
+                Critério: <strong>{{ form.criterio_padrao.codigo }} ({{ form.criterio_padrao.get_status_display }})</strong>
+                {{ form.criterio_versao.as_hidden }}
+            </p>
+        {% endif %}
+
+        {# ---- Responsável aplicador: informação, só vira decisão se houver mais de um gestor ---- #}
+        {% if form.total_aplicadores > 1 %}
+            <p>
+                <label for="{{ form.responsavel_aplicador.id_for_label }}">{{ form.responsavel_aplicador.label }}:</label>
+                {{ form.responsavel_aplicador }}
+                {% if form.responsavel_aplicador.errors %}<span class="helptext" style="color:#c0392b;">{{ form.responsavel_aplicador.errors|join:" " }}</span>{% endif %}
+            </p>
+        {% else %}
+            <p>
+                Responsável aplicador: <strong>Você{% if form.aplicador_padrao %} ({{ form.aplicador_padrao.username }}){% endif %}</strong>
+                {{ form.responsavel_aplicador.as_hidden }}
+            </p>
+        {% endif %}
+
+        {# ---- Data da aplicação: já vem preenchida com hoje, continua editável ---- #}
+        <p>
+            <label for="{{ form.data_aplicacao.id_for_label }}">{{ form.data_aplicacao.label }}:</label>
+            {{ form.data_aplicacao }}
+            {% if form.data_aplicacao.errors %}<span class="helptext" style="color:#c0392b;">{{ form.data_aplicacao.errors|join:" " }}</span>{% endif %}
+        </p>
+
+        {# ---- Justificativa: opcional, recolhida por padrão (exceto se já tem conteúdo) ---- #}
+        <p id="justificativa-toggle" {% if form.instance.justificativa_instrumento %}style="display:none;"{% endif %}>
+            <a href="#" onclick="document.getElementById('justificativa-campo').style.display='block'; document.getElementById('justificativa-toggle').style.display='none'; return false;">+ Adicionar justificativa</a>
+        </p>
+        <p id="justificativa-campo" {% if not form.instance.justificativa_instrumento %}style="display:none;"{% endif %}>
+            <label for="{{ form.justificativa_instrumento.id_for_label }}">{{ form.justificativa_instrumento.label }}:</label>
+            {{ form.justificativa_instrumento }}
+            {% if form.justificativa_instrumento.errors %}<span class="helptext" style="color:#c0392b;">{{ form.justificativa_instrumento.errors|join:" " }}</span>{% endif %}
+            <span class="helptext" style="display:block; margin-top:4px; color:#777;">{{ form.justificativa_instrumento.help_text }}</span>
+        </p>
+
+        <input type="submit" value="Salvar" class="botao">
+    </form>
+</div>
+
+<script type="application/json" id="instrumentos-ajuda-data">{{ form.instrumentos_ajuda_json|safe }}</script>
+<script>
+(function () {
+    var ajudaData = JSON.parse(document.getElementById('instrumentos-ajuda-data').textContent);
+
+    var selectInstrumento = document.getElementById('{{ form.instrumento.id_for_label }}');
+    var ajudaInstrumento = document.getElementById('instrumento-ajuda-dinamica');
+    function atualizarAjudaInstrumento() {
+        var texto = ajudaData[selectInstrumento.value];
+        ajudaInstrumento.textContent = texto || 'Selecione um instrumento para ver o que ele é e quando usá-lo.';
+    }
+    selectInstrumento.addEventListener('change', atualizarAjudaInstrumento);
+    atualizarAjudaInstrumento();
+})();
+</script>
+{% endblock %}

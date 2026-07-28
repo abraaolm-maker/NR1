@@ -1,0 +1,19 @@
+{% extends "painel/_base.html" %}
+{% block titulo %}{% if unidade %}Editar unidade{% else %}Nova unidade{% endif %}{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+    <a class="voltar" href="{% url 'painel_avaliacoes:empresa_detail' empresa.pk %}" title="Voltar para {{ empresa.nome }}">&larr; Voltar</a>
+    <h1>{% if unidade %}Editar unidade{% else %}Nova unidade{% endif %}</h1>
+    <p class="subtitulo">
+        {% if unidade %}Altere nome, CNPJ ou endereço de {{ unidade.nome }}.{% else %}Cadastre uma nova unidade/filial de {{ empresa.nome }}.{% endif %}
+    </p>
+</div>
+
+<div class="cartao">
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Salvar" class="botao">
+    </form>
+</div>
+{% endblock %}

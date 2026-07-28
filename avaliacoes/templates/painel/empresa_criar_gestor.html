@@ -1,0 +1,26 @@
+{% extends "painel/_base.html" %}
+{% block titulo %}Criar acesso do gestor{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+    <a class="voltar" href="{% url 'painel_avaliacoes:empresa_detail' empresa.pk %}" title="Voltar para {{ empresa.nome }}">&larr; Voltar</a>
+    <h1>Criar acesso do gestor</h1>
+    <p class="subtitulo">
+        Cria o único usuário que {{ empresa.nome }} vai usar pra entrar no painel. Repasse
+        o usuário e a senha ao responsável da empresa por um canal seguro.
+    </p>
+</div>
+
+<div class="cartao">
+    <form method="post">
+        {% csrf_token %}
+        {% for campo in form %}
+        <p>
+            <label for="{{ campo.id_for_label }}">{{ campo.label }}:</label>
+            {{ campo }}
+            {% if campo.errors %}<span class="helptext" style="color:#c0392b;">{{ campo.errors|join:" " }}</span>{% endif %}
+        </p>
+        {% endfor %}
+        <input type="submit" value="Criar acesso" class="botao">
+    </form>
+</div>
+{% endblock %}

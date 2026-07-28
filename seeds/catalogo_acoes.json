@@ -1,0 +1,132 @@
+{
+  "instrument_code": "COPSOQ_RR_REVESTIR",
+  "source_note": "Extraído da planilha 'Catalogo_Acoes' de Relatorio_Semaforo_Dados_Simulados.xlsx — 9 domínios x 2 níveis (Moderado/Elevado). D9 'Elevado' corresponde ao rótulo 'Elevado/alerta' da planilha original (nível de alerta protegido).",
+  "acoes": [
+    {
+      "dominio_codigo": "D1",
+      "nivel": "Moderado",
+      "acao_sugerida": "Revisar prioridades, prazos, interrupções e distribuição diária de tarefas.",
+      "hierarquia": "organizacao",
+      "indicador": "Fila de demandas, horas extras, retrabalho e cumprimento de pausas."
+    },
+    {
+      "dominio_codigo": "D1",
+      "nivel": "Elevado",
+      "acao_sugerida": "Redimensionar capacidade/efetivo, reduzir picos evitáveis e redesenhar fluxo e metas.",
+      "hierarquia": "eliminacao",
+      "indicador": "Carga planejada x capacidade, horas extras, atrasos e retrabalho."
+    },
+    {
+      "dominio_codigo": "D2",
+      "nivel": "Moderado",
+      "acao_sugerida": "Definir protocolo para situações tensas, apoio da liderança e recuperação após eventos difíceis.",
+      "hierarquia": "organizacao",
+      "indicador": "Eventos registrados e tempo de resposta da liderança."
+    },
+    {
+      "dominio_codigo": "D2",
+      "nivel": "Elevado",
+      "acao_sugerida": "Reduzir exposição, garantir cobertura/rodízio e autoridade para interromper interação abusiva.",
+      "hierarquia": "eliminacao",
+      "indicador": "Recorrência de eventos e afastamento da fonte de exposição."
+    },
+    {
+      "dominio_codigo": "D3",
+      "nivel": "Moderado",
+      "acao_sugerida": "Aumentar participação no planejamento e garantir pausas e margem de decisão.",
+      "hierarquia": "organizacao",
+      "indicador": "Pausas realizadas e melhorias propostas/implantadas."
+    },
+    {
+      "dominio_codigo": "D3",
+      "nivel": "Elevado",
+      "acao_sugerida": "Redesenhar papéis, alçadas e cobertura operacional para remover impedimentos à autonomia segura.",
+      "hierarquia": "eliminacao",
+      "indicador": "Decisões resolvidas no nível adequado e redução de atalhos."
+    },
+    {
+      "dominio_codigo": "D4",
+      "nivel": "Moderado",
+      "acao_sugerida": "Atualizar descrição de função, interfaces e critérios de prioridade.",
+      "hierarquia": "organizacao",
+      "indicador": "Conflitos de papel e retrabalho por ambiguidade."
+    },
+    {
+      "dominio_codigo": "D4",
+      "nivel": "Elevado",
+      "acao_sugerida": "Redesenhar responsabilidades e eliminar acúmulos incompatíveis ou ordens contraditórias.",
+      "hierarquia": "eliminacao",
+      "indicador": "Desvios de função e ordens conflitantes."
+    },
+    {
+      "dominio_codigo": "D5",
+      "nivel": "Moderado",
+      "acao_sugerida": "Tornar metas, feedback e reconhecimento previsíveis, claros e respeitosos.",
+      "hierarquia": "gestao",
+      "indicador": "Regularidade de feedback e percepção de clareza."
+    },
+    {
+      "dominio_codigo": "D5",
+      "nivel": "Elevado",
+      "acao_sugerida": "Revisar metas e recursos para compatibilizar exigência, qualidade e segurança.",
+      "hierarquia": "eliminacao",
+      "indicador": "Metas revisadas, recursos disponíveis e incidentes por pressão."
+    },
+    {
+      "dominio_codigo": "D6",
+      "nivel": "Moderado",
+      "acao_sugerida": "Estabelecer rotinas de suporte, alinhamento e tratamento imparcial de conflitos.",
+      "hierarquia": "gestao",
+      "indicador": "Tempo de resolução e recorrência de conflitos."
+    },
+    {
+      "dominio_codigo": "D6",
+      "nivel": "Elevado",
+      "acao_sugerida": "Intervir em práticas de liderança e fluxos de escalonamento, com responsabilização e monitoramento.",
+      "hierarquia": "gestao",
+      "indicador": "Reincidência, queixas e cumprimento dos acordos."
+    },
+    {
+      "dominio_codigo": "D7",
+      "nivel": "Moderado",
+      "acao_sugerida": "Criar rotina sem culpa para relatar erros, riscos e sugestões, com retorno documentado.",
+      "hierarquia": "gestao",
+      "indicador": "Relatos recebidos, retorno no prazo e melhorias implantadas."
+    },
+    {
+      "dominio_codigo": "D7",
+      "nivel": "Elevado",
+      "acao_sugerida": "Garantir proteção contra retaliação e autoridade de parada diante de risco grave.",
+      "hierarquia": "eliminacao",
+      "indicador": "Relatos sem retaliação e ações corretivas concluídas."
+    },
+    {
+      "dominio_codigo": "D8",
+      "nivel": "Moderado",
+      "acao_sugerida": "Publicar critérios de escalas, tarefas e mudanças e abrir canal de contestação.",
+      "hierarquia": "gestao",
+      "indicador": "Contestações, ajustes e antecedência da comunicação."
+    },
+    {
+      "dominio_codigo": "D8",
+      "nivel": "Elevado",
+      "acao_sugerida": "Revisar decisões e práticas com tratamento desigual e corrigir critérios e governança.",
+      "hierarquia": "eliminacao",
+      "indicador": "Desvios corrigidos e percepção de justiça na reaplicação."
+    },
+    {
+      "dominio_codigo": "D9",
+      "nivel": "Moderado",
+      "acao_sugerida": "Reforçar política, canal confidencial, não retaliação e fluxo de apuração.",
+      "hierarquia": "gestao",
+      "indicador": "Tempo de resposta, proteção aplicada e recorrência."
+    },
+    {
+      "dominio_codigo": "D9",
+      "nivel": "Elevado",
+      "acao_sugerida": "Ativar fluxo protegido imediato, cessar a exposição, preservar evidências e realizar apuração competente.",
+      "hierarquia": "resposta_imediata",
+      "indicador": "Proteção efetivada, prazo de resposta e não recorrência."
+    }
+  ]
+}

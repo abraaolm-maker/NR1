@@ -1,0 +1,20 @@
+{% extends "painel/_base.html" %}
+{% block titulo %}Nova função{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+    <a class="voltar" href="{% url 'painel_avaliacoes:unidade_detail' unidade.pk %}" title="Voltar para {{ unidade.nome }}">&larr; Voltar</a>
+    <h1>Nova função</h1>
+    <p class="subtitulo">
+        Funções são usadas pra marcar quais cargos participam de cada GHE de {{ unidade.nome }} (opcional).
+        Ex.: "Operador de Linha", "Supervisor de Produção".
+    </p>
+</div>
+
+<div class="cartao">
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Salvar" class="botao">
+    </form>
+</div>
+{% endblock %}

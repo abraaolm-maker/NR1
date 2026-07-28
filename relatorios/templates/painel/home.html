@@ -1,0 +1,96 @@
+{% extends "painel/_base.html" %}
+{% block titulo %}Início{% endblock %}
+{% block conteudo %}
+<div class="cartao">
+    <h1>Bem-vindo(a) ao Painel{% if eh_admin %} do Gestor{% endif %}</h1>
+    {% if eh_admin %}
+    <p>
+        {{ total_empresas }} empresa(s) cadastrada(s).
+        <a href="{% url 'painel_avaliacoes:empresa_list' %}">Ver todas &raquo;</a>
+    </p>
+    {% elif empresa_do_usuario %}
+    <p>Empresa: <strong>{{ empresa_do_usuario.nome }}</strong></p>
+    {% endif %}
+    <details style="margin-top: 10px;">
+        <summary style="cursor: pointer; font-size: 13px; font-weight: 600; color: var(--teal-700);">
+            Como funciona o ciclo completo — clique para ver
+        </summary>
+        <ol style="font-size: 13px; color: var(--slate-600); margin-top: 10px; padding-left: 20px; line-height: 1.9;">
+            <li>Cadastre a Empresa → Unidade → GHE (o grupo de trabalhadores que vai responder).</li>
+            <li>Crie uma Aplicação (uma rodada de questionário) para esse GHE.</li>
+            <li>Distribua o link único da Aplicação por WhatsApp, e-mail etc.</li>
+            <li>Acompanhe as respostas chegando no detalhe da Aplicação.</li>
+            <li>Quando achar que já respondeu gente suficiente, clique em "Encerrar coleta".</li>
+            <li>Um banner na própria Aplicação avisa quando ela está pronta — clique em "Criar relatório".</li>
+            <li>No relatório: revise os diagnósticos → gere o parecer técnico → gere o PDF → assine.</li>
+            <li>O relatório assinado (PDF final) fica disponível pra empresa baixar.</li>
+        </ol>
+    </details>
+</div>
+
+{% if eh_admin %}
+<div class="cartao" {% if aplicacoes_prontas_para_relatorio %}style="border-color: var(--teal-100); background: var(--teal-50);"{% endif %}>
+    <h2 {% if aplicacoes_prontas_para_relatorio %}style="color: var(--teal-700);"{% endif %}>
+        Coletas encerradas aguardando relatório ({{ aplicacoes_prontas_para_relatorio|length }})
+    </h2>
+    {% if aplicacoes_prontas_para_relatorio %}
+    <table>
+        <thead><tr><th>GHE</th><th>Unidade</th><th>Concluída em</th><th></th></tr></thead>
+        <tbody>
+        {% for aplicacao in aplicacoes_prontas_para_relatorio %}
+            <tr>
+                <td>{{ aplicacao.ghe.nome }}</td>
+                <td>{{ aplicacao.ghe.unidade.nome }} ({{ aplicacao.ghe.unidade.empresa.nome }})</td>
+                <td>{{ aplicacao.concluida_em|date:"d/m/Y" }}</td>
+                <td><a href="{% url 'painel_relatorios:relatorio_create' aplicacao.ghe.unidade.pk %}" class="botao pequeno">Criar relatório</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="font-size: 13px; color: #777;">Nenhuma coleta encerrada aguardando relatório no momento.</p>
+    {% endif %}
+</div>
+
+<div class="cartao">
+    <h2>Relatórios aguardando revisão ou assinatura ({{ relatorios_pendentes|length }})</h2>
+    {% if relatorios_pendentes %}
+    <table>
+        <thead><tr><th>Unidade</th><th>Período</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+        {% for relatorio in relatorios_pendentes %}
+            <tr>
+                <td>{{ relatorio.unidade }}</td>
+                <td>{{ relatorio.periodo_inicio }} – {{ relatorio.periodo_fim }}</td>
+                <td>{{ relatorio.get_status_display }}</td>
+                <td><a href="{% url 'painel_relatorios:relatorio_detail' relatorio.pk %}" class="botao secundario pequeno">Ver</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Nenhum relatório pendente — tudo assinado.</p>
+    {% endif %}
+</div>
+{% endif %}
+
+<div class="cartao">
+    <h2>Aplicações em andamento ({{ aplicacoes_em_andamento|length }})</h2>
+    {% if aplicacoes_em_andamento %}
+    <table>
+        <thead><tr><th>GHE</th><th>Instrumento</th><th></th></tr></thead>
+        <tbody>
+        {% for aplicacao in aplicacoes_em_andamento %}
+            <tr>
+                <td>{{ aplicacao.ghe.nome }} ({{ aplicacao.ghe.unidade.empresa.nome }})</td>
+                <td>{{ aplicacao.instrumento.nome }}</td>
+                <td><a href="{% url 'painel_avaliacoes:aplicacao_detail' aplicacao.pk %}" class="botao secundario pequeno">Ver</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Nenhuma aplicação em andamento no momento.</p>
+    {% endif %}
+</div>
+{% endblock %}

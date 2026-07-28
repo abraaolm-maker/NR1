@@ -1,0 +1,44 @@
+{% extends "painel/_base.html" %}
+{% block titulo %}Relatórios{% endblock %}
+{% block conteudo %}
+<div class="cartao">
+    <h1>Relatórios da sua empresa</h1>
+    <p style="font-size: 13px; color: #777;">
+        Cada relatório reúne uma ou mais avaliações encerradas numa única Unidade.
+        O parecer técnico e a assinatura são feitos pelo profissional responsável do
+        serviço — aqui você acompanha o andamento e baixa o PDF quando disponível.
+    </p>
+</div>
+
+<div class="cartao">
+    {% if relatorios %}
+    <table>
+        <thead><tr><th>Unidade</th><th>Período</th><th>Status</th><th>PDF</th></tr></thead>
+        <tbody>
+        {% for relatorio in relatorios %}
+            <tr>
+                <td>{{ relatorio.unidade.nome }}</td>
+                <td>{{ relatorio.periodo_inicio }} – {{ relatorio.periodo_fim }}</td>
+                <td>
+                    {% if relatorio.status == "assinado" %}
+                    <span class="badge aceitavel">Assinado</span>
+                    {% else %}
+                    <span class="badge moderado">Em preparação</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if relatorio.status == "assinado" and relatorio.pdf_path %}
+                    <a href="{{ relatorio.pdf_path.url }}" target="_blank" class="botao secundario pequeno">Baixar</a>
+                    {% else %}
+                    <span style="color: var(--slate-400); font-size: 12px;">Ainda não disponível</span>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Nenhum relatório disponível ainda. Ele aparece aqui assim que uma coleta for encerrada e o relatório for criado pelo profissional responsável.</p>
+    {% endif %}
+</div>
+{% endblock %}

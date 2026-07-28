@@ -1,0 +1,146 @@
+{% extends "painel/_base.html" %}
+{% block titulo %}Semáforo de riscos — {{ unidade.nome }}{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+    <a class="voltar" href="{% url 'painel_avaliacoes:unidade_detail' unidade.pk %}" title="Voltar para {{ unidade.nome }}">&larr; Voltar</a>
+    <h1>Semáforo de riscos</h1>
+    <p class="subtitulo">Distribuição dos domínios por faixa de risco (favorável/intermediário/risco) — {{ unidade.nome }}.</p>
+</div>
+
+<div class="cartao">
+    <p>
+        {% if ghe_selecionado %}
+        Exibindo apenas o GHE "{{ ghe_selecionado.nome }}".
+        {% else %}
+        Exibindo o total da unidade — todos os GHEs somados.
+        {% endif %}
+    </p>
+    <details style="font-size: 12.5px; color: #777; margin-bottom: 10px;">
+        <summary style="cursor: pointer;">Como são calculadas as 3 faixas?</summary>
+        <p>
+            Favorável (escore &le; limite baixo), intermediário (entre os limites) e risco
+            para a saúde (escore &ge; limite elevado). Um GHE suprimido isoladamente entra
+            na soma do total da unidade, mas o resultado só aparece quando o total agregado
+            também atinge o N mínimo de confidencialidade.
+        </p>
+    </details>
+    <form method="get" style="margin-top: 10px;">
+        <label for="ghe-select" style="display:inline; text-transform:none; font-weight:400; font-size:13px;">Filtrar por GHE:</label>
+        <select id="ghe-select" name="ghe" onchange="this.form.submit()">
+            <option value="">Todos (total da unidade)</option>
+            {% for ghe in ghes %}
+            <option value="{{ ghe.pk }}" {% if ghe_selecionado.pk == ghe.pk %}selected{% endif %}>{{ ghe.nome }}</option>
+            {% endfor %}
+        </select>
+    </form>
+</div>
+
+{% if linhas %}
+<div class="cartao">
+    <p class="rotulo-eyebrow">Distribuição dos fatores psicossociais por faixa de risco</p>
+    <p style="font-size: 12.5px; color: var(--slate-500); margin-bottom: 14px;">
+        Grupo analisado: {{ unidade.nome }}{% if ghe_selecionado %} — {{ ghe_selecionado.nome }}{% endif %}
+        · N válido: {{ n_total }}
+    </p>
+    {% for linha in linhas %}
+    <div style="display: flex; align-items: center; margin-bottom: 8px;">
+        <div style="width: 220px; font-size: 12px; text-align: right; padding-right: 10px; color: var(--slate-700);">
+            {{ linha.dominio_codigo }} - {{ linha.dominio_nome }}
+        </div>
+        {% if linha.suprimido %}
+        <div style="flex: 1; display: flex; align-items: center; height: 22px; border-radius: var(--radius); background: var(--slate-100); color: var(--slate-500); font-size: 11px; padding-left: 10px;">
+            Suprimido — N ({{ linha.n_respondentes }}) abaixo do mínimo de {{ linha.n_minimo }}
+        </div>
+        {% else %}
+        <div style="flex: 1; display: flex; height: 22px; border-radius: var(--radius); overflow: hidden;">
+            {% if linha.pct_risco > 0 %}
+            <div style="width: {% widthratio linha.pct_risco 1 100 %}%; background: var(--red-500); display:flex; align-items:center; justify-content:center; color:#fff; font-size:10px; font-weight:600;">
+                {% if linha.pct_risco >= 0.05 %}{% widthratio linha.pct_risco 1 100 %}%{% endif %}
+            </div>
+            {% endif %}
+            {% if linha.pct_intermediario > 0 %}
+            <div style="width: {% widthratio linha.pct_intermediario 1 100 %}%; background: var(--amber-500); display:flex; align-items:center; justify-content:center; color:#333; font-size:10px; font-weight:600;">
+                {% if linha.pct_intermediario >= 0.05 %}{% widthratio linha.pct_intermediario 1 100 %}%{% endif %}
+            </div>
+            {% endif %}
+            {% if linha.pct_favoravel > 0 %}
+            <div style="width: {% widthratio linha.pct_favoravel 1 100 %}%; background: var(--teal-500); display:flex; align-items:center; justify-content:center; color:#fff; font-size:10px; font-weight:600;">
+                {% if linha.pct_favoravel >= 0.05 %}{% widthratio linha.pct_favoravel 1 100 %}%{% endif %}
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+    <p style="font-size: 11.5px; color: var(--slate-500); margin-top: 12px;">
+        Leitura: <span style="color: var(--red-500); font-weight:700;">■</span> risco para a saúde ·
+        <span style="color: var(--amber-500); font-weight:700;">■</span> situação intermediária ·
+        <span style="color: var(--teal-500); font-weight:700;">■</span> situação favorável.
+        Referência visual: COPSOQ Manual Portugal 2013, Gráfico 1.
+    </p>
+</div>
+{% endif %}
+
+<div class="cartao">
+    {% if linhas %}
+    <table>
+        <thead>
+            <tr>
+                <th>Domínio</th>
+                <th>N</th>
+                <th style="background: var(--red-50);">Risco</th>
+                <th style="background: var(--amber-100);">Intermediário</th>
+                <th style="background: var(--teal-50);">Favorável</th>
+                <th>Prioridade</th>
+                <th>Média de risco</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for linha in linhas %}
+            <tr>
+                <td>{{ linha.dominio_codigo }} — {{ linha.dominio_nome }}</td>
+                <td>{{ linha.n_respondentes }}</td>
+                {% if linha.suprimido %}
+                <td colspan="5" style="color: var(--slate-500);">
+                    Suprimido por confidencialidade — são necessárias pelo menos
+                    {{ linha.n_minimo }} respostas para exibir este resultado.
+                </td>
+                {% else %}
+                <td style="background: var(--red-50);">{% widthratio linha.pct_risco 1 100 %}%</td>
+                <td style="background: var(--amber-100);">{% widthratio linha.pct_intermediario 1 100 %}%</td>
+                <td style="background: var(--teal-50);">{% widthratio linha.pct_favoravel 1 100 %}%</td>
+                <td>
+                    {% if linha.prioridade == "P1" %}
+                    <span class="badge critico">P1</span>
+                    {% elif linha.prioridade == "P2" %}
+                    <span class="badge moderado">P2</span>
+                    {% else %}
+                    <span class="badge aceitavel">P3</span>
+                    {% endif %}
+                </td>
+                <td>{{ linha.media_risco }}</td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Nenhum dado calculado ainda para esta seleção.</p>
+    {% endif %}
+</div>
+
+{% if resumo.maior_risco %}
+<div class="cartao">
+    <h2>Leitura resumida</h2>
+    <p>
+        Maior proporção em vermelho: <strong>{{ resumo.maior_risco.dominio_codigo }} —
+        {{ resumo.maior_risco.dominio_nome }}</strong> ({% widthratio resumo.maior_risco.pct_risco 1 100 %}%).
+    </p>
+    <p>
+        Domínios P1: <strong>{{ resumo.contagem_prioridade.P1 }}</strong> ·
+        Domínios P2: <strong>{{ resumo.contagem_prioridade.P2 }}</strong> ·
+        Domínios P3: <strong>{{ resumo.contagem_prioridade.P3 }}</strong>
+    </p>
+</div>
+{% endif %}
+{% endblock %}

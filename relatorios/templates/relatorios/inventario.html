@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<title>Inventário de Risco Psicossocial — {{ unidade.nome }}</title>
+<style>
+    @page {
+        size: A4;
+        margin: 2cm 1.8cm;
+        @bottom-center {
+            content: "Página " counter(page) " de " counter(pages);
+            font-size: 9px;
+            color: #666;
+        }
+    }
+
+    body {
+        font-family: "DejaVu Sans", Arial, sans-serif;
+        font-size: 11px;
+        color: #1a1a1a;
+        line-height: 1.4;
+    }
+
+    h1 { font-size: 22px; margin-bottom: 4px; }
+    h2 {
+        font-size: 15px;
+        margin-top: 24px;
+        margin-bottom: 8px;
+        padding-bottom: 4px;
+        border-bottom: 2px solid #2b3a55;
+        color: #2b3a55;
+    }
+    h3 { font-size: 12.5px; margin-top: 14px; margin-bottom: 4px; color: #2b3a55; }
+
+    .capa {
+        text-align: center;
+        margin-top: 8cm;
+    }
+    .capa .selo {
+        font-size: 12px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: #666;
+    }
+    .capa h1 { font-size: 26px; margin-top: 12px; }
+    .capa .meta { margin-top: 24px; font-size: 12px; color: #444; }
+    .capa .meta div { margin-bottom: 4px; }
+
+    .secao { page-break-before: always; }
+    .capa { page-break-after: always; }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 10px;
+        font-size: 10px;
+    }
+    th, td {
+        border: 1px solid #ccc;
+        padding: 4px 6px;
+        text-align: left;
+        vertical-align: top;
+    }
+    th { background: #eef1f6; color: #2b3a55; }
+
+    .badge {
+        display: inline-block;
+        padding: 1px 8px;
+        border-radius: 3px;
+        font-weight: bold;
+        color: #fff;
+        font-size: 9.5px;
+    }
+    .aceitavel { background: #3a9d5d; }
+    .moderado { background: #d1a316; }
+    .alto { background: #e07b1a; }
+    .critico { background: #c0392b; }
+
+    .matriz-tabela td, .matriz-tabela th { text-align: center; }
+    .matriz-cel { color: #fff; font-weight: bold; }
+
+    .aviso-minuta {
+        border: 1px solid #c0392b;
+        background: #fdecea;
+        color: #922;
+        padding: 8px 10px;
+        font-size: 10.5px;
+        margin-top: 12px;
+    }
+
+    .ficha-acao {
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        padding: 8px 10px;
+        margin-bottom: 10px;
+        page-break-inside: avoid;
+    }
+    .ficha-acao .ficha-titulo {
+        font-weight: bold;
+        color: #2b3a55;
+        margin-bottom: 4px;
+    }
+    .ficha-acao table { margin-bottom: 0; }
+    .ficha-acao table td.rotulo {
+        width: 140px;
+        font-weight: bold;
+        color: #444;
+        background: #f7f8fa;
+    }
+
+    .ghe-bloco { margin-bottom: 18px; }
+
+    /* Gráfico semáforo — barras empilhadas horizontais via HTML/CSS puro (WeasyPrint
+       não roda JS/Chart.js/canvas). Referência visual: COPSOQ Manual Portugal 2013,
+       Gráfico 1 (p. 15). */
+    .grafico-semaforo-titulo { font-weight: bold; font-size: 12.5px; color: #2b3a55; margin-bottom: 2px; }
+    .grafico-semaforo-subtitulo { font-size: 10px; color: #666; margin-bottom: 12px; }
+    .escala-x { display: flex; margin: 0 0 4px 208px; font-size: 8px; color: #888; }
+    .escala-x span { flex: 1; text-align: left; }
+    .escala-x span:last-child { flex: 0; text-align: right; }
+    .barra-semaforo { display: flex; align-items: center; margin-bottom: 6px; }
+    .label-dominio { width: 200px; font-size: 9px; text-align: right; padding-right: 8px; }
+    .barra-container { flex: 1; display: flex; height: 22px; border: 1px solid #ddd; }
+    .segmento { display: flex; align-items: center; justify-content: center; font-size: 8px; color: #fff; font-weight: bold; }
+    .segmento.vermelho { background: #c0392b; }
+    .segmento.amarelo { background: #f1c40f; color: #333; }
+    .segmento.verde { background: #27ae60; }
+    .rodape-nota { font-size: 9.5px; color: #555; margin-top: 10px; }
+    .rodape-nota .quadrado { font-weight: bold; }
+
+    .assinatura {
+        margin-top: 60px;
+        text-align: center;
+    }
+    .assinatura .linha {
+        width: 60%;
+        margin: 0 auto;
+        border-top: 1px solid #333;
+        padding-top: 4px;
+    }
+    .assinatura .pendente {
+        color: #999;
+        font-style: italic;
+    }
+
+    .rodape-nota { font-size: 9px; color: #777; margin-top: 6px; }
+</style>
+</head>
+<body>
+
+{% if minuta %}
+<div style="position: fixed; top: 45%; left: 5%; transform: rotate(-30deg); font-size: 72px; color: rgba(192,57,43,0.18); font-weight: bold; z-index: 0;">
+    MINUTA
+</div>
+{% endif %}
+
+<!-- 1. CAPA -->
+<div class="capa">
+    <div class="selo">Inventário de Risco Psicossocial</div>
+    <h1>{{ empresa.nome }}</h1>
+    <div class="meta">
+        <div>CNPJ: {{ empresa.cnpj }}</div>
+        <div>Unidade: {{ unidade.nome }}{% if unidade.cnpj %} — CNPJ {{ unidade.cnpj }}{% endif %}</div>
+        <div>Período de aplicação: {{ relatorio.periodo_inicio }} a {{ relatorio.periodo_fim }}</div>
+        <div>Documento nº {{ relatorio.pk }} — gerado em {{ gerado_em }}</div>
+        <div>Status: {{ relatorio.get_status_display }}</div>
+    </div>
+    {% if minuta %}
+    <div class="aviso-minuta">
+        Esta é uma MINUTA TÉCNICA sujeita a revisão e assinatura do profissional legalmente
+        habilitado responsável pelo PGR. Não tem validade como documento final.
+    </div>
+    {% endif %}
+</div>
+
+<!-- 2. BASE TÉCNICA E LEGAL -->
+<div class="secao">
+    <h2>2. Base técnica e legal utilizada</h2>
+    <p>
+        Avaliação realizada em conformidade com o Capítulo 1.5 da NR-01 (GRO/PGR), conforme
+        alteração da Portaria MTE nº 1.419/2024, com prazo de vigência plena definido pela
+        Portaria MTE nº 765/2025.
+    </p>
+    <table>
+        <tr><th>Critério de cálculo (versão)</th><td>{{ relatorio.criterio_versao.codigo }}</td></tr>
+        <tr><th>Status do critério</th><td>{{ relatorio.criterio_versao.get_status_display }}</td></tr>
+        <tr><th>Descrição</th><td>{{ relatorio.criterio_versao.descricao }}</td></tr>
+    </table>
+    <h3>Instrumentos utilizados por GHE</h3>
+    <table>
+        <thead><tr><th>GHE</th><th>Instrumento</th><th>Tipo de aplicação</th></tr></thead>
+        <tbody>
+        {% for item in ghes %}
+            <tr>
+                <td>{{ item.ghe.nome }}</td>
+                <td>{{ item.aplicacao.instrumento.nome }}</td>
+                <td>{{ item.aplicacao.get_tipo_display }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- 3. METODOLOGIA -->
+<div class="secao">
+    <h2>3. Metodologia</h2>
+    <p>
+        Coleta realizada por GHE (Grupo Homogêneo de Exposição), com questionário validado
+        (COPSOQ adaptado ou ITRA conforme indicado por GHE), aplicação anônima ou identificada
+        conforme registrado, e cálculo determinístico de escore, classificação e matriz de
+        risco por domínio/subescala.
+    </p>
+    <table>
+        <thead><tr><th>GHE</th><th>Domínio/subescala</th><th>N respondentes</th><th>Observação</th></tr></thead>
+        <tbody>
+        {% for item in ghes %}
+            {% for d in item.dominios %}
+            <tr>
+                <td>{{ item.ghe.nome }}</td>
+                <td>{{ d.escore_dominio.dominio.codigo }} — {{ d.escore_dominio.dominio.nome }}</td>
+                <td>{{ d.escore_dominio.n_respondentes }}</td>
+                <td>
+                    {% if d.escore_dominio.suprimido_por_confidencialidade %}
+                        Resultado suprimido — N abaixo do mínimo de confidencialidade.
+                    {% else %}—{% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- 4. RESULTADOS POR GHE E POR DOMÍNIO -->
+<div class="secao">
+    <h2>4. Resultados por GHE e por domínio</h2>
+
+    <h3>Matriz de risco de referência (Severidade × Probabilidade)</h3>
+    <table class="matriz-tabela" style="width: 60%;">
+        <thead>
+            <tr><th></th><th>Probabilidade 1</th><th>Probabilidade 2</th><th>Probabilidade 3</th></tr>
+        </thead>
+        <tbody>
+        {% for linha in matriz_linhas %}
+            <tr>
+                <th>Severidade {{ linha.severidade }}</th>
+                {% for cel in linha.celulas %}
+                    <td class="matriz-cel {{ cel.banda_css }}">
+                        {{ cel.banda }}<br><small>{{ cel.prazo_dias|default:"—" }}{% if cel.prazo_dias %}d{% endif %}</small>
+                    </td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    {% for item in ghes %}
+    <div class="ghe-bloco">
+        <h3>GHE: {{ item.ghe.nome }}{% if item.ghe.setor %} ({{ item.ghe.setor }}){% endif %}</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Domínio</th><th>Escore</th><th>Classificação</th><th>Severidade</th>
+                    <th>Probabilidade</th><th>Banda</th><th>Prazo (dias)</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for d in item.dominios %}
+                <tr>
+                    <td>{{ d.escore_dominio.dominio.codigo }} — {{ d.escore_dominio.dominio.nome }}</td>
+                    {% if d.escore_dominio.suprimido_por_confidencialidade %}
+                        <td colspan="6">Suprimido por confidencialidade (N &lt; mínimo)</td>
+                    {% else %}
+                        <td>{{ d.escore_dominio.escore }}</td>
+                        <td>{{ d.escore_dominio.classificacao }}</td>
+                        <td>{{ d.escore_dominio.severidade }}</td>
+                        <td>{{ d.classificacao_risco.probabilidade }}</td>
+                        <td><span class="badge {{ d.banda_css }}">{{ d.classificacao_risco.banda }}</span></td>
+                        <td>{{ d.classificacao_risco.prazo_dias_plano_de_acao|default:"—" }}</td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- 5. ANÁLISE SEMÁFORO -->
+<div class="secao">
+    <h2>5. Análise semáforo</h2>
+    <p>
+        Distribuição percentual dos respondentes em 3 faixas por domínio, agregando
+        todas as Aplicações desta Unidade. Um GHE suprimido isoladamente entra na
+        soma, mas o resultado só é exibido quando o total agregado também atinge o
+        N mínimo de confidencialidade.
+    </p>
+    {% if linhas_semaforo %}
+    <div class="grafico-semaforo-titulo">DISTRIBUIÇÃO DOS FATORES PSICOSSOCIAIS POR FAIXA DE RISCO</div>
+    <div class="grafico-semaforo-subtitulo">
+        Grupo analisado: {{ empresa.nome }} — {{ unidade.nome }} · N válido: {{ n_total_semaforo }}
+    </div>
+    <div class="escala-x"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
+    {% for linha in linhas_semaforo %}
+    <div class="barra-semaforo">
+        <div class="label-dominio">{{ linha.dominio_codigo }} - {{ linha.dominio_nome }}</div>
+        {% if linha.suprimido %}
+        <div class="barra-container" style="background: #f0f0f0; color: #888; font-size: 8px; align-items: center; padding-left: 6px;">
+            Suprimido — N ({{ linha.n_respondentes }}) abaixo do mínimo de {{ linha.n_minimo }}
+        </div>
+        {% else %}
+        <div class="barra-container">
+            {% if linha.pct_risco > 0 %}
+            <div class="segmento vermelho" style="width: {% widthratio linha.pct_risco 1 100 %}%;">
+                {% if linha.pct_risco >= 0.05 %}{% widthratio linha.pct_risco 1 100 %}%{% endif %}
+            </div>
+            {% endif %}
+            {% if linha.pct_intermediario > 0 %}
+            <div class="segmento amarelo" style="width: {% widthratio linha.pct_intermediario 1 100 %}%;">
+                {% if linha.pct_intermediario >= 0.05 %}{% widthratio linha.pct_intermediario 1 100 %}%{% endif %}
+            </div>
+            {% endif %}
+            {% if linha.pct_favoravel > 0 %}
+            <div class="segmento verde" style="width: {% widthratio linha.pct_favoravel 1 100 %}%;">
+                {% if linha.pct_favoravel >= 0.05 %}{% widthratio linha.pct_favoravel 1 100 %}%{% endif %}
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+    <p class="rodape-nota">
+        Leitura: <span class="quadrado" style="color: #c0392b;">■</span> risco para a saúde;
+        <span class="quadrado" style="color: #f1c40f;">■</span> situação intermediária;
+        <span class="quadrado" style="color: #27ae60;">■</span> situação favorável.
+        Referência visual: COPSOQ Manual Portugal 2013, Gráfico 1.
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Domínio</th><th>N</th><th>Risco</th><th>Intermediário</th><th>Favorável</th>
+                <th>Prioridade</th><th>Média de risco</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for linha in linhas_semaforo %}
+            <tr>
+                <td>{{ linha.dominio_codigo }} — {{ linha.dominio_nome }}</td>
+                <td>{{ linha.n_respondentes }}</td>
+                {% if linha.suprimido %}
+                <td colspan="5">Suprimido por confidencialidade (N &lt; {{ linha.n_minimo }})</td>
+                {% else %}
+                <td>{% widthratio linha.pct_risco 1 100 %}%</td>
+                <td>{% widthratio linha.pct_intermediario 1 100 %}%</td>
+                <td>{% widthratio linha.pct_favoravel 1 100 %}%</td>
+                <td><span class="badge {% if linha.prioridade == "P1" %}critico{% elif linha.prioridade == "P2" %}moderado{% else %}aceitavel{% endif %}">{{ linha.prioridade }}</span></td>
+                <td>{{ linha.media_risco }}</td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% if resumo_semaforo.maior_risco %}
+    <p>
+        Maior proporção em vermelho: <strong>{{ resumo_semaforo.maior_risco.dominio_codigo }} —
+        {{ resumo_semaforo.maior_risco.dominio_nome }}</strong>
+        ({% widthratio resumo_semaforo.maior_risco.pct_risco 1 100 %}%). Domínios P1:
+        {{ resumo_semaforo.contagem_prioridade.P1 }} · Domínios P2:
+        {{ resumo_semaforo.contagem_prioridade.P2 }} · Domínios P3:
+        {{ resumo_semaforo.contagem_prioridade.P3 }}.
+    </p>
+    {% endif %}
+    {% else %}
+    <p>Nenhum escore por respondente calculado ainda para esta unidade.</p>
+    {% endif %}
+</div>
+
+<!-- 6. EVIDÊNCIAS COMPLEMENTARES -->
+<div class="secao">
+    <h2>6. Evidências complementares</h2>
+    {% for item in ghes %}
+        <h3>GHE: {{ item.ghe.nome }}</h3>
+        {% if item.indicadores %}
+        <table>
+            <thead><tr><th>Tipo</th><th>Período de referência</th><th>Domínio relacionado</th><th>Descrição</th></tr></thead>
+            <tbody>
+            {% for ind in item.indicadores %}
+                <tr>
+                    <td>{{ ind.get_tipo_display }}</td>
+                    <td>{{ ind.periodo_referencia }}</td>
+                    <td>{{ ind.dominio_relacionado.codigo|default:"Geral do GHE" }}</td>
+                    <td>{{ ind.descricao }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>Nenhuma evidência complementar registrada para este GHE.</p>
+        {% endif %}
+    {% endfor %}
+</div>
+
+<!-- 7. ENTREVISTA E OBSERVAÇÃO -->
+<div class="secao">
+    <h2>7. Entrevista e observação</h2>
+    {% for item in ghes %}
+        <h3>GHE: {{ item.ghe.nome }}</h3>
+        {% if item.checklist_triangulacao %}
+        <table>
+            <thead><tr><th>Tipo</th><th>Item</th><th>Conformidade</th><th>Evidência/observação</th></tr></thead>
+            <tbody>
+            {% for resposta in item.checklist_triangulacao %}
+                <tr>
+                    <td>{{ resposta.item.get_tipo_display }}</td>
+                    <td>{{ resposta.item.texto }}</td>
+                    <td>{{ resposta.get_conformidade_display }}</td>
+                    <td>{{ resposta.evidencia|default:"—" }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>Nenhum item do checklist de entrevista/observação avaliado para este GHE.</p>
+        {% endif %}
+    {% endfor %}
+</div>
+
+<!-- 8. PARECER TÉCNICO -->
+<div class="secao">
+    <h2>8. Parecer técnico</h2>
+    {% if relatorio.parecer_ia %}
+        <h3>Síntese executiva</h3>
+        <p>{{ relatorio.parecer_ia.sintese_executiva }}</p>
+
+        <h3>Pareceres por domínio</h3>
+        <table>
+            <thead><tr><th>GHE</th><th>Instrumento</th><th>Domínio</th><th>Classificação</th><th>Banda</th><th>Parecer</th></tr></thead>
+            <tbody>
+            {% for p in relatorio.parecer_ia.pareceres_por_dominio %}
+                <tr>
+                    <td>{{ p.ghe }}</td><td>{{ p.instrumento }}</td><td>{{ p.dominio }}</td>
+                    <td>{{ p.classificacao }}</td><td>{{ p.banda }}</td><td>{{ p.parecer }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <h3>Riscos prioritários</h3>
+        <table>
+            <thead><tr><th>GHE</th><th>Domínio</th><th>Banda</th><th>Justificativa</th></tr></thead>
+            <tbody>
+            {% for r in relatorio.parecer_ia.riscos_prioritarios %}
+                <tr><td>{{ r.ghe }}</td><td>{{ r.dominio }}</td><td>{{ r.banda }}</td><td>{{ r.justificativa }}</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <h3>Recomendações</h3>
+        <table>
+            <thead><tr><th>GHE</th><th>Domínio</th><th>Banda</th><th>Medida preventiva</th></tr></thead>
+            <tbody>
+            {% for r in relatorio.parecer_ia.recomendacoes %}
+                <tr><td>{{ r.ghe }}</td><td>{{ r.dominio }}</td><td>{{ r.banda }}</td><td>{{ r.medida_preventiva }}</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <p class="rodape-nota">{{ relatorio.parecer_ia.aviso_minuta }}</p>
+    {% else %}
+        <p>Parecer técnico ainda não gerado para este relatório.</p>
+    {% endif %}
+</div>
+
+<!-- 9. PLANO DE AÇÃO -->
+<div class="secao">
+    <h2>9. Plano de ação</h2>
+    {% for item in ghes %}
+        {% for d in item.dominios %}
+            {% for plano in d.planos_de_acao %}
+            <div class="ficha-acao">
+                <div class="ficha-titulo">
+                    {{ plano.codigo|default:"—" }} — {{ item.ghe.nome }} —
+                    {{ d.escore_dominio.dominio.codigo }} / <span class="badge {{ d.banda_css }}">{{ d.classificacao_risco.banda }}</span>
+                </div>
+                <table>
+                    <tr><td class="rotulo">Medida escolhida</td><td>{{ plano.medida }}</td></tr>
+                    <tr><td class="rotulo">Hierarquia de controle</td><td>{{ plano.get_hierarquia_display|default:"—" }}</td></tr>
+                    <tr><td class="rotulo">Evidência do diagnóstico</td><td>{{ plano.evidencia_diagnostico|default:"—" }}</td></tr>
+                    <tr><td class="rotulo">Indicador de acompanhamento</td><td>{{ plano.indicador|default:"—" }}</td></tr>
+                    <tr><td class="rotulo">Meta</td><td>{{ plano.meta|default:"—" }}</td></tr>
+                    <tr><td class="rotulo">Responsável</td><td>{{ plano.responsavel|default:"A definir" }}</td></tr>
+                    <tr><td class="rotulo">Prazo</td><td>{{ plano.prazo|default:"—" }}</td></tr>
+                    <tr><td class="rotulo">Status</td><td>{{ plano.get_status_display }}</td></tr>
+                    <tr><td class="rotulo">Evidência de execução</td><td>{{ plano.evidencia_execucao|default:"—" }}</td></tr>
+                    <tr><td class="rotulo">Verificação de eficácia</td><td>{{ plano.verificacao_eficacia|default:"—" }}</td></tr>
+                    <tr><td class="rotulo">Data da revisão</td><td>{{ plano.data_revisao|default:"—" }}</td></tr>
+                    <tr><td class="rotulo">Observações</td><td>{{ plano.observacoes|default:"—" }}</td></tr>
+                </table>
+            </div>
+            {% endfor %}
+        {% endfor %}
+    {% endfor %}
+</div>
+
+<!-- 10. ASSINATURA -->
+<div class="secao">
+    <h2>10. Assinatura do responsável técnico</h2>
+    <div class="assinatura">
+        {% if minuta %}
+            <div class="linha pendente">Aguardando assinatura do profissional responsável</div>
+        {% else %}
+            <div class="linha">
+                <strong>{{ relatorio.assinado_por.get_full_name|default:relatorio.assinado_por }}</strong><br>
+                {% if perfil_assinante %}
+                    {{ perfil_assinante.titulo_profissional }} — {{ perfil_assinante.conselho }} {{ perfil_assinante.numero_registro }}<br>
+                {% endif %}
+                Assinado em {{ relatorio.assinado_em }}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+</body>
+</html>

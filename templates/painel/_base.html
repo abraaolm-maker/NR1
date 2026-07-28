@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block titulo %}Painel do Gestor{% endblock %} — CRARP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        color-scheme: light;
+        --slate-900: #0f172a;
+        --slate-700: #334155;
+        --slate-600: #475569;
+        --slate-500: #64748b;
+        --slate-400: #94a3b8;
+        --slate-300: #cbd5e1;
+        --slate-200: #e2e8f0;
+        --slate-100: #f1f5f9;
+        --slate-50:  #f8fafc;
+        --teal-700: #0f766e;
+        --teal-600: #0d9488;
+        --teal-500: #14b8a6;
+        --teal-100: #ccfbf1;
+        --teal-50:  #f0fdfa;
+        --amber-700: #b45309;
+        --amber-500: #f59e0b;
+        --amber-100: #fef3c7;
+        --orange-700: #c2410c;
+        --orange-500: #f97316;
+        --orange-100: #ffedd5;
+        --red-700: #b91c1c;
+        --red-600: #dc2626;
+        --red-500: #ef4444;
+        --red-200: #fecaca;
+        --red-50:  #fef2f2;
+        --radius: 6px;
+        --radius-lg: 8px;
+        --font-heading: "Plus Jakarta Sans", Inter, -apple-system, "Segoe UI", sans-serif;
+        --font-mono: "Space Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body {
+        font-family: Inter, -apple-system, "Segoe UI", Arial, sans-serif;
+        background: #fff;
+        color: var(--slate-900);
+        margin: 0;
+        font-size: 14px;
+    }
+    a { color: var(--teal-700); }
+    h1, h2, h3 { font-family: var(--font-heading); color: var(--slate-900); }
+
+    /* ---- shell: sidebar + main ---- */
+    .shell { display: flex; min-height: 100vh; }
+    aside.barra-lateral {
+        width: 224px;
+        flex-shrink: 0;
+        background: #fff;
+        border-right: 1px solid var(--slate-200);
+        display: flex;
+        flex-direction: column;
+    }
+    .marca-caixa {
+        height: 64px;
+        padding: 0 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-bottom: 1px solid var(--slate-100);
+    }
+    .marca-icone {
+        width: 28px; height: 28px; flex-shrink: 0;
+        background: var(--teal-50); color: var(--teal-600);
+        border: 1px solid var(--teal-100); border-radius: var(--radius);
+        display: flex; align-items: center; justify-content: center;
+        font-family: var(--font-heading); font-weight: 700; font-size: 13px;
+    }
+    .marca-texto {
+        font-family: var(--font-heading); font-weight: 600; font-size: 15px;
+        color: var(--slate-900); letter-spacing: -0.01em; text-decoration: none;
+    }
+    nav.painel-nav { flex: 1; padding: 12px; }
+    nav.painel-nav a {
+        display: flex; align-items: center; gap: 10px;
+        padding: 9px 12px; border-radius: var(--radius);
+        font-size: 13.5px; color: var(--slate-600); text-decoration: none;
+        margin-bottom: 2px; transition: background-color .15s, color .15s;
+    }
+    nav.painel-nav a:hover { background: var(--slate-100); color: var(--slate-900); }
+    nav.painel-nav a.ativo { background: var(--teal-50); color: var(--teal-700); font-weight: 600; }
+    .rodape-lateral {
+        padding: 12px; border-top: 1px solid var(--slate-100);
+        display: flex; align-items: center; gap: 10px;
+    }
+    .avatar-inicial {
+        width: 26px; height: 26px; border-radius: var(--radius);
+        background: var(--slate-100); color: var(--slate-500);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 11px; font-weight: 700; flex-shrink: 0;
+    }
+    .rodape-lateral .nome-usuario { font-size: 12.5px; color: var(--slate-700); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .rodape-lateral button.sair {
+        background: none; border: none; color: var(--slate-400); cursor: pointer;
+        font-size: 11px; text-transform: uppercase; letter-spacing: .05em; font-weight: 600;
+        padding: 4px 6px;
+    }
+    .rodape-lateral button.sair:hover { color: var(--red-600); }
+
+    main {
+        flex: 1;
+        max-width: 880px;
+        margin: 0 auto;
+        padding: 32px 24px 60px;
+        width: 100%;
+    }
+
+    /* ---- cards ---- */
+    .cartao {
+        background: #fff;
+        border: 1px solid var(--slate-200);
+        border-radius: var(--radius-lg);
+        box-shadow: 0 1px 2px rgba(15,23,42,0.04);
+        padding: 28px 28px;
+        margin-bottom: 20px;
+    }
+    h1 { font-size: 20px; font-weight: 600; letter-spacing: -0.01em; margin: 0 0 4px; }
+    h2 { font-size: 14px; font-weight: 600; margin: 0 0 12px; }
+    .subtitulo { font-size: 13.5px; color: var(--slate-500); margin: 0; }
+
+    /* ---- page header: voltar + h1 + subtitulo, sem cartão/borda em volta ---- */
+    .cabecalho-pagina { margin-bottom: 20px; }
+    .cabecalho-pagina .voltar { margin-bottom: 14px; }
+
+    /* ---- eyebrow micro-label ---- */
+    .rotulo-eyebrow {
+        font-size: 10px; font-weight: 600; letter-spacing: .12em;
+        color: var(--slate-400); text-transform: uppercase; margin: 0 0 4px;
+    }
+
+    /* ---- tables ---- */
+    table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+    thead { background: rgba(248,250,252,0.7); border-bottom: 1px solid var(--slate-100); }
+    th {
+        text-align: left; padding: 10px 12px;
+        font-size: 10px; font-weight: 600; letter-spacing: .08em;
+        color: var(--slate-400); text-transform: uppercase;
+    }
+    td { text-align: left; padding: 12px; border-bottom: 1px solid var(--slate-100); color: var(--slate-700); }
+    tbody tr:hover { background: rgba(248,250,252,0.6); }
+    tbody tr:last-child td { border-bottom: none; }
+
+    /* ---- buttons ---- */
+    a.botao, button.botao, input[type="submit"].botao {
+        display: inline-block;
+        background: var(--slate-900);
+        color: #fff;
+        border: none;
+        padding: 10px 18px;
+        border-radius: var(--radius);
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        cursor: pointer;
+        text-decoration: none;
+        box-shadow: 0 1px 2px rgba(15,23,42,0.08);
+        transition: background-color .15s;
+    }
+    a.botao:hover, button.botao:hover { background: #1e293b; }
+    a.botao.secundario, button.botao.secundario {
+        background: #fff; color: var(--slate-600); border: 1px solid var(--slate-200); box-shadow: none;
+    }
+    a.botao.secundario:hover, button.botao.secundario:hover { background: var(--slate-50); }
+    a.botao.pequeno, button.botao.pequeno { padding: 5px 12px; font-size: 10.5px; }
+    .voltar {
+        display: inline-block;
+        background: var(--slate-100);
+        color: var(--slate-600);
+        padding: 7px 14px;
+        border-radius: var(--radius);
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        margin-bottom: 4px;
+    }
+    .voltar:hover { background: var(--slate-200); color: var(--slate-900); }
+
+    /* ---- risk badges: dot + uppercase label, no solid fill ---- */
+    .badge {
+        display: inline-flex; align-items: center; gap: 6px;
+        font-weight: 700; font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+    }
+    .badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .aceitavel { color: var(--teal-700); }
+    .aceitavel::before { background: var(--teal-500); }
+    .moderado { color: var(--amber-700); }
+    .moderado::before { background: var(--amber-500); }
+    .alto { color: var(--orange-700); }
+    .alto::before { background: var(--orange-500); }
+    .critico { color: var(--red-700); }
+    .critico::before { background: var(--red-500); }
+
+    /* ---- flash messages ---- */
+    .mensagens { list-style: none; padding: 0; margin: 0 0 16px; }
+    .mensagens li {
+        padding: 11px 14px;
+        border-radius: var(--radius);
+        margin-bottom: 8px;
+        font-size: 13px;
+        border: 1px solid transparent;
+    }
+    .mensagens li.success { background: var(--teal-50); color: var(--teal-700); border-color: var(--teal-100); }
+    .mensagens li.error { background: var(--red-50); color: var(--red-700); border-color: var(--red-200); }
+    .mensagens li.info { background: var(--slate-50); color: var(--slate-700); border-color: var(--slate-200); }
+
+    /* ---- forms ---- */
+    form p { margin: 14px 0; }
+    label {
+        font-size: 10px; font-weight: 600; letter-spacing: .08em;
+        color: var(--slate-400); text-transform: uppercase;
+        display: block; margin-bottom: 6px;
+    }
+    input[type="text"], input[type="number"], input[type="date"], textarea, select {
+        width: 100%; padding: 9px 11px; border: 1px solid var(--slate-200); border-radius: var(--radius);
+        font-size: 13.5px; font-family: Inter, sans-serif; color: var(--slate-900);
+        background: #fff; transition: border-color .15s, box-shadow .15s;
+    }
+    input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus,
+    textarea:focus, select:focus {
+        outline: none; border-color: var(--teal-500);
+        box-shadow: 0 0 0 3px rgba(20,184,166,0.15);
+    }
+    textarea { font-family: var(--font-mono); font-size: 12px; }
+    .helptext { font-family: Inter, sans-serif; text-transform: none; letter-spacing: normal; font-weight: 400; }
+</style>
+</head>
+<body>
+<div class="shell">
+    {% if user.is_authenticated %}
+    <aside class="barra-lateral">
+        <a href="{% url 'painel_relatorios:home' %}" class="marca-caixa">
+            <span class="marca-icone">C</span>
+            <span class="marca-texto">CRARP</span>
+        </a>
+        <nav class="painel-nav">
+            <a href="{% url 'painel_relatorios:home' %}">Início</a>
+            {% if eh_admin %}
+            <a href="{% url 'painel_avaliacoes:empresa_list' %}">Empresas</a>
+            <a href="{% url 'painel_relatorios:relatorio_list' %}">Relatórios</a>
+            <a href="{% url 'painel_avaliacoes:catalogo_acoes_list' %}">Catálogo de ações</a>
+            <a href="{% url 'painel_avaliacoes:configuracoes_risco' %}">Configurações de risco</a>
+            <a href="{% url 'painel_relatorios:meu_perfil' %}">Meu perfil profissional</a>
+            {% elif empresa_do_usuario %}
+            <a href="{% url 'painel_avaliacoes:empresa_detail' empresa_do_usuario.pk %}">Minha empresa</a>
+            <a href="{% url 'painel_avaliacoes:relatorios_empresa' %}">Relatórios</a>
+            <a href="{% url 'painel_avaliacoes:analise_ia_empresa' %}">Análise da IA</a>
+            {% endif %}
+        </nav>
+        <div class="rodape-lateral">
+            <span class="avatar-inicial">{{ user.get_full_name|default:user.username|first|upper }}</span>
+            <span class="nome-usuario">{{ user.get_full_name|default:user.username }}</span>
+            <form method="post" action="{% url 'painel_logout' %}" style="margin:0;">
+                {% csrf_token %}
+                <button type="submit" class="sair">Sair</button>
+            </form>
+        </div>
+    </aside>
+    {% endif %}
+    <main>
+        {% if messages %}
+        <ul class="mensagens">
+            {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% block conteudo %}{% endblock %}
+    </main>
+</div>
+</body>
+</html>

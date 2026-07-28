@@ -1,0 +1,103 @@
+{% extends "painel/_base.html" %}
+{% block titulo %}Revisar parecer{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+    <a class="voltar" href="{% url 'painel_relatorios:relatorio_detail' relatorio.pk %}" title="Voltar para o relatório">&larr; Voltar</a>
+    <h1>Revisar parecer técnico</h1>
+    <p class="subtitulo">
+        {{ relatorio.unidade }} — revise cada campo abaixo. Linhas em branco no final de
+        cada tabela servem pra adicionar itens novos.
+    </p>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="modo" value="estruturado">
+
+    <div class="cartao">
+        <h2>Síntese executiva</h2>
+        <textarea name="sintese_executiva" rows="4" style="width: 100%;">{{ parecer.sintese_executiva|default:"" }}</textarea>
+    </div>
+
+    <div class="cartao">
+        <h2>Pareceres por domínio</h2>
+        <div style="overflow-x: auto;">
+        <table>
+            <thead><tr><th>GHE</th><th>Instrumento</th><th>Domínio</th><th>Classificação</th><th>Banda</th><th>Parecer</th><th>Remover</th></tr></thead>
+            <tbody>
+            {% for linha in linhas.dominio %}
+                <tr>
+                    <td><input type="text" name="dominio_{{ linha.indice }}_ghe" value="{{ linha.ghe }}"></td>
+                    <td><input type="text" name="dominio_{{ linha.indice }}_instrumento" value="{{ linha.instrumento }}"></td>
+                    <td><input type="text" name="dominio_{{ linha.indice }}_dominio" value="{{ linha.dominio }}"></td>
+                    <td><input type="text" name="dominio_{{ linha.indice }}_classificacao" value="{{ linha.classificacao }}"></td>
+                    <td><input type="text" name="dominio_{{ linha.indice }}_banda" value="{{ linha.banda }}"></td>
+                    <td><textarea name="dominio_{{ linha.indice }}_parecer" rows="2" style="width: 100%;">{{ linha.parecer }}</textarea></td>
+                    <td><input type="checkbox" name="dominio_{{ linha.indice }}_remover"></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+
+    <div class="cartao">
+        <h2>Riscos prioritários</h2>
+        <div style="overflow-x: auto;">
+        <table>
+            <thead><tr><th>GHE</th><th>Domínio</th><th>Banda</th><th>Justificativa</th><th>Remover</th></tr></thead>
+            <tbody>
+            {% for linha in linhas.risco %}
+                <tr>
+                    <td><input type="text" name="risco_{{ linha.indice }}_ghe" value="{{ linha.ghe }}"></td>
+                    <td><input type="text" name="risco_{{ linha.indice }}_dominio" value="{{ linha.dominio }}"></td>
+                    <td><input type="text" name="risco_{{ linha.indice }}_banda" value="{{ linha.banda }}"></td>
+                    <td><textarea name="risco_{{ linha.indice }}_justificativa" rows="2" style="width: 100%;">{{ linha.justificativa }}</textarea></td>
+                    <td><input type="checkbox" name="risco_{{ linha.indice }}_remover"></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+
+    <div class="cartao">
+        <h2>Recomendações</h2>
+        <div style="overflow-x: auto;">
+        <table>
+            <thead><tr><th>GHE</th><th>Domínio</th><th>Banda</th><th>Medida preventiva</th><th>Remover</th></tr></thead>
+            <tbody>
+            {% for linha in linhas.recom %}
+                <tr>
+                    <td><input type="text" name="recom_{{ linha.indice }}_ghe" value="{{ linha.ghe }}"></td>
+                    <td><input type="text" name="recom_{{ linha.indice }}_dominio" value="{{ linha.dominio }}"></td>
+                    <td><input type="text" name="recom_{{ linha.indice }}_banda" value="{{ linha.banda }}"></td>
+                    <td><textarea name="recom_{{ linha.indice }}_medida_preventiva" rows="2" style="width: 100%;">{{ linha.medida_preventiva }}</textarea></td>
+                    <td><input type="checkbox" name="recom_{{ linha.indice }}_remover"></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+
+    <div class="cartao">
+        <h2>Aviso de minuta</h2>
+        <textarea name="aviso_minuta" rows="2" style="width: 100%;">{{ parecer.aviso_minuta|default:"Minuta técnica sujeita a revisão e assinatura do profissional habilitado responsável pelo PGR." }}</textarea>
+    </div>
+
+    <div class="cartao">
+        <input type="submit" value="Salvar parecer" class="botao">
+    </div>
+</form>
+
+<details class="cartao">
+    <summary style="cursor: pointer; font-weight: 600; font-size: 13px;">Modo avançado (editar JSON bruto)</summary>
+    <form method="post" style="margin-top: 14px;">
+        {% csrf_token %}
+        <input type="hidden" name="modo" value="json">
+        {{ form_json.as_p }}
+        <input type="submit" value="Salvar JSON" class="botao secundario">
+    </form>
+</details>
+{% endblock %}

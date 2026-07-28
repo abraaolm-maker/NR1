@@ -1,0 +1,57 @@
+{% extends "painel/_base.html" %}
+{% block titulo %}Pontuação anônima — {{ aplicacao.ghe.nome }}{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+    <a class="voltar" href="{% url 'painel_avaliacoes:aplicacao_detail' aplicacao.pk %}" title="Voltar para {{ aplicacao.instrumento.nome }} — {{ aplicacao.ghe.nome }}">&larr; Voltar</a>
+    <h1>Pontuação anônima</h1>
+    <p class="subtitulo">
+        {{ aplicacao.ghe.nome }} — uma linha por respondente, escore 0–100 por domínio, mapa
+        de calor verde (favorável) a vermelho (risco). Nenhum nome aparece aqui, só o alias anônimo.
+    </p>
+</div>
+
+<div class="cartao">
+    {% if linhas %}
+    <div style="overflow-x: auto;">
+    <table>
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Respondente</th>
+                <th>Tempo na organização</th>
+                <th>Modalidade</th>
+                {% for dominio in dominios %}
+                <th>{{ dominio.codigo }}</th>
+                {% endfor %}
+                <th>Índice geral</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for linha in linhas %}
+            <tr>
+                <td>{{ linha.respondente.criado_em|date:"d/m/Y" }}</td>
+                <td>{{ linha.respondente.alias_anonimo }}</td>
+                <td>{{ linha.respondente.get_tempo_na_organizacao_display|default:"—" }}</td>
+                <td>{{ linha.respondente.get_modalidade_trabalho_display|default:"—" }}</td>
+                {% for celula in linha.celulas %}
+                {% if celula.valor is not None %}
+                <td style="background-color: {{ celula.cor }}; text-align: center; font-weight: 600;">{{ celula.valor|floatformat:1 }}</td>
+                {% else %}
+                <td style="text-align: center; color: var(--slate-400);">—</td>
+                {% endif %}
+                {% endfor %}
+                {% if linha.indice_geral is not None %}
+                <td style="background-color: {{ linha.indice_geral_cor }}; text-align: center; font-weight: 700;">{{ linha.indice_geral|floatformat:1 }}</td>
+                {% else %}
+                <td style="text-align: center; color: var(--slate-400);">—</td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% else %}
+    <p>Ninguém respondeu nenhum domínio ainda — a tabela aparece conforme as respostas forem chegando.</p>
+    {% endif %}
+</div>
+{% endblock %}

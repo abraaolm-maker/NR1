@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block titulo %}Avaliação de Riscos Psicossociais{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        color-scheme: light;
+        --slate-900: #0f172a;
+        --slate-700: #334155;
+        --slate-600: #475569;
+        --slate-500: #64748b;
+        --slate-400: #94a3b8;
+        --slate-300: #cbd5e1;
+        --slate-200: #e2e8f0;
+        --slate-100: #f1f5f9;
+        --slate-50:  #f8fafc;
+        --teal-700: #0f766e;
+        --teal-600: #0d9488;
+        --teal-500: #14b8a6;
+        --teal-100: #ccfbf1;
+        --teal-50:  #f0fdfa;
+        --red-700: #b91c1c;
+        --red-200: #fecaca;
+        --red-50:  #fef2f2;
+    }
+    * { box-sizing: border-box; }
+    body {
+        font-family: Inter, -apple-system, "Segoe UI", Arial, sans-serif;
+        background: var(--slate-50);
+        color: var(--slate-900);
+        margin: 0;
+        padding: 40px 16px 48px;
+    }
+    .marca {
+        max-width: 640px; margin: 0 auto 20px; display: flex; align-items: center; gap: 10px;
+    }
+    .marca-icone {
+        width: 26px; height: 26px; background: var(--teal-50); color: var(--teal-600);
+        border: 1px solid var(--teal-100); border-radius: 6px;
+        display: flex; align-items: center; justify-content: center;
+        font-family: "Plus Jakarta Sans", sans-serif; font-weight: 700; font-size: 12px;
+    }
+    .marca-texto {
+        font-family: "Plus Jakarta Sans", sans-serif; font-weight: 600; font-size: 14px;
+        color: var(--slate-500); letter-spacing: .02em;
+    }
+    .cartao {
+        max-width: 640px;
+        margin: 0 auto;
+        background: #fff;
+        border: 1px solid var(--slate-200);
+        border-radius: 8px;
+        box-shadow: 0 1px 2px rgba(15,23,42,0.04);
+        padding: 32px 28px;
+    }
+    h1 {
+        font-family: "Plus Jakarta Sans", sans-serif; font-size: 19px; font-weight: 600;
+        color: var(--slate-900); margin-top: 0; letter-spacing: -0.01em;
+    }
+    .progresso {
+        font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+        color: var(--slate-400);
+        margin-bottom: 10px;
+    }
+    .barra-progresso {
+        height: 5px;
+        background: var(--slate-100);
+        border-radius: 3px;
+        margin-bottom: 22px;
+        overflow: hidden;
+    }
+    .barra-progresso .preenchido {
+        height: 100%;
+        background: var(--teal-500);
+    }
+    fieldset {
+        border: none;
+        padding: 16px 0;
+        border-bottom: 1px solid var(--slate-100);
+        margin: 0;
+    }
+    fieldset legend {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--slate-900);
+        margin-bottom: 10px;
+        padding: 0;
+    }
+    fieldset label {
+        display: block;
+        font-size: 13.5px;
+        font-weight: 400;
+        text-transform: none;
+        letter-spacing: normal;
+        color: var(--slate-700);
+        padding: 7px 8px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    fieldset label:hover { background: var(--slate-50); }
+    fieldset input[type="radio"] { margin-right: 8px; accent-color: var(--teal-600); }
+    button, .botao {
+        display: inline-block;
+        background: var(--slate-900);
+        color: #fff;
+        border: none;
+        padding: 12px 22px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        cursor: pointer;
+        margin-top: 22px;
+        text-decoration: none;
+    }
+    button:hover, .botao:hover { background: #1e293b; }
+    .botao-secundario {
+        background: var(--slate-200);
+        color: var(--slate-700);
+    }
+    .botao-secundario:hover { background: var(--slate-300); }
+    .acoes-form {
+        display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    .acoes-form button, .acoes-form .botao { margin-top: 0; }
+    .aviso {
+        background: var(--teal-50);
+        border: 1px solid var(--teal-100);
+        padding: 13px 15px;
+        border-radius: 6px;
+        font-size: 13px;
+        color: var(--teal-700);
+        margin-bottom: 18px;
+        line-height: 1.5;
+    }
+    .campo { margin-bottom: 18px; }
+    .campo label.rotulo {
+        display: block; font-size: 10px; font-weight: 600; letter-spacing: .08em;
+        color: var(--slate-400); text-transform: uppercase; margin-bottom: 6px;
+    }
+    .campo select, .campo input[type="text"], .campo textarea {
+        width: 100%; padding: 9px 11px; border: 1px solid var(--slate-200); border-radius: 6px;
+        font-size: 13.5px; font-family: Inter, sans-serif; color: var(--slate-900);
+    }
+    .campo select:focus, .campo input[type="text"]:focus, .campo textarea:focus {
+        outline: none; border-color: var(--teal-500); box-shadow: 0 0 0 3px rgba(20,184,166,0.15);
+    }
+    .campo textarea { min-height: 90px; resize: vertical; }
+    .checkbox-linha {
+        display: flex; align-items: flex-start; gap: 10px; padding: 12px 0;
+        border-bottom: 1px solid var(--slate-100); font-size: 13.5px; color: var(--slate-700);
+    }
+    .checkbox-linha input[type="checkbox"] { margin-top: 3px; flex-shrink: 0; accent-color: var(--teal-600); }
+    .erro-campo { color: var(--red-700); font-size: 12.5px; margin-top: 6px; background: var(--red-50); border: 1px solid var(--red-200); border-radius: 6px; padding: 8px 10px; }
+</style>
+</head>
+<body>
+<div class="marca">
+    <span class="marca-icone">C</span>
+    <span class="marca-texto">CRARP</span>
+</div>
+<div class="cartao">
+    {% block conteudo %}{% endblock %}
+</div>
+</body>
+</html>

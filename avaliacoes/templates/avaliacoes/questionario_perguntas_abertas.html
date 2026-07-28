@@ -1,0 +1,26 @@
+{% extends "avaliacoes/_base_questionario.html" %}
+
+{% block titulo %}Últimas perguntas{% endblock %}
+
+{% block conteudo %}
+<h1>Para finalizar</h1>
+<p class="aviso">
+    As duas perguntas abaixo são opcionais — responda se quiser complementar algo que os
+    itens anteriores não cobriram.
+</p>
+
+<form method="post">
+    {% csrf_token %}
+    {% for campo in form %}
+    <div class="campo">
+        <label class="rotulo" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+        {{ campo }}
+        {% if campo.errors %}<p class="erro-campo">{{ campo.errors|join:" " }}</p>{% endif %}
+    </div>
+    {% endfor %}
+    <div class="acoes-form">
+        <a href="{{ url_anterior }}" class="botao botao-secundario">Voltar</a>
+        <button type="submit">Finalizar</button>
+    </div>
+</form>
+{% endblock %}

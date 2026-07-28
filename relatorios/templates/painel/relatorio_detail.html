@@ -1,0 +1,132 @@
+{% extends "painel/_base.html" %}
+{% block titulo %}Relatório — {{ relatorio.unidade }}{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+    <a class="voltar" href="{% url 'painel_relatorios:relatorio_list' %}" title="Voltar para Relatórios">&larr; Voltar</a>
+    <h1>{{ relatorio.unidade }}</h1>
+    <p class="subtitulo">Inventário de Risco Psicossocial desta unidade.</p>
+</div>
+
+<div class="cartao">
+    <p>
+        Período: {{ relatorio.periodo_inicio }} – {{ relatorio.periodo_fim }}<br>
+        Status: <strong>{{ relatorio.get_status_display }}</strong><br>
+        Critério: {{ relatorio.criterio_versao.codigo }} ({{ relatorio.criterio_versao.get_status_display }})
+        {% if relatorio.assinado_por %}<br>Assinado por {{ relatorio.assinado_por.get_full_name|default:relatorio.assinado_por }} em {{ relatorio.assinado_em }}{% endif %}
+    </p>
+    {% if relatorio.criterio_versao.status != "ratificado" %}
+    <p style="font-size: 12.5px; color: #777;">
+        "Aguardando ratificação" significa que o critério de cálculo ainda não foi formalmente
+        revisado e assinado por um profissional habilitado — os números deste relatório já valem
+        normalmente, mas essa revisão formal do critério em si fica pendente.
+    </p>
+    {% endif %}
+
+    <h2>Aplicações incluídas</h2>
+    <table>
+        <thead><tr><th>GHE</th><th>Instrumento</th><th>Diagnóstico</th><th>Pontuação anônima</th></tr></thead>
+        <tbody>
+        {% for aplicacao in aplicacoes %}
+            <tr>
+                <td>{{ aplicacao.ghe.nome }}</td>
+                <td>{{ aplicacao.instrumento.nome }}</td>
+                <td><a href="{% url 'painel_avaliacoes:diagnostico_ghe' aplicacao.pk %}" class="botao secundario pequeno">Ver</a></td>
+                <td><a href="{% url 'painel_avaliacoes:pontuacao_anonima' aplicacao.pk %}" class="botao secundario pequeno">Ver</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <p style="margin-top: 10px;">
+        <a href="{% url 'painel_avaliacoes:semaforo_riscos' relatorio.unidade.pk %}" class="botao secundario">Semáforo de riscos</a>
+        <a href="{% url 'painel_avaliacoes:alertas_agregados' relatorio.unidade.pk %}" class="botao secundario">Alertas agregados</a>
+    </p>
+</div>
+
+<div class="cartao">
+    <div style="display: flex; gap: 0;">
+        {% for etapa in etapas %}
+        <div style="flex: 1; text-align: center; position: relative;">
+            {% if not forloop.first %}
+            <div style="position: absolute; top: 12px; left: -50%; width: 100%; height: 2px; background: {% if etapa.concluida or etapa.atual %}var(--teal-500){% else %}var(--slate-200){% endif %};"></div>
+            {% endif %}
+            <div style="position: relative; width: 26px; height: 26px; border-radius: 50%; margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;
+                {% if etapa.concluida %}background: var(--teal-500); color: #fff;
+                {% elif etapa.atual %}background: #fff; color: var(--teal-700); border: 2px solid var(--teal-500);
+                {% else %}background: var(--slate-100); color: var(--slate-400);{% endif %}">
+                {% if etapa.concluida %}✓{% else %}{{ forloop.counter }}{% endif %}
+            </div>
+            <div style="font-size: 11px; color: {% if etapa.atual %}var(--teal-700){% else %}var(--slate-500){% endif %}; font-weight: {% if etapa.atual %}600{% else %}400{% endif %};">
+                {{ etapa.nome }}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="cartao">
+    <h2>Parecer técnico (IA)</h2>
+    {% if relatorio.parecer_ia %}
+        <p><strong>Síntese executiva:</strong> {{ relatorio.parecer_ia.sintese_executiva }}</p>
+        <p>{{ relatorio.parecer_ia.pareceres_por_dominio|length }} parecer(es) por domínio ·
+           {{ relatorio.parecer_ia.riscos_prioritarios|length }} risco(s) prioritário(s) ·
+           {{ relatorio.parecer_ia.recomendacoes|length }} recomendação(ões)</p>
+        <p class="rodape-nota" style="color:#777; font-size: 12.5px;">{{ relatorio.parecer_ia.aviso_minuta }}</p>
+    {% else %}
+        <p>Nenhum parecer gerado ainda.</p>
+    {% endif %}
+
+    <p style="display:flex; gap:10px; flex-wrap:wrap;">
+        <form method="post" action="{% url 'painel_relatorios:relatorio_gerar_parecer_ia' relatorio.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="botao {% if etapa_parecer %}secundario{% endif %}">
+                {% if etapa_parecer %}Gerar parecer novamente{% else %}Gerar parecer via IA{% endif %}
+            </button>
+        </form>
+        <a href="{% url 'painel_relatorios:relatorio_parecer_editar' relatorio.pk %}" class="botao secundario">
+            Revisar/editar parecer
+        </a>
+    </p>
+</div>
+
+<div class="cartao">
+    <h2>PDF</h2>
+    {% if relatorio.pdf_path %}
+    <p><a href="{{ relatorio.pdf_path.url }}" target="_blank" class="botao secundario">Baixar PDF atual</a>
+    ({% if relatorio.status == "assinado" %}final{% else %}minuta com marca d'água{% endif %})</p>
+    {% else %}
+    <p>Nenhum PDF gerado ainda.</p>
+    {% endif %}
+
+    {% if not etapa_parecer %}
+    <p style="font-size: 12.5px; color: var(--amber-700); background: var(--amber-100); padding: 8px 12px; border-radius: 6px; margin-bottom: 10px;">
+        Ainda não há parecer técnico — o PDF pode ser gerado, mas a Seção de parecer sairá em branco.
+        Recomendado gerar o parecer primeiro.
+    </p>
+    {% endif %}
+    <form method="post" action="{% url 'painel_relatorios:relatorio_gerar_pdf' relatorio.pk %}" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="botao {% if not etapa_parecer or etapa_pdf %}secundario{% endif %}">
+            {% if etapa_pdf %}Gerar PDF novamente{% else %}Gerar PDF{% endif %}
+        </button>
+    </form>
+
+    {% if relatorio.status != "assinado" %}
+        {% if not etapa_parecer %}
+        <p style="font-size: 12.5px; color: var(--slate-500); margin-top: 12px;">
+            Assinatura bloqueada — gere o parecer técnico antes de assinar.
+        </p>
+        {% elif not tem_perfil %}
+        <p class="aviso" style="background:#fdecea; color:#922; padding:10px; border-radius:6px; font-size:13px;">
+            Você precisa cadastrar seu <a href="{% url 'painel_relatorios:meu_perfil' %}">perfil profissional</a>
+            (conselho + registro) antes de assinar.
+        </p>
+        {% else %}
+        <form method="post" action="{% url 'painel_relatorios:relatorio_assinar' relatorio.pk %}" style="display:inline;"
+            onsubmit="return confirm('Assinar este relatório? Isso marca o documento como final (não é possível desfazer pelo painel).');">
+            {% csrf_token %}
+            <button type="submit" class="botao">Assinar relatório</button>
+        </form>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

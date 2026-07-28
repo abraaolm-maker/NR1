@@ -1,0 +1,29 @@
+# Blueprint do Render — clique em "New +" -> "Blueprint" no dashboard e aponte pro
+# repositório; o Render lê este arquivo e já deixa o serviço configurado. Os únicos
+# valores que você precisa preencher são os marcados "sync: false" (secretos: nunca
+# ficam neste arquivo, você digita direto no dashboard do Render).
+services:
+  - type: web
+    name: crarp
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_DB_PATH
+        value: /var/data/db.sqlite3
+      - key: DJANGO_MEDIA_ROOT
+        value: /var/data/media
+      - key: DJANGO_ADMIN_USER
+        sync: false
+      - key: DJANGO_ADMIN_PASSWORD
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+    disk:
+      name: crarp-dados
+      mountPath: /var/data
+      sizeGB: 1

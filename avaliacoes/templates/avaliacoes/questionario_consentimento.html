@@ -1,0 +1,38 @@
+{% extends "avaliacoes/_base_questionario.html" %}
+
+{% block titulo %}Termo de consentimento{% endblock %}
+
+{% block conteudo %}
+<h1>Avaliação de Fatores de Risco Psicossocial</h1>
+
+<p>
+    Você foi convidado(a) a participar de uma avaliação de fatores de risco psicossociais
+    relacionados ao trabalho, conforme exigido pela NR-01 (GRO/PGR).
+</p>
+
+<div class="aviso">
+    <strong>Sua participação é {{ aplicacao.get_tipo_display|lower }}.</strong>
+    Suas respostas nunca são atribuídas ao seu nome em relatórios ou repassadas
+    individualmente à liderança — o resultado é sempre analisado de forma agregada, por
+    domínio, com identificação apenas por um alias (ex.: "Respondente A").
+    Se o número de respondentes do seu grupo for menor que o mínimo de confidencialidade,
+    o resultado nem chega a ser exibido de forma agregada.
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="checkbox-linha">
+        {{ form.participacao_voluntaria }}
+        <label for="{{ form.participacao_voluntaria.id_for_label }}">{{ form.participacao_voluntaria.label }}</label>
+    </div>
+    {% if form.participacao_voluntaria.errors %}<p class="erro-campo">{{ form.participacao_voluntaria.errors|join:" " }}</p>{% endif %}
+
+    <div class="checkbox-linha">
+        {{ form.li_e_compreendi }}
+        <label for="{{ form.li_e_compreendi.id_for_label }}">{{ form.li_e_compreendi.label }}</label>
+    </div>
+    {% if form.li_e_compreendi.errors %}<p class="erro-campo">{{ form.li_e_compreendi.errors|join:" " }}</p>{% endif %}
+
+    <button type="submit">Concordo e quero continuar</button>
+</form>
+{% endblock %}

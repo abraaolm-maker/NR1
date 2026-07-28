@@ -1,0 +1,32 @@
+{% extends "avaliacoes/_base_questionario.html" %}
+
+{% block titulo %}{{ titulo_grupo }}{% endblock %}
+
+{% block conteudo %}
+<div class="progresso">Grupo {{ progresso.atual }} de {{ progresso.total }}</div>
+<div class="barra-progresso">
+    <div class="preenchido" style="width: {% widthratio progresso.atual progresso.total 100 %}%;"></div>
+</div>
+
+<h1>{{ titulo_grupo }}</h1>
+
+<form method="post">
+    {% csrf_token %}
+    {% for entrada in itens_com_campos %}
+    <fieldset>
+        <legend>{{ entrada.item.texto }}</legend>
+        {{ entrada.campo_conformidade }}
+        {% if entrada.campo_conformidade.errors %}<p class="erro-campo">{{ entrada.campo_conformidade.errors|join:" " }}</p>{% endif %}
+        {{ entrada.campo_evidencia }}
+    </fieldset>
+    {% endfor %}
+    <div class="acoes-form">
+        {% if url_anterior %}
+        <a href="{{ url_anterior }}" class="botao botao-secundario">Anterior</a>
+        {% else %}
+        <span></span>
+        {% endif %}
+        <button type="submit">{% if e_ultimo_grupo %}Finalizar{% else %}Próximo{% endif %}</button>
+    </div>
+</form>
+{% endblock %}

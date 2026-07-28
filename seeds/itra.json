@@ -1,0 +1,182 @@
+{
+  "instrument_code": "ITRA",
+  "instrument_name": "ITRA",
+  "instrument_description": "Instrumento acadêmico genérico, com perguntas universais para qualquer cargo — 5 escalas (114 itens no total): contexto de trabalho, custo humano, danos, prazer e sofrimento. Mais extenso que o COPSOQ (9 domínios, ~30 itens); use quando quiser uma avaliação mais aprofundada ou quiser seguir uma metodologia acadêmica publicada.",
+  "source_note": "ITRA = Inventário de Trabalho e Risco de Adoecimento (Mendes, A. M.; Ferreira, M. C., 2007, \"Psicodinâmica do Trabalho\", cap. 5). Itens extraídos da planilha CRARP fornecida pelo usuário. Escala e cortes de EACT confirmados em fonte acadêmica aberta. Escala de ECHT/EIPSTP/EIPSTN padronizada em 1-5 pelo mesmo padrão estrutural da planilha-fonte (ver CLAUDE.md secao 5.2). Cortes de classificacao de ECHT/EIPSTP/EIPSTN adotam o mesmo criterio da EACT; EADRT usa corte proprio mais conservador. Todos os cortes devem ser formalmente ratificados pelo profissional responsavel do PGR.",
+  "scales": [
+    {
+      "scale_code": "EACT",
+      "scale_name": "Escala de Avaliação do Contexto do Trabalho",
+      "n_items_divisor": 27,
+      "scale": {
+        "min": 1, "max": 5,
+        "labels": { "1": "Nunca", "2": "Raramente", "3": "Às vezes", "4": "Frequentemente", "5": "Sempre" }
+      },
+      "thresholds": { "baixo_max": 32.25, "moderado_max": 67.25 },
+      "items": [
+        { "id": "EACT.01", "text": "O ritmo de trabalho é excessivo", "polarity": "RISCO" },
+        { "id": "EACT.02", "text": "As tarefas são cumpridas com pressão de prazos", "polarity": "RISCO" },
+        { "id": "EACT.03", "text": "Existe forte cobrança por resultados", "polarity": "RISCO" },
+        { "id": "EACT.04", "text": "As normas para execução das tarefas são rígidas", "polarity": "RISCO" },
+        { "id": "EACT.05", "text": "Existe fiscalização do desempenho", "polarity": "RISCO" },
+        { "id": "EACT.06", "text": "O número de pessoas é insuficiente para se realizar as tarefas", "polarity": "RISCO" },
+        { "id": "EACT.07", "text": "Os resultados esperados estão fora da realidade", "polarity": "RISCO" },
+        { "id": "EACT.08", "text": "Existe divisão entre quem planeja e quem executa", "polarity": "RISCO" },
+        { "id": "EACT.09", "text": "As tarefas são repetitivas", "polarity": "RISCO" },
+        { "id": "EACT.10", "text": "Falta tempo para realizar pausas de descanso no trabalho", "polarity": "RISCO" },
+        { "id": "EACT.11", "text": "As tarefas executadas sofrem descontinuidade", "polarity": "RISCO" },
+        { "id": "EACT.12", "text": "As condições de trabalho são precárias", "polarity": "RISCO" },
+        { "id": "EACT.13", "text": "O ambiente físico é desconfortável", "polarity": "RISCO" },
+        { "id": "EACT.14", "text": "Existe muito barulho no ambiente de trabalho", "polarity": "RISCO" },
+        { "id": "EACT.15", "text": "O mobiliário existente no ambiente de trabalho é inadequado", "polarity": "RISCO" },
+        { "id": "EACT.16", "text": "Os instrumentos de trabalho são insuficientes para a realização das tarefas", "polarity": "RISCO" },
+        { "id": "EACT.17", "text": "O material de consumo é insuficiente", "polarity": "RISCO" },
+        { "id": "EACT.18", "text": "As tarefas não estão claramente definidas", "polarity": "RISCO" },
+        { "id": "EACT.19", "text": "Os funcionários são excluídos das decisões", "polarity": "RISCO" },
+        { "id": "EACT.20", "text": "Existem dificuldades na comunicação entre chefia e subordinados", "polarity": "RISCO" },
+        { "id": "EACT.21", "text": "Existem disputas profissionais no local de trabalho", "polarity": "RISCO" },
+        { "id": "EACT.22", "text": "Falta integração no ambiente de trabalho", "polarity": "RISCO" },
+        { "id": "EACT.23", "text": "A comunicação entre funcionários é insatisfatória", "polarity": "RISCO" },
+        { "id": "EACT.24", "text": "Falta apoio das chefias para o meu desenvolvimento profissional", "polarity": "RISCO" },
+        { "id": "EACT.25", "text": "As informações que preciso para executar minhas tarefas são de difícil acesso", "polarity": "RISCO" },
+        { "id": "EACT.26", "text": "As condições de trabalho oferecem risco à segurança das pessoas", "polarity": "RISCO", "evento_grave": true },
+        { "id": "EACT.27", "text": "O espaço físico para realizar o trabalho é inadequado", "polarity": "RISCO" }
+      ]
+    },
+    {
+      "scale_code": "ECHT",
+      "scale_name": "Escala de Custo Humano do Trabalho",
+      "n_items_divisor": 29,
+      "scale": {
+        "min": 1, "max": 5,
+        "labels": { "1": "Nunca", "2": "Raramente", "3": "Às vezes", "4": "Frequentemente", "5": "Sempre" }
+      },
+      "thresholds": { "baixo_max": 32.25, "moderado_max": 67.25 },
+      "items": [
+        { "id": "ECHT.01", "text": "Usar força física", "polarity": "RISCO" },
+        { "id": "ECHT.02", "text": "Usar os braços de forma contínua", "polarity": "RISCO" },
+        { "id": "ECHT.03", "text": "Ficar em posição curvada", "polarity": "RISCO" },
+        { "id": "ECHT.04", "text": "Caminhar", "polarity": "RISCO" },
+        { "id": "ECHT.05", "text": "Ser obrigado a ficar em pé", "polarity": "RISCO" },
+        { "id": "ECHT.06", "text": "Ter que manusear objetos pesados", "polarity": "RISCO" },
+        { "id": "ECHT.07", "text": "Fazer esforço físico", "polarity": "RISCO" },
+        { "id": "ECHT.08", "text": "Usar as pernas de forma contínua", "polarity": "RISCO" },
+        { "id": "ECHT.09", "text": "Usar as mãos de forma repetida", "polarity": "RISCO" },
+        { "id": "ECHT.10", "text": "Subir e descer escada", "polarity": "RISCO" },
+        { "id": "ECHT.11", "text": "Desenvolver macetes", "polarity": "RISCO" },
+        { "id": "ECHT.12", "text": "Ter que resolver problemas", "polarity": "RISCO" },
+        { "id": "ECHT.13", "text": "Ser obrigado a lidar com imprevistos", "polarity": "RISCO" },
+        { "id": "ECHT.14", "text": "Fazer previsão de acontecimentos", "polarity": "RISCO" },
+        { "id": "ECHT.15", "text": "Usar a visão de forma contínua", "polarity": "RISCO" },
+        { "id": "ECHT.16", "text": "Usar a memória", "polarity": "RISCO" },
+        { "id": "ECHT.17", "text": "Ter desafios intelectuais", "polarity": "RISCO" },
+        { "id": "ECHT.18", "text": "Fazer esforço mental", "polarity": "RISCO" },
+        { "id": "ECHT.19", "text": "Ter concentração mental", "polarity": "RISCO" },
+        { "id": "ECHT.20", "text": "Usar a criatividade", "polarity": "RISCO" },
+        { "id": "ECHT.21", "text": "Ter controle das emoções", "polarity": "RISCO" },
+        { "id": "ECHT.22", "text": "Ter que lidar com ordens contraditórias", "polarity": "RISCO" },
+        { "id": "ECHT.23", "text": "Ter custo emocional", "polarity": "RISCO" },
+        { "id": "ECHT.24", "text": "Ser obrigado a lidar com a agressividade dos outros", "polarity": "RISCO", "evento_grave": true },
+        { "id": "ECHT.25", "text": "Disfarçar sentimentos", "polarity": "RISCO" },
+        { "id": "ECHT.26", "text": "Ser obrigado a elogiar as pessoas", "polarity": "RISCO" },
+        { "id": "ECHT.27", "text": "Ser submetido a constrangimentos", "polarity": "RISCO" },
+        { "id": "ECHT.28", "text": "Transgredir valores éticos", "polarity": "RISCO" },
+        { "id": "ECHT.29", "text": "Ser obrigado a sorrir", "polarity": "RISCO" }
+      ]
+    },
+    {
+      "scale_code": "EADRT",
+      "scale_name": "Escala de Avaliação de Danos Relacionados ao Trabalho",
+      "n_items_divisor": 29,
+      "scale": {
+        "min": 1, "max": 5,
+        "labels": { "1": "Nunca", "2": "Raramente", "3": "Às vezes", "4": "Frequentemente", "5": "Sempre" }
+      },
+      "thresholds": { "baixo_max": 24.75, "moderado_max": 47.5 },
+      "items": [
+        { "id": "EADRT.01", "text": "Dores no corpo", "polarity": "RISCO" },
+        { "id": "EADRT.02", "text": "Dores nos braços", "polarity": "RISCO" },
+        { "id": "EADRT.03", "text": "Dor de cabeça", "polarity": "RISCO" },
+        { "id": "EADRT.04", "text": "Distúrbios respiratórios", "polarity": "RISCO" },
+        { "id": "EADRT.05", "text": "Distúrbios digestivos", "polarity": "RISCO" },
+        { "id": "EADRT.06", "text": "Dores nas costas", "polarity": "RISCO" },
+        { "id": "EADRT.07", "text": "Distúrbios auditivos", "polarity": "RISCO" },
+        { "id": "EADRT.08", "text": "Alterações do apetite", "polarity": "RISCO" },
+        { "id": "EADRT.09", "text": "Distúrbios na visão", "polarity": "RISCO" },
+        { "id": "EADRT.10", "text": "Alterações do sono", "polarity": "RISCO" },
+        { "id": "EADRT.11", "text": "Dores nas pernas", "polarity": "RISCO" },
+        { "id": "EADRT.12", "text": "Distúrbios circulatórios", "polarity": "RISCO" },
+        { "id": "EADRT.13", "text": "Amargura", "polarity": "RISCO" },
+        { "id": "EADRT.14", "text": "Sensação de vazio", "polarity": "RISCO" },
+        { "id": "EADRT.15", "text": "Sentimento de desamparo", "polarity": "RISCO" },
+        { "id": "EADRT.16", "text": "Mau humor", "polarity": "RISCO" },
+        { "id": "EADRT.17", "text": "Vontade de desistir de tudo", "polarity": "RISCO", "evento_grave": true },
+        { "id": "EADRT.18", "text": "Tristeza", "polarity": "RISCO" },
+        { "id": "EADRT.19", "text": "Irritação com tudo", "polarity": "RISCO" },
+        { "id": "EADRT.20", "text": "Sensação de abandono", "polarity": "RISCO" },
+        { "id": "EADRT.21", "text": "Dúvida sobre a capacidade de fazer as tarefas", "polarity": "RISCO" },
+        { "id": "EADRT.22", "text": "Solidão", "polarity": "RISCO" },
+        { "id": "EADRT.23", "text": "Insensibilidade em relação aos colegas", "polarity": "RISCO" },
+        { "id": "EADRT.24", "text": "Dificuldades nas relações fora do trabalho", "polarity": "RISCO" },
+        { "id": "EADRT.25", "text": "Vontade de ficar sozinho", "polarity": "RISCO" },
+        { "id": "EADRT.26", "text": "Conflitos nas relações familiares", "polarity": "RISCO" },
+        { "id": "EADRT.27", "text": "Agressividade com os outros", "polarity": "RISCO" },
+        { "id": "EADRT.28", "text": "Dificuldade com os amigos", "polarity": "RISCO" },
+        { "id": "EADRT.29", "text": "Impaciência com as pessoas em geral", "polarity": "RISCO" }
+      ]
+    },
+    {
+      "scale_code": "EIPSTP",
+      "scale_name": "Escala de Indicadores de Prazer no Trabalho",
+      "n_items_divisor": 16,
+      "scale": {
+        "min": 1, "max": 5,
+        "labels": { "1": "Nunca", "2": "Raramente", "3": "Às vezes", "4": "Frequentemente", "5": "Sempre" }
+      },
+      "thresholds": { "baixo_max": 32.25, "moderado_max": 67.25 },
+      "items": [
+        { "id": "EIPSTP.01", "text": "Satisfação", "polarity": "PROTETIVO" },
+        { "id": "EIPSTP.02", "text": "Motivação", "polarity": "PROTETIVO" },
+        { "id": "EIPSTP.03", "text": "Orgulho pelo que faço", "polarity": "PROTETIVO" },
+        { "id": "EIPSTP.04", "text": "Bem-estar", "polarity": "PROTETIVO" },
+        { "id": "EIPSTP.05", "text": "Realização profissional", "polarity": "PROTETIVO" },
+        { "id": "EIPSTP.06", "text": "Valorização", "polarity": "PROTETIVO" },
+        { "id": "EIPSTP.07", "text": "Reconhecimento", "polarity": "PROTETIVO" },
+        { "id": "EIPSTP.08", "text": "Identificação com as minhas atividades", "polarity": "PROTETIVO" },
+        { "id": "EIPSTP.09", "text": "Liberdade com a chefia para negociar o que precisa", "polarity": "PROTETIVO" },
+        { "id": "EIPSTP.10", "text": "Liberdade para falar do meu trabalho com meus colegas", "polarity": "PROTETIVO" },
+        { "id": "EIPSTP.11", "text": "Solidariedade entre os colegas", "polarity": "PROTETIVO" },
+        { "id": "EIPSTP.12", "text": "Confiança entre os colegas", "polarity": "PROTETIVO" },
+        { "id": "EIPSTP.13", "text": "Liberdade para expressar minhas opiniões no local de trabalho", "polarity": "PROTETIVO" },
+        { "id": "EIPSTP.14", "text": "Liberdade para utilizar minha criatividade", "polarity": "PROTETIVO" },
+        { "id": "EIPSTP.15", "text": "Liberdade para falar sobre o meu trabalho com as chefias", "polarity": "PROTETIVO" },
+        { "id": "EIPSTP.16", "text": "Cooperação entre os colegas", "polarity": "PROTETIVO" }
+      ]
+    },
+    {
+      "scale_code": "EIPSTN",
+      "scale_name": "Escala de Indicadores de Sofrimento no Trabalho",
+      "n_items_divisor": 13,
+      "scale": {
+        "min": 1, "max": 5,
+        "labels": { "1": "Nunca", "2": "Raramente", "3": "Às vezes", "4": "Frequentemente", "5": "Sempre" }
+      },
+      "thresholds": { "baixo_max": 32.25, "moderado_max": 67.25 },
+      "items": [
+        { "id": "EIPSTN.01", "text": "Esgotamento emocional", "polarity": "RISCO" },
+        { "id": "EIPSTN.02", "text": "Estresse", "polarity": "RISCO" },
+        { "id": "EIPSTN.03", "text": "Insatisfação", "polarity": "RISCO" },
+        { "id": "EIPSTN.04", "text": "Sobrecarga", "polarity": "RISCO" },
+        { "id": "EIPSTN.05", "text": "Frustração", "polarity": "RISCO" },
+        { "id": "EIPSTN.06", "text": "Insegurança", "polarity": "RISCO" },
+        { "id": "EIPSTN.07", "text": "Medo", "polarity": "RISCO" },
+        { "id": "EIPSTN.08", "text": "Falta de reconhecimento do meu esforço", "polarity": "RISCO" },
+        { "id": "EIPSTN.09", "text": "Falta de reconhecimento do meu desempenho", "polarity": "RISCO" },
+        { "id": "EIPSTN.10", "text": "Desvalorização", "polarity": "RISCO" },
+        { "id": "EIPSTN.11", "text": "Indignação", "polarity": "RISCO" },
+        { "id": "EIPSTN.12", "text": "Inutilidade", "polarity": "RISCO" },
+        { "id": "EIPSTN.13", "text": "Discriminação", "polarity": "RISCO", "evento_grave": true }
+      ]
+    }
+  ]
+}

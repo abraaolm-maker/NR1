@@ -1,0 +1,23 @@
+{% extends "avaliacoes/_base_questionario.html" %}
+
+{% block titulo %}Sobre você{% endblock %}
+
+{% block conteudo %}
+<h1>Antes de começar</h1>
+<p class="aviso">
+    Essas informações ajudam a entender o contexto das respostas — não são usadas para
+    identificar você individualmente.
+</p>
+
+<form method="post">
+    {% csrf_token %}
+    {% for campo in form %}
+    <div class="campo">
+        <label class="rotulo" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+        {{ campo }}
+        {% if campo.errors %}<p class="erro-campo">{{ campo.errors|join:" " }}</p>{% endif %}
+    </div>
+    {% endfor %}
+    <button type="submit">Continuar</button>
+</form>
+{% endblock %}

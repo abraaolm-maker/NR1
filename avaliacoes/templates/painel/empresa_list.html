@@ -1,0 +1,24 @@
+{% extends "painel/_base.html" %}
+{% block titulo %}Empresas{% endblock %}
+{% block conteudo %}
+<div class="cartao">
+    <h1>Empresas</h1>
+    <p><a href="{% url 'painel_avaliacoes:empresa_create' %}" class="botao">+ Nova empresa</a></p>
+    {% if empresas %}
+    <table>
+        <thead><tr><th>Nome</th><th>CNPJ</th><th></th></tr></thead>
+        <tbody>
+        {% for empresa in empresas %}
+            <tr>
+                <td>{{ empresa.nome }}</td>
+                <td>{{ empresa.cnpj }}</td>
+                <td><a href="{% url 'painel_avaliacoes:empresa_detail' empresa.pk %}" class="botao secundario pequeno">Ver</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Nenhuma empresa cadastrada ainda.</p>
+    {% endif %}
+</div>
+{% endblock %}

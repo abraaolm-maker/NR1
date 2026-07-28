@@ -1,0 +1,21 @@
+{
+  "source_note": "Extraído da planilha 'Entrevista_Observacao' de Relatorio_Semaforo_Dados_Simulados.xlsx — 6 itens de entrevista com liderança + 10 itens de observação em campo.",
+  "itens": [
+    {"tipo": "entrevista", "ordem": 1, "texto": "Quais são os períodos de maior demanda e por quê?"},
+    {"tipo": "entrevista", "ordem": 2, "texto": "Há acúmulo de função, substituição informal ou tarefas fora do papel definido?"},
+    {"tipo": "entrevista", "ordem": 3, "texto": "Como são distribuídas tarefas, pausas, folgas, prioridades e cobranças?"},
+    {"tipo": "entrevista", "ordem": 4, "texto": "Que registros existem sobre conflitos, retrabalho, erros, perdas ou reclamações?"},
+    {"tipo": "entrevista", "ordem": 5, "texto": "Quais controles previnem assédio, violência, retaliação e discriminação?"},
+    {"tipo": "entrevista", "ordem": 6, "texto": "Que evidências comprovam comunicação, reuniões, treinamentos e medidas preventivas?"},
+    {"tipo": "observacao", "ordem": 1, "texto": "Dimensionamento de pessoal compatível com a demanda real."},
+    {"tipo": "observacao", "ordem": 2, "texto": "Pausas e acesso a banheiro/hidratação são viáveis na rotina."},
+    {"tipo": "observacao", "ordem": 3, "texto": "Prioridades, responsabilidades e mudanças são comunicadas com clareza."},
+    {"tipo": "observacao", "ordem": 4, "texto": "Não há cobrança vexatória ou exposição pública."},
+    {"tipo": "observacao", "ordem": 5, "texto": "Há canal de relato e fluxo de resposta sem retaliação."},
+    {"tipo": "observacao", "ordem": 6, "texto": "O fluxo físico e informacional é adequado ao trabalho."},
+    {"tipo": "observacao", "ordem": 7, "texto": "Tarefas simultâneas e interrupções têm controles definidos."},
+    {"tipo": "observacao", "ordem": 8, "texto": "Integração e treinamento são adequados às rotinas reais."},
+    {"tipo": "observacao", "ordem": 9, "texto": "O tratamento entre liderança, colegas, clientes e terceiros é respeitoso."},
+    {"tipo": "observacao", "ordem": 10, "texto": "Há registros mínimos de acompanhamento e melhoria contínua."}
+  ]
+}

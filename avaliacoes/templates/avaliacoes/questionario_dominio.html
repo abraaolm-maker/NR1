@@ -1,0 +1,30 @@
+{% extends "avaliacoes/_base_questionario.html" %}
+
+{% block titulo %}{{ dominio.nome }}{% endblock %}
+
+{% block conteudo %}
+<div class="progresso">Domínio {{ progresso.atual }} de {{ progresso.total }}</div>
+<div class="barra-progresso">
+    <div class="preenchido" style="width: {% widthratio progresso.atual progresso.total 100 %}%;"></div>
+</div>
+
+<h1>{{ dominio.nome }}</h1>
+{% if dominio.nota %}
+<p class="aviso">{{ dominio.nota }}</p>
+{% endif %}
+
+<form method="post">
+    {% csrf_token %}
+    {% for campo in form %}
+    <fieldset>
+        <legend>{{ campo.label }}</legend>
+        {{ campo }}
+        {% if campo.errors %}<p style="color:#c0392b; font-size: 13px;">{{ campo.errors }}</p>{% endif %}
+    </fieldset>
+    {% endfor %}
+    <div class="acoes-form">
+        <a href="{{ url_anterior }}" class="botao botao-secundario">Anterior</a>
+        <button type="submit">Próximo</button>
+    </div>
+</form>
+{% endblock %}

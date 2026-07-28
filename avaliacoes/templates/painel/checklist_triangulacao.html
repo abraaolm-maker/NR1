@@ -1,0 +1,99 @@
+{% extends "painel/_base.html" %}
+{% block titulo %}Entrevista e observação — {{ aplicacao.ghe.nome }}{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+    <a class="voltar" href="{% url 'painel_avaliacoes:aplicacao_detail' aplicacao.pk %}" title="Voltar para {{ aplicacao.instrumento.nome }} — {{ aplicacao.ghe.nome }}">&larr; Voltar</a>
+    <h1>Entrevista e observação</h1>
+    <p class="subtitulo">
+        {{ aplicacao.ghe.nome }} — checklist de triangulação (6 itens de entrevista com a
+        liderança + 10 itens de observação em campo), respondido pelos gestores da empresa
+        pelo link abaixo. Complementa os indicadores indiretos (absenteísmo, turnover etc.)
+        já cadastrados — não os substitui.
+    </p>
+</div>
+
+<div class="cartao">
+    {% if coleta and coleta.status == "aberta" %}
+        <p>
+            Status: <strong>Coleta aberta</strong> desde {{ coleta.criado_em }}.
+        </p>
+        <p>
+            <code>{{ link_checklist }}</code>
+            <button type="button" class="botao secundario" style="padding:3px 10px; font-size:12px;"
+                onclick="navigator.clipboard.writeText('{{ link_checklist }}'); this.textContent='Copiado!';">
+                Copiar link
+            </button>
+        </p>
+        <form method="post" action="{% url 'painel_avaliacoes:checklist_encerrar_coleta' aplicacao.pk %}"
+            onsubmit="return confirm('Encerrar esta coleta? O link parará de aceitar novas respostas.');">
+            {% csrf_token %}
+            <button type="submit" class="botao secundario">Encerrar coleta</button>
+        </form>
+    {% else %}
+        {% if coleta %}
+        <p style="font-size: 13px; color: var(--slate-500);">
+            Última coleta encerrada em {{ coleta.encerrada_em }}.
+        </p>
+        {% else %}
+        <p style="font-size: 13px; color: var(--slate-500);">
+            Nenhuma coleta aberta ainda — abra uma para gerar o link e distribuir aos
+            gestores da empresa.
+        </p>
+        {% endif %}
+        <form method="post" action="{% url 'painel_avaliacoes:checklist_abrir_coleta' aplicacao.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="botao">Abrir nova coleta</button>
+        </form>
+    {% endif %}
+</div>
+
+<div class="cartao">
+    <h2>Respondentes ({{ respondentes|length }})</h2>
+    {% if respondentes %}
+    <table>
+        <thead><tr><th>Nome</th><th>Cargo</th><th>Concluiu</th></tr></thead>
+        <tbody>
+        {% for respondente in respondentes %}
+            <tr>
+                <td>{{ respondente.nome }}</td>
+                <td>{{ respondente.cargo|default:"—" }}</td>
+                <td>{{ respondente.concluido_em|default:"Em andamento" }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Ninguém respondeu ainda. Distribua o link acima.</p>
+    {% endif %}
+</div>
+
+<div class="cartao">
+    <h2>Respostas avaliadas ({{ respostas|length }})</h2>
+    {% if respostas %}
+    <div style="overflow-x: auto;">
+    <table>
+        <thead><tr><th>Tipo</th><th>Item</th><th>Respondente</th><th>Conformidade</th><th>Evidência/observação</th></tr></thead>
+        <tbody>
+        {% for resposta in respostas %}
+            <tr>
+                <td>{{ resposta.item.get_tipo_display }}</td>
+                <td>{{ resposta.item.texto }}</td>
+                <td>{{ resposta.respondente.nome }}</td>
+                <td>
+                    {% if resposta.conformidade == "nao_conforme" %}
+                    <span class="badge critico">Não conforme</span>
+                    {% else %}
+                    <span class="badge aceitavel">Conforme</span>
+                    {% endif %}
+                </td>
+                <td>{{ resposta.evidencia|default:"—" }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% else %}
+    <p>Nenhuma resposta registrada ainda — aparece automaticamente conforme os gestores forem respondendo pelo link.</p>
+    {% endif %}
+</div>
+{% endblock %}

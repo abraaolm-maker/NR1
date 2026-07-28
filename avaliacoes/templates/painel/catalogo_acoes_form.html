@@ -1,0 +1,17 @@
+{% extends "painel/_base.html" %}
+{% block titulo %}Editar ação — {{ acao.dominio.codigo }} / {{ acao.get_nivel_display }}{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+    <a class="voltar" href="{% url 'painel_avaliacoes:catalogo_acoes_list' %}" title="Voltar para Catálogo de ações">&larr; Voltar</a>
+    <h1>Editar ação</h1>
+    <p class="subtitulo">{{ acao.dominio.codigo }} — {{ acao.dominio.nome }} ({{ acao.get_nivel_display }})</p>
+</div>
+
+<div class="cartao">
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Salvar" class="botao">
+    </form>
+</div>
+{% endblock %}

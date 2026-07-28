@@ -1,0 +1,230 @@
+{% extends "painel/_base.html" %}
+{% block titulo %}Aplicação — {{ aplicacao.ghe.nome }}{% endblock %}
+{% block conteudo %}
+{% if todos_suprimidos %}
+<div class="cartao" style="border-color: var(--amber-100); background: var(--amber-100);">
+    <h2 style="color: var(--amber-700);">⚠ Resultados suprimidos por confidencialidade</h2>
+    <p style="color: var(--amber-700);">
+        Apenas <strong>{{ n_concluidos }}</strong> pessoa(s) concluíram o questionário, e o
+        mínimo para exibir resultados é <strong>{{ n_minimo }}</strong> — abaixo disso,
+        mostrar escores identificaria as respostas individuais. Para obter resultados:
+        {% if aplicacao.status == "concluida" %}
+        crie uma nova rodada de coleta com mais participantes deste grupo, ou considere
+        agrupar este GHE com outro de exposição equivalente.
+        {% else %}
+        distribua o link abaixo para mais pessoas antes de encerrar a coleta.
+        {% endif %}
+    </p>
+</div>
+{% endif %}
+{% if pronta_para_relatorio %}
+<div class="cartao" style="border-color: var(--teal-100); background: var(--teal-50);">
+    <h2 style="color: var(--teal-700);">✓ Coleta encerrada — pronta para relatório</h2>
+    <p style="color: var(--teal-700);">
+        Esta aplicação já foi concluída e ainda não faz parte de nenhum relatório.
+        Próximo passo: criar o Inventário de Risco Psicossocial desta unidade.
+    </p>
+    <a href="{% url 'painel_relatorios:relatorio_create' aplicacao.ghe.unidade.pk %}" class="botao">
+        Criar relatório desta unidade
+    </a>
+</div>
+{% endif %}
+<div class="cabecalho-pagina">
+    <a class="voltar" href="{% url 'painel_avaliacoes:ghe_detail' aplicacao.ghe.pk %}" title="Voltar para {{ aplicacao.ghe.nome }}">&larr; Voltar</a>
+    <h1>{{ aplicacao.instrumento.nome }}</h1>
+    <p class="subtitulo">Aplicação do questionário para o GHE {{ aplicacao.ghe.nome }} ({{ aplicacao.ghe.unidade.nome }}).</p>
+</div>
+
+<div class="cartao">
+    <p>
+        GHE: {{ aplicacao.ghe.nome }} ({{ aplicacao.ghe.unidade.nome }}, {{ aplicacao.ghe.unidade.empresa.nome }})<br>
+        Tipo: {{ aplicacao.get_tipo_display }} · Status: <strong>{{ aplicacao.get_status_display }}</strong><br>
+        Critério: {{ aplicacao.criterio_versao.codigo }} ({{ aplicacao.criterio_versao.get_status_display }})
+    </p>
+    {% if aplicacao.criterio_versao.status != "ratificado" %}
+    <details style="font-size: 12.5px; color: #777;">
+        <summary style="cursor: pointer;">O que significa "Aguardando ratificação"?</summary>
+        <p>
+            O critério de cálculo (thresholds, matriz de risco) ainda não foi formalmente
+            revisado e assinado por um profissional habilitado — os cálculos já valem
+            normalmente enquanto isso, mas essa revisão formal fica pendente antes do
+            relatório final ser considerado definitivo.
+        </p>
+    </details>
+    {% endif %}
+    <div style="display: flex; gap: 12px; margin: 14px 0; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 130px; border: 1px solid var(--slate-200); border-radius: var(--radius); padding: 10px 14px;">
+            <div style="font-size: 22px; font-weight: 700;">{{ n_concluidos }}</div>
+            <div style="font-size: 11px; color: var(--slate-500);">responderam (mín. {{ n_minimo }})</div>
+        </div>
+        <div style="flex: 1; min-width: 130px; border: 1px solid var(--slate-200); border-radius: var(--radius); padding: 10px 14px;">
+            <div style="font-size: 22px; font-weight: 700;">{{ escores|length }}</div>
+            <div style="font-size: 11px; color: var(--slate-500);">domínios calculados</div>
+        </div>
+        <div style="flex: 1; min-width: 130px; border: 1px solid {% if dominios_em_risco %}var(--red-200){% else %}var(--slate-200){% endif %}; border-radius: var(--radius); padding: 10px 14px; {% if dominios_em_risco %}background: var(--red-50);{% endif %}">
+            <div style="font-size: 22px; font-weight: 700; {% if dominios_em_risco %}color: var(--red-700);{% endif %}">{{ dominios_em_risco }}</div>
+            <div style="font-size: 11px; color: var(--slate-500);">domínios em nível elevado</div>
+        </div>
+        <div style="flex: 1; min-width: 130px; border: 1px solid {% if alertas_d9.alertas_d9 %}var(--red-200){% else %}var(--slate-200){% endif %}; border-radius: var(--radius); padding: 10px 14px; {% if alertas_d9.alertas_d9 %}background: var(--red-50);{% endif %}">
+            <div style="font-size: 22px; font-weight: 700; {% if alertas_d9.alertas_d9 %}color: var(--red-700);{% endif %}">{{ alertas_d9.alertas_d9 }}</div>
+            <div style="font-size: 11px; color: var(--slate-500);">alertas D9 (evento grave)</div>
+        </div>
+    </div>
+    <p>
+        <a href="{% url 'painel_avaliacoes:aplicacao_update' aplicacao.pk %}" class="botao secundario">Editar</a>
+        {% if eh_admin %}
+        <a href="{% url 'painel_avaliacoes:pontuacao_anonima' aplicacao.pk %}" class="botao secundario">Pontuação anônima</a>
+        <a href="{% url 'painel_avaliacoes:diagnostico_ghe' aplicacao.pk %}" class="botao secundario">Diagnóstico GHE</a>
+        <a href="{% url 'painel_avaliacoes:checklist_triangulacao' aplicacao.pk %}" class="botao secundario">Entrevista e observação</a>
+        <a href="{% url 'painel_avaliacoes:indicadores_indiretos' aplicacao.ghe.pk %}" class="botao secundario">Evidências complementares</a>
+        {% endif %}
+    </p>
+</div>
+
+<div class="cartao">
+    <h2>Link para respondentes</h2>
+    {% if aplicacao.status == "concluida" or aplicacao.status == "cancelada" %}
+    <p style="font-size: 13px; color: #777;">
+        Esta coleta está {{ aplicacao.get_status_display|lower }} — o link abaixo não aceita mais respostas.
+    </p>
+    {% else %}
+    <p>
+        Um único link, o mesmo para todos os participantes deste GHE. Distribua por
+        WhatsApp, e-mail ou o canal que preferir — o sistema não envia nada
+        automaticamente. Cada pessoa que abrir o link cria seu próprio registro de
+        resposta na hora; reabrir o link no mesmo aparelho retoma de onde parou.
+    </p>
+    {% endif %}
+    <p>
+        <code>{{ link_respondente }}</code>
+        <button type="button" class="botao secundario" style="padding:3px 10px; font-size:12px;"
+            onclick="navigator.clipboard.writeText('{{ link_respondente }}'); this.textContent='Copiado!';">
+            Copiar link
+        </button>
+    </p>
+    {% if aplicacao.status != "concluida" and aplicacao.status != "cancelada" %}
+    {% if n_concluidos < n_minimo %}
+    <p style="font-size: 12.5px; color: var(--amber-700); background: var(--amber-100); padding: 8px 12px; border-radius: 6px;">
+        Até agora <strong>{{ n_concluidos }}</strong> pessoa(s) concluíram — o mínimo para
+        exibir resultados é <strong>{{ n_minimo }}</strong>. Se encerrar agora, todos os
+        resultados desta coleta ficarão suprimidos por confidencialidade.
+    </p>
+    <form method="post" action="{% url 'painel_avaliacoes:aplicacao_encerrar_coleta' aplicacao.pk %}"
+        onsubmit="return confirm('ATENÇÃO: apenas {{ n_concluidos }} pessoa(s) responderam, e o mínimo para exibir resultados é {{ n_minimo }}. Se encerrar agora, TODOS os resultados ficarão suprimidos por confidencialidade. Encerrar mesmo assim?');">
+        {% csrf_token %}
+        <button type="submit" class="botao secundario">Encerrar coleta</button>
+    </form>
+    {% else %}
+    <form method="post" action="{% url 'painel_avaliacoes:aplicacao_encerrar_coleta' aplicacao.pk %}"
+        onsubmit="return confirm('Encerrar a coleta? O link parará de aceitar novas respostas — não é possível desfazer pelo painel.');">
+        {% csrf_token %}
+        <button type="submit" class="botao secundario">Encerrar coleta</button>
+    </form>
+    {% endif %}
+    {% endif %}
+</div>
+
+{% if alertas_d9.alertas_d9 > 0 %}
+<div class="cartao" style="border-color: var(--red-200); background: var(--red-50);">
+    <h2 style="color: var(--red-700);">⚠ Alertas D9</h2>
+    <p style="color: var(--red-700);">
+        <strong>{{ alertas_d9.alertas_d9 }}</strong> de {{ alertas_d9.n_respondentes }} respondente(s)
+        concluído(s) relatou(aram) violência, ameaça, assédio moral ou discriminação grave (D9.1/D9.2).
+        Ativar fluxo protegido imediato — não aguardar o fechamento do ciclo de coleta.
+    </p>
+</div>
+{% else %}
+<div class="cartao">
+    <h2>Alertas D9</h2>
+    <p style="font-size: 13px; color: #777;">
+        Nenhum evento grave relatado até agora ({{ alertas_d9.n_respondentes }} respondente(s) concluído(s)).
+    </p>
+</div>
+{% endif %}
+
+<div class="cartao">
+    <h2>Respondentes ({{ respondentes|length }})</h2>
+    {% if respondentes %}
+    <table>
+        <thead><tr><th>Alias</th><th>Tempo na organização</th><th>Modalidade</th><th>Consentiu</th><th>Concluiu</th></tr></thead>
+        <tbody>
+        {% for respondente in respondentes %}
+            <tr>
+                <td>{{ respondente.alias_anonimo }}</td>
+                <td>{{ respondente.get_tempo_na_organizacao_display|default:"—" }}</td>
+                <td>{{ respondente.get_modalidade_trabalho_display|default:"—" }}</td>
+                <td>{{ respondente.consentimento_aceito_em|default:"—" }}</td>
+                <td>{{ respondente.concluido_em|default:"—" }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Ninguém respondeu ainda. Distribua o link acima.</p>
+    {% endif %}
+</div>
+
+<div class="cartao">
+    <h2>Resultados por domínio</h2>
+    {% if escores %}
+    <details style="font-size: 12.5px; color: #777; margin-bottom: 10px;">
+        <summary style="cursor: pointer;">Qual a diferença entre Classificação e Banda?</summary>
+        <p>
+            <strong>Classificação</strong> é o nível bruto deste domínio (Baixo/Moderado/Elevado),
+            calculado só a partir das respostas. <strong>Banda</strong> é o resultado final depois de
+            cruzar esse nível com a probabilidade de o problema realmente acontecer (evidências como
+            absenteísmo, turnover, relatos — ver "Evidências complementares" no GHE) — é a Banda que
+            define se precisa de ação e em quanto tempo. As duas podem ser diferentes: uma
+            Classificação "Moderado" sem evidências de probabilidade vira uma Banda "Aceitável"; a
+            mesma Classificação com evidências fortes pode virar "Alto" ou "Crítico".
+        </p>
+    </details>
+    <table>
+        <thead><tr><th>Domínio</th><th>Escore</th><th>Classificação</th><th>Banda</th><th>N</th></tr></thead>
+        <tbody>
+        {% for escore in escores %}
+            <tr>
+                <td>{{ escore.dominio.codigo }} — {{ escore.dominio.nome }}</td>
+                {% if escore.suprimido_por_confidencialidade %}
+                    <td colspan="3">Suprimido por confidencialidade — mínimo de {{ n_minimo }} respostas</td>
+                {% else %}
+                    <td>{{ escore.escore }}</td>
+                    <td>{{ escore.classificacao }}</td>
+                    <td><span class="badge {{ escore.classificacao_risco.banda|slugify }}">{{ escore.classificacao_risco.banda }}</span></td>
+                {% endif %}
+                <td>{{ escore.n_respondentes }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Nenhum resultado calculado ainda — aparece automaticamente conforme os respondentes forem terminando.</p>
+    {% endif %}
+</div>
+
+{% if eh_admin %}
+<div class="cartao">
+    <h2>Planos de ação ({{ planos_de_acao|length }})</h2>
+    {% if planos_de_acao %}
+    <table>
+        <thead><tr><th>ID</th><th>Domínio</th><th>Medida</th><th>Responsável</th><th>Prazo</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+        {% for plano in planos_de_acao %}
+            <tr>
+                <td>{{ plano.codigo|default:"—" }}</td>
+                <td>{{ plano.classificacao_risco.escore_dominio.dominio.codigo }}</td>
+                <td>{{ plano.medida|truncatechars:80 }}</td>
+                <td>{{ plano.responsavel|default:"A definir" }}</td>
+                <td>{{ plano.prazo|default:"—" }}</td>
+                <td>{{ plano.get_status_display }}</td>
+                <td><a href="{% url 'painel_avaliacoes:plano_de_acao_update' plano.pk %}" class="botao secundario pequeno">Editar</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Nenhum plano de ação gerado ainda — aparece automaticamente quando um domínio é calculado acima do nível Aceitável.</p>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

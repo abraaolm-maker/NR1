@@ -1,0 +1,42 @@
+{% extends "painel/_base.html" %}
+{% block titulo %}{{ ghe.nome }}{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+    <a class="voltar" href="{% url 'painel_avaliacoes:unidade_detail' ghe.unidade.pk %}" title="Voltar para {{ ghe.unidade.nome }}">&larr; Voltar</a>
+    <h1>{{ ghe.nome }}</h1>
+    <p class="subtitulo">Aplicações e evidências complementares deste GHE — {{ ghe.unidade.nome }}.</p>
+</div>
+
+<div class="cartao">
+    <p>{{ ghe.setor|default:"Sem setor cadastrado." }}</p>
+    <p>
+        <a href="{% url 'painel_avaliacoes:ghe_update' ghe.pk %}" class="botao secundario">Editar</a>
+        {% if eh_admin %}
+        <a href="{% url 'painel_avaliacoes:indicadores_indiretos' ghe.pk %}" class="botao secundario">Evidências complementares</a>
+        {% endif %}
+    </p>
+</div>
+
+<div class="cartao">
+    <h2>Aplicações</h2>
+    <p><a href="{% url 'painel_avaliacoes:aplicacao_create' ghe.pk %}" class="botao">+ Nova aplicação</a></p>
+    {% if aplicacoes %}
+    <table>
+        <thead><tr><th>Instrumento</th><th>Tipo</th><th>Status</th><th>Critério</th><th></th></tr></thead>
+        <tbody>
+        {% for aplicacao in aplicacoes %}
+            <tr>
+                <td>{{ aplicacao.instrumento.nome }}</td>
+                <td>{{ aplicacao.get_tipo_display }}</td>
+                <td>{{ aplicacao.get_status_display }}</td>
+                <td>{{ aplicacao.criterio_versao.codigo }}</td>
+                <td><a href="{% url 'painel_avaliacoes:aplicacao_detail' aplicacao.pk %}" class="botao secundario pequeno">Ver</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Nenhuma aplicação cadastrada ainda.</p>
+    {% endif %}
+</div>
+{% endblock %}

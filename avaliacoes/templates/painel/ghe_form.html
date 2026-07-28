@@ -1,0 +1,27 @@
+{% extends "painel/_base.html" %}
+{% block titulo %}{% if ghe %}Editar GHE{% else %}Novo GHE{% endif %}{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+    <a class="voltar" href="{% url 'painel_avaliacoes:unidade_detail' unidade.pk %}" title="Voltar para {{ unidade.nome }}">&larr; Voltar</a>
+    <h1>{% if ghe %}Editar GHE{% else %}Novo GHE{% endif %}</h1>
+    <p class="subtitulo">
+        {% if ghe %}Altere os dados de {{ ghe.nome }}.{% else %}Cadastre o grupo de trabalhadores que vai responder o questionário em {{ unidade.nome }}.{% endif %}
+    </p>
+</div>
+
+<div class="cartao">
+    {% if not form.fields.funcoes.queryset.exists %}
+    <p style="font-size: 13px; color: #777;">
+        Nenhuma função cadastrada nesta unidade ainda — o campo "Funções" abaixo vai ficar
+        vazio até você <a href="{% url 'painel_avaliacoes:funcao_create' unidade.pk %}" target="_blank" rel="noopener">
+        criar uma numa aba nova</a> e voltar aqui sem perder o que já preencheu (é opcional,
+        pode deixar em branco também).
+    </p>
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Salvar" class="botao">
+    </form>
+</div>
+{% endblock %}

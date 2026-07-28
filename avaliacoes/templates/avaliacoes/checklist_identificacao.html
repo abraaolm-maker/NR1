@@ -1,0 +1,28 @@
+{% extends "avaliacoes/_base_questionario.html" %}
+
+{% block titulo %}Entrevista e observação{% endblock %}
+
+{% block conteudo %}
+<h1>Checklist de entrevista e observação</h1>
+<p class="aviso">
+    Este checklist complementa a avaliação de riscos psicossociais em andamento —
+    são 6 perguntas de entrevista com a liderança e 10 itens de observação em campo.
+    Suas respostas ficam associadas ao seu nome (não são anônimas), pois fazem parte
+    do parecer técnico do profissional responsável.
+</p>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="campo">
+        <label class="rotulo" for="{{ form.nome.id_for_label }}">{{ form.nome.label }}</label>
+        {{ form.nome }}
+        {% if form.nome.errors %}<p class="erro-campo">{{ form.nome.errors|join:" " }}</p>{% endif %}
+    </div>
+    <div class="campo">
+        <label class="rotulo" for="{{ form.cargo.id_for_label }}">{{ form.cargo.label }}</label>
+        {{ form.cargo }}
+        {% if form.cargo.errors %}<p class="erro-campo">{{ form.cargo.errors|join:" " }}</p>{% endif %}
+    </div>
+    <button type="submit">Começar</button>
+</form>
+{% endblock %}

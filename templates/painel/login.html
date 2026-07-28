@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entrar — Painel do Gestor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --slate-900: #0f172a; --slate-600: #475569; --slate-500: #64748b;
+        --slate-400: #94a3b8; --slate-200: #e2e8f0; --slate-100: #f1f5f9;
+        --teal-600: #0d9488; --teal-100: #ccfbf1; --teal-50: #f0fdfa;
+        --red-700: #b91c1c; --red-200: #fecaca; --red-50: #fef2f2;
+    }
+    * { box-sizing: border-box; }
+    body {
+        font-family: Inter, -apple-system, "Segoe UI", Arial, sans-serif;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        margin: 0;
+        color: var(--slate-900);
+    }
+    .marca { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; }
+    .marca-icone {
+        width: 30px; height: 30px; background: var(--teal-50); color: var(--teal-600);
+        border: 1px solid var(--teal-100); border-radius: 6px;
+        display: flex; align-items: center; justify-content: center;
+        font-family: "Plus Jakarta Sans", sans-serif; font-weight: 700; font-size: 14px;
+    }
+    .marca-texto { font-family: "Plus Jakarta Sans", sans-serif; font-weight: 600; font-size: 18px; letter-spacing: -0.01em; }
+    .envoltorio { width: 100%; max-width: 380px; padding: 0 16px; }
+    .cartao {
+        background: #fff;
+        border: 1px solid var(--slate-200);
+        border-radius: 8px;
+        box-shadow: 0 1px 2px rgba(15,23,42,0.04);
+        padding: 32px 28px;
+        width: 100%;
+    }
+    h1 { font-family: "Plus Jakarta Sans", sans-serif; font-size: 19px; font-weight: 600; color: var(--slate-900); margin: 0 0 4px; }
+    label {
+        font-size: 10px; font-weight: 600; letter-spacing: .08em; color: var(--slate-400);
+        text-transform: uppercase; display: block; margin: 16px 0 6px;
+    }
+    input[type="text"], input[type="password"] {
+        width: 100%; padding: 9px 11px; border: 1px solid var(--slate-200); border-radius: 6px;
+        font-size: 13.5px; font-family: Inter, sans-serif; color: var(--slate-900);
+    }
+    input[type="text"]:focus, input[type="password"]:focus {
+        outline: none; border-color: var(--teal-600); box-shadow: 0 0 0 3px rgba(20,184,166,0.15);
+    }
+    button {
+        margin-top: 22px;
+        width: 100%;
+        background: var(--slate-900);
+        color: #fff;
+        border: none;
+        padding: 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        cursor: pointer;
+    }
+    button:hover { background: #1e293b; }
+    .erro { color: var(--red-700); font-size: 12.5px; margin-top: 12px; background: var(--red-50); border: 1px solid var(--red-200); border-radius: 6px; padding: 9px 12px; }
+    .contexto { font-size: 12.5px; color: var(--slate-500); margin: 0 0 20px; line-height: 1.5; }
+    .ajuda { font-size: 12px; color: var(--slate-400); margin-top: 18px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="envoltorio">
+    <div class="marca">
+        <span class="marca-icone">C</span>
+        <span class="marca-texto">CRARP</span>
+    </div>
+    <div class="cartao">
+        <h1>Painel do Gestor</h1>
+        <p class="contexto">
+            Sistema de Avaliação de Fatores de Risco Psicossocial (NR-01/GRO-PGR) — cadastro de
+            empresas, GHEs, aplicações e relatórios.
+        </p>
+        <form method="post">
+            {% csrf_token %}
+            {% if form.errors %}
+            <p class="erro">Usuário ou senha inválidos.</p>
+            {% endif %}
+            <label for="id_username">Usuário</label>
+            {{ form.username }}
+            <label for="id_password">Senha</label>
+            {{ form.password }}
+            <button type="submit">Entrar</button>
+        </form>
+        <p class="ajuda">Esqueceu sua senha? Fale com o administrador do sistema.</p>
+    </div>
+</div>
+</body>
+</html>

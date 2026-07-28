@@ -1,0 +1,54 @@
+{% extends "painel/_base.html" %}
+{% block titulo %}{{ empresa.nome }}{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+    {% if eh_admin %}
+    <a class="voltar" href="{% url 'painel_avaliacoes:empresa_list' %}" title="Voltar para Empresas">&larr; Voltar</a>
+    {% endif %}
+    <h1>{{ empresa.nome }}</h1>
+    <p class="subtitulo">Dados cadastrais e unidades desta empresa.</p>
+</div>
+
+<div class="cartao">
+    <p>CNPJ: {{ empresa.cnpj }}</p>
+    {% if eh_admin %}
+    <p><a href="{% url 'painel_avaliacoes:empresa_update' empresa.pk %}" class="botao secundario">Editar</a></p>
+    {% endif %}
+</div>
+
+{% if eh_admin %}
+<div class="cartao">
+    <h2>Acesso do gestor</h2>
+    {% if empresa.gestor %}
+    <p>Usuário: <strong>{{ empresa.gestor.username }}</strong></p>
+    {% else %}
+    <p style="font-size: 13px; color: var(--slate-500);">
+        Esta empresa ainda não tem um usuário gestor — sem ele, ninguém do lado do
+        cliente consegue acessar o painel.
+    </p>
+    <p><a href="{% url 'painel_avaliacoes:empresa_criar_gestor' empresa.pk %}" class="botao secundario">Criar acesso do gestor</a></p>
+    {% endif %}
+</div>
+{% endif %}
+
+<div class="cartao">
+    <h2>Unidades</h2>
+    <p><a href="{% url 'painel_avaliacoes:unidade_create' empresa.pk %}" class="botao">+ Nova unidade</a></p>
+    {% if unidades %}
+    <table>
+        <thead><tr><th>Nome</th><th>CNPJ</th><th></th></tr></thead>
+        <tbody>
+        {% for unidade in unidades %}
+            <tr>
+                <td>{{ unidade.nome }}</td>
+                <td>{{ unidade.cnpj|default:"—" }}</td>
+                <td><a href="{% url 'painel_avaliacoes:unidade_detail' unidade.pk %}" class="botao secundario pequeno">Ver</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Nenhuma unidade cadastrada ainda.</p>
+    {% endif %}
+</div>
+{% endblock %}

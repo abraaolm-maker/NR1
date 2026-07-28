@@ -1,0 +1,19 @@
+{% extends "painel/_base.html" %}
+{% block titulo %}{% if empresa %}Editar empresa{% else %}Nova empresa{% endif %}{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+    <a class="voltar" href="{% url 'painel_avaliacoes:empresa_list' %}" title="Voltar para Empresas">&larr; Voltar</a>
+    <h1>{% if empresa %}Editar empresa{% else %}Nova empresa{% endif %}</h1>
+    <p class="subtitulo">
+        {% if empresa %}Altere os dados cadastrais de {{ empresa.nome }}.{% else %}Cadastre uma nova empresa cliente.{% endif %}
+    </p>
+</div>
+
+<div class="cartao">
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Salvar" class="botao">
+    </form>
+</div>
+{% endblock %}

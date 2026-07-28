@@ -1,0 +1,14 @@
+{% extends "avaliacoes/_base_questionario.html" %}
+
+{% block titulo %}Obrigado pela participação{% endblock %}
+
+{% block conteudo %}
+<h1>Obrigado pela sua participação!</h1>
+<p>
+    Suas respostas foram registradas com sucesso{% if respondente.concluido_em %} em {{ respondente.concluido_em }}{% endif %}.
+</p>
+<p>
+    Elas complementam o parecer técnico do profissional responsável pela avaliação de
+    riscos psicossociais.
+</p>
+{% endblock %}

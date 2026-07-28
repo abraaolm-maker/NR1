@@ -1,0 +1,20 @@
+{% extends "painel/_base.html" %}
+{% block titulo %}Novo relatório{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+    <a class="voltar" href="{% url 'painel_avaliacoes:unidade_detail' unidade.pk %}" title="Voltar para {{ unidade.nome }}">&larr; Voltar</a>
+    <h1>Novo relatório</h1>
+    <p class="subtitulo">Selecione as aplicações concluídas de {{ unidade.nome }} que farão parte deste relatório.</p>
+</div>
+
+<div class="cartao">
+    {% if form.non_field_errors %}
+    <p style="color:#c0392b;">{{ form.non_field_errors }}</p>
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Criar relatório" class="botao">
+    </form>
+</div>
+{% endblock %}
