@@ -2,6 +2,12 @@
 # repositório; o Render lê este arquivo e já deixa o serviço configurado. Os únicos
 # valores que você precisa preencher são os marcados "sync: false" (secretos: nunca
 # ficam neste arquivo, você digita direto no dashboard do Render).
+#
+# Plano free do Render não suporta disco persistente — por isso não há "disk" aqui e
+# DJANGO_DB_PATH/DJANGO_MEDIA_ROOT não são definidos (caem no default de settings.py,
+# dentro do próprio container). Isso significa que o banco SQLite reseta a cada novo
+# deploy (aceitável pra um teste curto com pessoas reais; se precisar persistir os
+# dados, mude "plan" pra um pago e adicione de volta um bloco "disk").
 services:
   - type: web
     name: crarp
@@ -13,17 +19,9 @@ services:
         value: "False"
       - key: DJANGO_SECRET_KEY
         generateValue: true
-      - key: DJANGO_DB_PATH
-        value: /var/data/db.sqlite3
-      - key: DJANGO_MEDIA_ROOT
-        value: /var/data/media
       - key: DJANGO_ADMIN_USER
         sync: false
       - key: DJANGO_ADMIN_PASSWORD
         sync: false
       - key: ANTHROPIC_API_KEY
         sync: false
-    disk:
-      name: crarp-dados
-      mountPath: /var/data
-      sizeGB: 1
