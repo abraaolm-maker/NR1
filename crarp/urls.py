@@ -35,5 +35,9 @@ urlpatterns = [
     path('', include('avaliacoes.urls')),
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Servir /media/ direto pelo Django mesmo com DEBUG=False: os PDFs de relatório são
+# gerados em runtime (WeasyPrint), então o WhiteNoise (que só serve STATIC_URL,
+# coletado no build) não os enxerga. Para o volume baixo deste ambiente de teste isso
+# é aceitável; se o tráfego crescer, mover para um storage externo (S3 etc.) em vez de
+# servir arquivos direto do processo Django.
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
