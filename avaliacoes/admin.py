@@ -71,7 +71,7 @@ class PerigoIdentificadoAdmin(admin.ModelAdmin):
 
 @admin.register(ItemChecklistTriangulacao)
 class ItemChecklistTriangulacaoAdmin(admin.ModelAdmin):
-    list_display = ("tipo", "ordem", "texto")
+    list_display = ("tipo", "ordem", "texto", "dominio_codigo_relacionado")
     list_filter = ("tipo",)
 
 

@@ -1,0 +1,16 @@
+{% extends "painel/_base.html" %}
+{% block titulo %}Nova chave de API do Claude{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+    <a class="voltar" href="{% url 'painel_relatorios:chaves_api_list' %}" title="Voltar para Chaves de API">&larr; Voltar</a>
+    <h1>Nova chave de API do Claude</h1>
+</div>
+
+<div class="cartao">
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Salvar chave" class="botao">
+    </form>
+</div>
+{% endblock %}

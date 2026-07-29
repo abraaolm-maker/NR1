@@ -1,0 +1,28 @@
+{% extends "painel/_base.html" %}
+{% block titulo %}Nova versão do critério{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+    <a class="voltar" href="{% url 'painel_avaliacoes:configuracoes_risco' %}" title="Voltar para Configurações de risco">&larr; Voltar</a>
+    <h1>Nova versão do critério de cálculo</h1>
+    <p class="subtitulo">
+        {% if base %}
+        Os valores abaixo começam iguais aos da versão atual ({{ base.codigo }}) — ajuste
+        só o que precisa mudar. Os thresholds por domínio, a severidade e a matriz de
+        risco são copiados de "{{ base.codigo }}" automaticamente e não aparecem aqui
+        pra edição (são ancorados no motor de cálculo, `risk_engine.py`).
+        {% else %}
+        Nenhuma versão anterior encontrada — esta será a primeira, sem thresholds por
+        domínio (rode o management command `criar_criterio_versao` se precisar de uma
+        base completa a partir do `risk_engine.py`).
+        {% endif %}
+    </p>
+</div>
+
+<div class="cartao">
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Criar versão" class="botao">
+    </form>
+</div>
+{% endblock %}

@@ -28,6 +28,7 @@ from risk_engine import (
     calcular_severidade,
     calcular_probabilidade,
     calcular_prevalencia,
+    calcular_risco_por_prevalencia,
     verificar_evento_grave,
     calcular_risco,
     deve_suprimir_por_confidencialidade,
@@ -196,6 +197,42 @@ def test_prevalencia_lista_vazia():
     resultado = calcular_prevalencia([])
     assert resultado.prioridade == Prioridade.P3
     assert resultado.percentual_elevados == 0.0
+
+
+# ---------------------------------------------------------------------------
+# Banda por prevalência (substitui a matriz S×P como critério principal, achado de
+# 2026-07-29 — a regra de evidências convergentes não tinha fonte científica citável
+# e divergia do semáforo do próprio manual COPSOQ e da planilha de referência)
+# ---------------------------------------------------------------------------
+
+def test_banda_por_prevalencia_p1_vira_alto():
+    resultado = calcular_risco_por_prevalencia(Prioridade.P1, severidade=3, evento_grave_confirmado=False)
+    assert resultado.banda == BandaRisco.ALTO
+    assert resultado.prazo_dias_plano_de_acao == 30
+
+
+def test_banda_por_prevalencia_p2_vira_moderado():
+    resultado = calcular_risco_por_prevalencia(Prioridade.P2, severidade=2, evento_grave_confirmado=False)
+    assert resultado.banda == BandaRisco.MODERADO
+    assert resultado.prazo_dias_plano_de_acao == 90
+
+
+def test_banda_por_prevalencia_p3_vira_aceitavel():
+    resultado = calcular_risco_por_prevalencia(Prioridade.P3, severidade=1, evento_grave_confirmado=False)
+    assert resultado.banda == BandaRisco.ACEITAVEL
+    assert resultado.prazo_dias_plano_de_acao is None
+
+
+def test_banda_por_prevalencia_evento_grave_forca_critico_mesmo_com_p3():
+    # Um relato grave confirmado nunca pode ficar mascarado por prevalência baixa.
+    resultado = calcular_risco_por_prevalencia(Prioridade.P3, severidade=3, evento_grave_confirmado=True)
+    assert resultado.banda == BandaRisco.CRITICO
+    assert resultado.prazo_dias_plano_de_acao == 15
+
+
+def test_banda_por_prevalencia_agrupar_levanta_erro():
+    with pytest.raises(ValueError):
+        calcular_risco_por_prevalencia(Prioridade.AGRUPAR, severidade=1, evento_grave_confirmado=False)
 
 
 # ---------------------------------------------------------------------------

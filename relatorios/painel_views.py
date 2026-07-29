@@ -16,9 +16,16 @@ from avaliacoes.decorators import admin_required, gestor_required
 from avaliacoes.models import Aplicacao, StatusAplicacao, Unidade
 from avaliacoes.services.tenancy import empresas_visiveis
 
-from .forms import ParecerJSONForm, PerfilProfissionalForm, RelatorioForm
-from .models import PerfilProfissional, Relatorio, StatusRelatorio
+from .forms import ChaveApiClaudeForm, ParecerJSONForm, PerfilProfissionalForm, RelatorioForm
+from .models import ChaveApiClaude, PerfilProfissional, Relatorio, StatusRelatorio
 from .services.analise_ia import gerar_e_salvar_parecer
+from .services.chaves_api import (
+    chave_precisa_reverificacao,
+    definir_chave_ativa,
+    remover_chave,
+    salvar_chave,
+    verificar_chave,
+)
 from .services.parecer_form import contar_linhas_renderizadas, linhas_para_template, montar_parecer_do_post
 from .services.pdf import assinar_relatorio, gerar_pdf_relatorio
 
@@ -118,8 +125,18 @@ def relatorio_detail(request, pk):
 
     # Stepper do fluxo (achado no diagnóstico de UX de 2026-07-28: nada no painel
     # mostrava em que etapa o relatório estava, nem impedia pular etapas).
+    #
+    # Bug corrigido em 2026-07-29 (achado pelo usuário, print do card com ícones
+    # verdes): `etapa_pdf` marcava a etapa 3 como concluída só por existir um
+    # `pdf_path`, mesmo sem nenhum parecer gerado — um PDF gerado antes do parecer
+    # existir aparecia com ✓ verde igual a um PDF de verdade completo, confundindo
+    # a hierarquia visual do fluxo. Agora só conta como concluída quando o PDF
+    # existe E reflete um parecer já gerado; um PDF "órfão" (sem parecer) aparece
+    # como pendente/desatualizado (`pdf_desatualizado`), não como concluído.
     etapa_parecer = bool(relatorio.parecer_ia)
-    etapa_pdf = bool(relatorio.pdf_path)
+    pdf_existe = bool(relatorio.pdf_path)
+    etapa_pdf = etapa_parecer and pdf_existe
+    pdf_desatualizado = pdf_existe and not etapa_parecer
     etapa_assinatura = relatorio.status == StatusRelatorio.ASSINADO
     etapas = [
         {"nome": "Diagnósticos", "concluida": True, "atual": False},
@@ -142,6 +159,7 @@ def relatorio_detail(request, pk):
             "etapas": etapas,
             "etapa_parecer": etapa_parecer,
             "etapa_pdf": etapa_pdf,
+            "pdf_desatualizado": pdf_desatualizado,
         },
     )
 
@@ -220,6 +238,66 @@ def relatorio_assinar(request, pk):
     except ValueError as exc:
         messages.error(request, str(exc))
     return redirect("painel_relatorios:relatorio_detail", pk=pk)
+
+
+@admin_required
+def chaves_api_list(request):
+    """Reverifica automaticamente (contra `client.models.list()`, sem custo de
+    tokens) qualquer chave nunca checada ou checada há mais de 1 dia — assim a
+    coluna "Válida" nunca fica desatualizada por muito tempo, sem precisar de uma
+    tarefa agendada separada."""
+    chaves = list(ChaveApiClaude.objects.select_related("criada_por").all())
+    for chave in chaves:
+        if chave_precisa_reverificacao(chave):
+            verificar_chave(chave)
+    return render(request, "painel/chaves_api_list.html", {"chaves": chaves})
+
+
+@admin_required
+def chaves_api_create(request):
+    if request.method == "POST":
+        form = ChaveApiClaudeForm(request.POST)
+        if form.is_valid():
+            try:
+                chave = salvar_chave(
+                    form.cleaned_data["nome"], form.cleaned_data["valor"], request.user
+                )
+            except ValueError as exc:
+                form.add_error("valor", str(exc))
+            else:
+                if not ChaveApiClaude.objects.exclude(pk=chave.pk).filter(ativa=True).exists():
+                    definir_chave_ativa(chave.pk)
+                verificar_chave(chave)
+                if chave.valida:
+                    messages.success(request, f'Chave "{chave.nome}" salva e válida ({chave.prefixo}…{chave.sufixo}).')
+                else:
+                    messages.warning(
+                        request,
+                        f'Chave "{chave.nome}" salva ({chave.prefixo}…{chave.sufixo}), mas a Anthropic '
+                        "não aceitou esse valor — confira se copiou a chave corretamente.",
+                    )
+                return redirect("painel_relatorios:chaves_api_list")
+    else:
+        form = ChaveApiClaudeForm()
+    return render(request, "painel/chaves_api_form.html", {"form": form})
+
+
+@admin_required
+def chaves_api_ativar(request, pk):
+    if request.method == "POST":
+        chave = get_object_or_404(ChaveApiClaude, pk=pk)
+        definir_chave_ativa(chave.pk)
+        messages.success(request, f'Chave "{chave.nome}" agora é a usada para gerar pareceres via IA.')
+    return redirect("painel_relatorios:chaves_api_list")
+
+
+@admin_required
+def chaves_api_remover(request, pk):
+    if request.method == "POST":
+        chave = get_object_or_404(ChaveApiClaude, pk=pk)
+        remover_chave(chave)
+        messages.success(request, "Chave removida.")
+    return redirect("painel_relatorios:chaves_api_list")
 
 
 @admin_required

@@ -5,7 +5,7 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 
-from instrumentos.models import Instrumento
+from instrumentos.models import Instrumento, Profundidade
 from .models import (
     GHE,
     Aplicacao,
@@ -37,6 +37,39 @@ class EmpresaForm(forms.ModelForm):
 
     def clean_cnpj(self):
         return _formatar_cnpj(self.cleaned_data["cnpj"])
+
+
+class CriterioVersaoForm(forms.ModelForm):
+    """Cria uma NOVA versão do critério de cálculo de risco (CLAUDE.md Seção 7.8) —
+    nunca edita uma versão existente, pra garantir que um Relatorio antigo continue
+    citando exatamente o critério com que foi calculado. Os thresholds por domínio, a
+    severidade e a matriz de risco são tecnicamente ancorados em risk_engine.py e
+    sempre copiados da versão-base escolhida na view (nunca editáveis por aqui) — só
+    os parâmetros numéricos de negócio (N mínimo, limiar de evento grave, limites de
+    faixa, prevalência, período de referência) ficam abertos pra ajuste."""
+
+    class Meta:
+        model = CriterioVersao
+        fields = [
+            "codigo",
+            "descricao",
+            "n_minimo_respondentes",
+            "limiar_evento_grave",
+            "limite_baixo",
+            "limite_elevado",
+            "prevalencia_p1",
+            "prevalencia_p2",
+            "periodo_referencia",
+        ]
+        widgets = {"descricao": forms.Textarea(attrs={"rows": 3})}
+
+    def clean_codigo(self):
+        codigo = self.cleaned_data["codigo"].strip()
+        if CriterioVersao.objects.filter(codigo=codigo).exists():
+            raise forms.ValidationError(
+                f'Já existe uma versão "{codigo}" — escolha um código novo (ex.: "v1.2").'
+            )
+        return codigo
 
 
 class CatalogoAcaoForm(forms.ModelForm):
@@ -113,6 +146,33 @@ class CriarGestorForm(forms.Form):
         return username
 
 
+class EditarGestorForm(forms.Form):
+    """Edita usuário/senha do gestor já existente de uma Empresa — troca de senha é
+    opcional (deixar em branco mantém a atual)."""
+
+    username = forms.CharField(max_length=150, label="Usuário")
+    password = forms.CharField(
+        widget=forms.PasswordInput,
+        required=False,
+        min_length=8,
+        label="Nova senha",
+        help_text="Deixe em branco para manter a senha atual.",
+    )
+
+    def __init__(self, *args, usuario=None, **kwargs):
+        self._usuario = usuario
+        super().__init__(*args, **kwargs)
+
+    def clean_username(self):
+        username = self.cleaned_data["username"]
+        qs = get_user_model().objects.filter(username=username)
+        if self._usuario:
+            qs = qs.exclude(pk=self._usuario.pk)
+        if qs.exists():
+            raise forms.ValidationError("Já existe um usuário com esse nome.")
+        return username
+
+
 class UnidadeForm(forms.ModelForm):
     class Meta:
         model = Unidade
@@ -178,6 +238,7 @@ class AplicacaoForm(forms.ModelForm):
             "responsavel_aplicador",
             "justificativa_instrumento",
             "data_aplicacao",
+            "profundidade",
         ]
         widgets = {"data_aplicacao": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")}
         help_texts = {
@@ -188,7 +249,18 @@ class AplicacaoForm(forms.ModelForm):
                 "escolha a mais recente, a menos que precise reabrir uma aplicação com o "
                 "mesmo critério de um relatório já existente."
             ),
+            "profundidade": (
+                "Só aparece pro COPSOQ Oficial: Curta (41 itens) é mais rápida de responder, "
+                "Longa (119 itens) é mais completa e precisa. Escolha conforme o tempo "
+                "disponível dos respondentes."
+            ),
         }
+
+    profundidade = forms.ChoiceField(
+        choices=[("", "---------")] + list(Profundidade.choices),
+        required=False,
+        label="Profundidade do questionário",
+    )
 
     def __init__(self, *args, usuario_logado=None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -201,6 +273,17 @@ class AplicacaoForm(forms.ModelForm):
                 str(instrumento.pk): instrumento.descricao
                 for instrumento in Instrumento.objects.all()
             }
+        )
+        # Instrumentos que usam profundidade (COPSOQ Oficial) — o form_form.html usa
+        # isto pra mostrar/esconder o campo "Profundidade" conforme o instrumento
+        # escolhido, mesmo padrão JS da ajuda dinâmica acima.
+        self.instrumentos_com_profundidade_json = json.dumps(
+            [
+                str(pk)
+                for pk in Instrumento.objects.filter(
+                    dominios__itens__profundidade__gt=""
+                ).values_list("pk", flat=True).distinct()
+            ]
         )
 
         self.fields["criterio_versao"].label_from_instance = (
@@ -224,3 +307,16 @@ class AplicacaoForm(forms.ModelForm):
         if criando:
             self.fields["tipo"].initial = TipoAplicacao.ANONIMA
             self.fields["data_aplicacao"].initial = timezone.now().date()
+
+    def clean(self):
+        cleaned_data = super().clean()
+        instrumento = cleaned_data.get("instrumento")
+        profundidade = cleaned_data.get("profundidade")
+        if instrumento and not profundidade:
+            usa_profundidade = instrumento.dominios.filter(itens__profundidade__gt="").exists()
+            if usa_profundidade:
+                self.add_error(
+                    "profundidade",
+                    "Este instrumento tem profundidades (curta/média/longa) — escolha uma.",
+                )
+        return cleaned_data

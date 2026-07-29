@@ -12,11 +12,10 @@
         <summary style="cursor: pointer;">Como a prioridade é calculada?</summary>
         <p>
             A Prioridade vem da prevalência de respondentes na faixa elevada — P1 (≥50%),
-            P2 (≥25%), P3 (abaixo disso) — não da matriz de severidade × probabilidade
-            (essa continua calculada internamente, ver "Resultados por domínio" no
-            detalhe da Aplicação, só que não define mais a prioridade deste diagnóstico).
-            "AGRUPAR" significa N abaixo do mínimo de confidencialidade — resultado
-            suprimido, não divulgar isoladamente.
+            P2 (≥25%), P3 (abaixo disso) — a mesma lógica que define a Banda em
+            "Resultados por domínio" no detalhe da Aplicação. "AGRUPAR" significa N
+            abaixo do mínimo de confidencialidade — resultado suprimido, não divulgar
+            isoladamente.
         </p>
     </details>
 </div>
@@ -60,7 +59,7 @@
                 <td>{{ linha.classificacao }}</td>
                 <td>
                     {% if linha.prioridade == "P1" %}
-                    <span class="badge critico">P1</span>
+                    <span class="badge alto">P1</span>
                     {% elif linha.prioridade == "P2" %}
                     <span class="badge moderado">P2</span>
                     {% elif linha.prioridade == "P3" %}

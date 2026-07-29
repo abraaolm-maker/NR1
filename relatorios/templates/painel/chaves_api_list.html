@@ -1,0 +1,72 @@
+{% extends "painel/_base.html" %}
+{% block titulo %}Chaves de API do Claude{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+    <a class="voltar" href="{% url 'painel_relatorios:relatorio_list' %}" title="Voltar para Relatórios">&larr; Voltar</a>
+    <h1>Chaves de API do Claude</h1>
+    <p class="subtitulo">A chave "Em uso" é usada para gerar pareceres via IA.</p>
+</div>
+
+<div class="cartao">
+    <div style="display:flex; justify-content:flex-end; margin-bottom: 14px;">
+        <a href="{% url 'painel_relatorios:chaves_api_create' %}" class="botao">+ Nova chave</a>
+    </div>
+
+    {% if chaves %}
+    <table>
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Chave</th>
+                <th>Em uso</th>
+                <th>Válida</th>
+                <th>Cadastrada por</th>
+                <th>Criada em</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for chave in chaves %}
+            <tr>
+                <td>{{ chave.nome }}</td>
+                <td style="font-family: monospace; font-size: 12.5px; color: var(--slate-600);">
+                    {{ chave.prefixo }}••••••••{{ chave.sufixo }}
+                </td>
+                <td>
+                    {% if chave.ativa %}
+                    <span class="badge aceitavel">Em uso</span>
+                    {% else %}
+                    <form method="post" action="{% url 'painel_relatorios:chaves_api_ativar' chave.pk %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="botao secundario pequeno">Usar esta</button>
+                    </form>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if chave.valida is None %}
+                    <span class="badge moderado">Verificando…</span>
+                    {% elif chave.valida %}
+                    <span class="badge aceitavel" title="Verificada em {{ chave.verificada_em|date:'d/m/Y H:i' }}">Válida</span>
+                    {% else %}
+                    <span class="badge critico" title="Verificada em {{ chave.verificada_em|date:'d/m/Y H:i' }}">Inválida</span>
+                    {% endif %}
+                </td>
+                <td>{{ chave.criada_por|default:"—" }}</td>
+                <td>{{ chave.criada_em|date:"d/m/Y H:i" }}</td>
+                <td>
+                    <form method="post" action="{% url 'painel_relatorios:chaves_api_remover' chave.pk %}"
+                          onsubmit="return confirm('Remover a chave \'{{ chave.nome }}\'? Não pode ser desfeito.');"
+                          style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="botao secundario pequeno" style="color: var(--red-700);">Remover</button>
+                    </form>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Nenhuma chave cadastrada ainda — sem uma chave ativa, "Gerar parecer via IA" não vai funcionar.</p>
+    {% endif %}
+</div>
+{% endblock %}

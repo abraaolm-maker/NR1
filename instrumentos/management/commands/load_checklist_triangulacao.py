@@ -29,7 +29,10 @@ class Command(BaseCommand):
             ItemChecklistTriangulacao.objects.update_or_create(
                 tipo=entrada["tipo"],
                 ordem=entrada["ordem"],
-                defaults={"texto": entrada["texto"]},
+                defaults={
+                    "texto": entrada["texto"],
+                    "dominio_codigo_relacionado": entrada.get("dominio_relacionado", ""),
+                },
             )
             total += 1
 

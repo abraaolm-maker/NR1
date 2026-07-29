@@ -73,6 +73,8 @@ class Command(BaseCommand):
                     "do nível do instrumento."
                 )
 
+            referencia = dominio_entry.get("reference")
+
             dominio, dominio_criado = Dominio.objects.update_or_create(
                 instrumento=instrumento,
                 codigo=codigo,
@@ -84,6 +86,8 @@ class Command(BaseCommand):
                     "escala_labels": escala.get("labels", {}),
                     "thresholds_referencia_baixo_max": _decimal(thresholds["baixo_max"]),
                     "thresholds_referencia_moderado_max": _decimal(thresholds["moderado_max"]),
+                    "referencia_media_nacional": _decimal(referencia["media"]) if referencia else None,
+                    "referencia_desvio_padrao": _decimal(referencia["dp"]) if referencia else None,
                     "ordem": ordem_dominio,
                 },
             )
@@ -97,6 +101,7 @@ class Command(BaseCommand):
                         "texto": item_entry["text"],
                         "polaridade": item_entry["polarity"],
                         "evento_grave": item_entry.get("evento_grave", False),
+                        "profundidade": item_entry.get("profundidade", ""),
                         "ordem": ordem,
                     },
                 )

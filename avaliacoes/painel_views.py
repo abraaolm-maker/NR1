@@ -13,6 +13,7 @@ from django import forms
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.db import models as django_models
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -22,6 +23,8 @@ from .forms import (
     AplicacaoForm,
     CatalogoAcaoForm,
     CriarGestorForm,
+    CriterioVersaoForm,
+    EditarGestorForm,
     EmpresaForm,
     FuncaoForm,
     GHEForm,
@@ -35,16 +38,25 @@ from .models import (
     CatalogoAcao,
     ColetaChecklistTriangulacao,
     ConformidadeChecklist,
+    CriterioVersao,
     Empresa,
     IndicadorIndireto,
     PlanoDeAcao,
     RespostaChecklistTriangulacao,
     StatusAplicacao,
     StatusColetaChecklist,
+    StatusCriterioVersao,
     Unidade,
 )
 from .services.aplicacao_status import encerrar_coleta
-from .services.calculo_risco import contar_alertas_d9, diagnostico_ghe, dominios_da_aplicacao
+from .services.calculo_risco import (
+    BANDA_ORDEM,
+    contar_alertas_d9,
+    criterio_classificacao_linhas,
+    diagnostico_ghe,
+    dominios_da_aplicacao,
+    media_nacional_comparavel,
+)
 from .services.semaforo import calcular_semaforo, leitura_resumida
 from .services.tenancy import empresa_do_usuario, empresas_visiveis
 
@@ -156,6 +168,45 @@ def empresa_criar_gestor(request, pk):
     else:
         form = CriarGestorForm()
     return render(request, "painel/empresa_criar_gestor.html", {"form": form, "empresa": empresa})
+
+
+@admin_required
+def empresa_editar_gestor(request, pk):
+    empresa = get_object_or_404(Empresa, pk=pk)
+    if not empresa.gestor_id:
+        messages.error(request, "Esta empresa ainda não tem um gestor.")
+        return redirect("painel_avaliacoes:empresa_detail", pk=empresa.pk)
+
+    if request.method == "POST":
+        form = EditarGestorForm(request.POST, usuario=empresa.gestor)
+        if form.is_valid():
+            usuario = empresa.gestor
+            usuario.username = form.cleaned_data["username"]
+            if form.cleaned_data["password"]:
+                usuario.set_password(form.cleaned_data["password"])
+            usuario.save()
+            messages.success(request, f'Acesso de "{usuario.username}" atualizado.')
+            return redirect("painel_avaliacoes:empresa_detail", pk=empresa.pk)
+    else:
+        form = EditarGestorForm(initial={"username": empresa.gestor.username}, usuario=empresa.gestor)
+    return render(request, "painel/empresa_editar_gestor.html", {"form": form, "empresa": empresa})
+
+
+@admin_required
+def empresa_remover_gestor(request, pk):
+    """Remove o acesso ao painel sem apagar o usuário do banco: `Aplicacao.responsavel_aplicador`
+    é PROTECT, então excluir o User quebraria com ProtectedError se o gestor já tiver
+    conduzido alguma Aplicacao. Desvincular + desativar (`is_active=False`) já resolve
+    o objetivo real (barrar o login) sem esse risco."""
+    empresa = get_object_or_404(Empresa, pk=pk)
+    if request.method == "POST" and empresa.gestor_id:
+        usuario = empresa.gestor
+        empresa.gestor = None
+        empresa.save(update_fields=["gestor"])
+        usuario.is_active = False
+        usuario.save(update_fields=["is_active"])
+        messages.success(request, f'Acesso de "{usuario.username}" removido.')
+    return redirect("painel_avaliacoes:empresa_detail", pk=empresa.pk)
 
 
 @gestor_required
@@ -324,15 +375,23 @@ def aplicacao_detail(request, pk):
         reverse("avaliacoes:responder_consentimento", args=[aplicacao.token])
     )
     alertas_d9 = contar_alertas_d9(aplicacao)
-    planos_de_acao = PlanoDeAcao.objects.filter(
-        classificacao_risco__escore_dominio__aplicacao=aplicacao
-    ).select_related("classificacao_risco__escore_dominio__dominio")
+    # Ordenado do mais urgente pro menos urgente (Crítico > Alto > Moderado) — antes
+    # vinha na ordem de cadastro do domínio, sem relação com prioridade de ação.
+    planos_de_acao = sorted(
+        PlanoDeAcao.objects.filter(
+            classificacao_risco__escore_dominio__aplicacao=aplicacao
+        ).select_related("classificacao_risco__escore_dominio__dominio"),
+        key=lambda p: BANDA_ORDEM.get(p.classificacao_risco.banda, 0),
+        reverse=True,
+    )
     pronta_para_relatorio = (
         aplicacao.status == StatusAplicacao.CONCLUIDA and not aplicacao.relatorios.exists()
     )
     n_minimo = aplicacao.criterio_versao.n_minimo_respondentes
     n_concluidos = sum(1 for r in respondentes if r.concluido_em)
     escores_lista = list(escores)
+    for escore in escores_lista:
+        escore.media_nacional = media_nacional_comparavel(escore.dominio)
     todos_suprimidos = bool(escores_lista) and all(
         e.suprimido_por_confidencialidade for e in escores_lista
     )
@@ -497,9 +556,15 @@ def checklist_triangulacao(request, pk):
     aplicacao = _aplicacao_ou_404(request, pk)
     coleta = aplicacao.coletas_checklist.order_by("-criado_em").first()
 
+    # Itens de entrevista não têm conformidade válida (achado em 2026-07-29 — são
+    # perguntas abertas), então aparecem sempre que houver texto de resposta; itens de
+    # observação continuam exigindo uma conformidade avaliada (Conforme/Não conforme).
     respostas = (
         RespostaChecklistTriangulacao.objects.filter(respondente__coleta__aplicacao=aplicacao)
-        .exclude(conformidade=ConformidadeChecklist.NAO_AVALIADO)
+        .filter(
+            django_models.Q(item__tipo="entrevista")
+            | ~django_models.Q(conformidade=ConformidadeChecklist.NAO_AVALIADO)
+        )
         .select_related("item", "respondente")
         .order_by("item__tipo", "item__ordem")
     )
@@ -585,12 +650,106 @@ def semaforo_riscos(request, pk):
 @gestor_required
 def em_execucao(request, titulo):
     """Placeholder genérico pra módulos ainda não detalhados — CLAUDE.md Seção 6.8:
-    evita construir/deduzir esses fluxos antes do usuário definir como devem ficar.
-    Hoje só sobra "Configurações de Classificação de Risco" (admin) usando isso;
-    Relatórios/Análise da IA do lado da empresa ganharam view real (achado no
-    diagnóstico de UX de 2026-07-28: a empresa cliente não tinha acesso a nenhum
-    resultado da própria coleta)."""
+    evita construir/deduzir esses fluxos antes do usuário definir como devem ficar."""
     return render(request, "painel/em_execucao.html", {"titulo": titulo})
+
+
+@admin_required
+def configuracoes_risco_list(request):
+    """CLAUDE.md Seção 7.8: toda versão de CriterioVersao é um snapshot IMUTÁVEL —
+    esta tela só lista/inspeciona/ratifica versões existentes e permite criar uma
+    versão NOVA a partir de uma base; nunca edita os números de uma versão já usada
+    por algum Relatorio (isso quebraria a rastreabilidade exigida pela NR-01)."""
+    criterios = CriterioVersao.objects.annotate(
+        n_aplicacoes=django_models.Count("aplicacoes", distinct=True)
+    ).order_by("-criado_em")
+    return render(request, "painel/configuracoes_risco_list.html", {"criterios": criterios})
+
+
+@admin_required
+def configuracoes_risco_detail(request, pk):
+    criterio = get_object_or_404(CriterioVersao, pk=pk)
+    n_aplicacoes = criterio.aplicacoes.count()
+
+    matriz_por_severidade: dict[int, list[dict]] = {}
+    for entrada in criterio.matriz_risco:
+        matriz_por_severidade.setdefault(entrada["severidade"], []).append(entrada)
+    matriz_linhas = [
+        {"severidade": s, "celulas": sorted(matriz_por_severidade.get(s, []), key=lambda e: e["probabilidade"])}
+        for s in sorted(matriz_por_severidade)
+    ]
+
+    thresholds_por_instrumento = [
+        {"instrumento": instrumento, "dominios": sorted(dominios.items())}
+        for instrumento, dominios in criterio.thresholds_por_dominio.items()
+    ]
+
+    return render(
+        request,
+        "painel/configuracoes_risco_detail.html",
+        {
+            "criterio": criterio,
+            "n_aplicacoes": n_aplicacoes,
+            "criterio_classificacao_linhas": criterio_classificacao_linhas(criterio),
+            "matriz_linhas": matriz_linhas,
+            "thresholds_por_instrumento": thresholds_por_instrumento,
+            "pode_ratificar": criterio.status == StatusCriterioVersao.AGUARDANDO_RATIFICACAO,
+        },
+    )
+
+
+@admin_required
+def configuracoes_risco_ratificar(request, pk):
+    if request.method != "POST":
+        return redirect("painel_avaliacoes:configuracoes_risco_detail", pk=pk)
+    criterio = get_object_or_404(CriterioVersao, pk=pk)
+    if criterio.status == StatusCriterioVersao.AGUARDANDO_RATIFICACAO:
+        criterio.status = StatusCriterioVersao.RATIFICADO
+        criterio.ratificado_por = request.user
+        criterio.ratificado_em = timezone.now()
+        criterio.save(update_fields=["status", "ratificado_por", "ratificado_em"])
+        messages.success(request, f'Versão "{criterio.codigo}" ratificada.')
+    return redirect("painel_avaliacoes:configuracoes_risco_detail", pk=pk)
+
+
+@admin_required
+def configuracoes_risco_create(request):
+    """Cria uma nova CriterioVersao clonando os thresholds/severidade/matriz de risco
+    (tecnicamente ancorados em risk_engine.py — nunca editáveis por aqui) da versão
+    mais recente, deixando abertos só os parâmetros numéricos de negócio."""
+    base = CriterioVersao.objects.order_by("-criado_em").first()
+
+    if request.method == "POST":
+        form = CriterioVersaoForm(request.POST)
+        if form.is_valid():
+            criterio = form.save(commit=False)
+            criterio.thresholds_por_dominio = base.thresholds_por_dominio if base else {}
+            criterio.severidade_por_classificacao = base.severidade_por_classificacao if base else {}
+            criterio.matriz_risco = base.matriz_risco if base else []
+            criterio.save()
+            messages.success(
+                request,
+                f'Nova versão "{criterio.codigo}" criada — aguardando ratificação do '
+                "profissional responsável antes de uso conclusivo.",
+            )
+            return redirect("painel_avaliacoes:configuracoes_risco_detail", pk=criterio.pk)
+    else:
+        initial = (
+            {
+                "n_minimo_respondentes": base.n_minimo_respondentes,
+                "limiar_evento_grave": base.limiar_evento_grave,
+                "limite_baixo": base.limite_baixo,
+                "limite_elevado": base.limite_elevado,
+                "prevalencia_p1": base.prevalencia_p1,
+                "prevalencia_p2": base.prevalencia_p2,
+                "periodo_referencia": base.periodo_referencia,
+            }
+            if base
+            else {}
+        )
+        form = CriterioVersaoForm(initial=initial)
+
+    return render(request, "painel/configuracoes_risco_form.html", {"form": form, "base": base})
 
 
 @gestor_required

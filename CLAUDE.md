@@ -226,15 +226,27 @@ como argumento externo, ele é sempre derivado do banco.
 > não existe mais conceito de variante, nem campo `instrumento_ghe_variante`/`ghe_variante` no
 > banco.
 
+> **Reescrita de 2026-07-29** (achado em teste com usuários reais): o rótulo antigo de cada valor
+> da escala combinava três estilos de escala diferentes ao mesmo tempo ("Muito baixo / nunca /
+> discordo totalmente"), porque os itens originais misturavam frases-afirmação em terceira pessoa
+> ("Ritmo de trabalho elevado...") com frases que só faziam sentido como frequência ou como
+> concordância — confuso pra quem responde. Os 34 itens foram reescritos em primeira pessoa, como
+> afirmações que se respondem só por concordância (mesmo padrão de instrumentos de referência da
+> NR-01, ex.: "Tenho ajuda e apoio do meu superior imediato"). A escala virou um único padrão de
+> concordância; **decisão do usuário**: manter 5 pontos (não migrar pra uma escala de 6, que exigiria
+> recalibrar os thresholds de Baixo/Moderado/Elevado, calculados sobre a faixa 1–5). O código do
+> item (`D1.1`, `D9.2` etc.) não muda — só o texto da pergunta — então não há impacto nos dados já
+> respondidos nem no motor de cálculo.
+
 **Escala (todos os itens, 1 a 5):**
 
 | Valor | Rótulo |
 |---|---|
-| 1 | Muito baixo / nunca / discordo totalmente |
-| 2 | Baixo / raramente |
-| 3 | Moderado / às vezes |
-| 4 | Alto / frequentemente |
-| 5 | Muito alto / sempre / concordo totalmente |
+| 1 | Discordo totalmente |
+| 2 | Discordo |
+| 3 | Neutro |
+| 4 | Concordo |
+| 5 | Concordo totalmente |
 
 **Classificação por domínio (após inversão de polaridade item a item):**
 Baixo ≤ 2,5 · Moderado 2,6–3,4 · Elevado ≥ 3,5
@@ -245,56 +257,154 @@ maior o valor, menor o risco (inverter antes de agregar: `valor_invertido = 6 - 
 ---
 
 **D1 — Exigências do trabalho** (todos `RISCO`)
-- D1.1 Ritmo de trabalho elevado em relação ao tempo disponível para realizar as tarefas.
-- D1.2 Pressão por prazos para concluir as atividades do dia a dia.
-- D1.3 Volume de trabalho superior ao efetivo disponível em períodos de maior demanda.
-- D1.4 Interrupções frequentes que dificultam concluir as tarefas em andamento.
-- D1.5 Baixa previsibilidade da demanda, com solicitações urgentes, ajustes de última hora e retrabalho.
+- D1.1 Preciso manter um ritmo de trabalho muito acelerado em relação ao tempo que tenho disponível.
+- D1.2 Sinto pressão por prazos para concluir minhas atividades do dia a dia.
+- D1.3 O volume de trabalho é maior do que a equipe consegue dar conta, principalmente em períodos de maior demanda.
+- D1.4 Sou interrompido com frequência, o que dificulta concluir as tarefas que já comecei.
+- D1.5 Recebo solicitações urgentes ou ajustes de última hora que atrapalham meu planejamento.
 
 **D2 — Exigências emocionais** (todos `RISCO`)
-- D2.1 Necessidade de lidar com clientes, fornecedores ou colegas em situação de tensão, cobrança ou conflito.
-- D2.2 Necessidade de controlar emoções para manter o atendimento/relacionamento adequado mesmo sob pressão.
-- D2.3 Exposição a reclamações, cobranças ríspidas ou hostilidade verbal durante a rotina.
-- D2.4 Carga emocional decorrente da responsabilidade por evitar erros, perdas ou retrabalho na execução das tarefas.
+- D2.1 Preciso lidar com clientes, fornecedores ou colegas em situações de tensão, cobrança ou conflito.
+- D2.2 Preciso controlar minhas emoções para manter um bom atendimento mesmo quando estou sob pressão.
+- D2.3 Sou exposto a reclamações, cobranças ríspidas ou hostilidade verbal na minha rotina de trabalho.
+- D2.4 Sinto um desgaste emocional grande com a responsabilidade de evitar erros, perdas ou retrabalho.
 
 **D3 — Autonomia e controle** (todos `PROTETIVO`)
-- D3.1 Possui autonomia para organizar a sequência das próprias atividades e priorizar demandas.
-- D3.2 Consegue realizar pausas técnicas básicas sem prejuízo operacional ou constrangimento.
-- D3.3 Tem influência sobre rotinas/procedimentos quando identifica falhas de segurança, qualidade ou organização.
-- D3.4 A carga de trabalho permite executar as tarefas com atenção, sem necessidade de atalhos inseguros ou esforço excessivo.
+- D3.1 Tenho autonomia para organizar a ordem das minhas atividades e definir prioridades.
+- D3.2 Consigo fazer pausas básicas (banheiro, água, descanso curto) sem prejuízo pro meu trabalho.
+- D3.3 Quando percebo uma falha de segurança, qualidade ou organização, tenho como influenciar a mudança.
+- D3.4 Minha carga de trabalho permite que eu execute minhas tarefas com atenção, sem precisar de atalhos inseguros.
 
 **D4 — Sentido e significado do trabalho** (todos `PROTETIVO`)
-- D4.1 Percebe que o próprio trabalho contribui para o funcionamento seguro e organizado da empresa.
-- D4.2 As atividades realizadas são coerentes com as responsabilidades da função.
-- D4.3 Há clareza do papel, das responsabilidades e dos limites da função, evitando conflito e retrabalho.
+- D4.1 Sinto que o meu trabalho contribui pro funcionamento seguro e organizado da empresa.
+- D4.2 As atividades que realizo no dia a dia são coerentes com as responsabilidades da minha função.
+- D4.3 Tenho clareza sobre meu papel, minhas responsabilidades e os limites da minha função.
 
 **D5 — Reconhecimento e recompensa** (todos `PROTETIVO`)
-- D5.1 Recebe reconhecimento proporcional às responsabilidades assumidas na rotina.
-- D5.2 O feedback sobre desempenho é claro, respeitoso e voltado à melhoria do trabalho.
-- D5.3 Critérios de metas, cobranças e prioridades são compatíveis com qualidade, segurança e capacidade operacional.
-- D5.4 Percebe equilíbrio entre exigências e recursos disponíveis, incluindo estrutura, ferramentas, apoio e tempo.
+- D5.1 Recebo reconhecimento proporcional às responsabilidades que assumo no dia a dia.
+- D5.2 O feedback que recebo sobre meu desempenho é claro, respeitoso e ajuda a melhorar meu trabalho.
+- D5.3 As metas e cobranças que recebo são compatíveis com o que é possível fazer com qualidade e segurança.
+- D5.4 Tenho os recursos necessários (estrutura, ferramentas, apoio e tempo) pra dar conta do que é exigido de mim.
 
 **D6 — Relações sociais e liderança** (todos `PROTETIVO`)
-- D6.1 A liderança fornece suporte quando há sobrecarga, conflito de prioridade ou dificuldade operacional.
-- D6.2 A comunicação com a liderança é acessível e resolve problemas de rotina.
-- D6.3 As relações no trabalho são cooperativas, com ajuda mútua e respeito.
-- D6.4 Conflitos são tratados de forma técnica, imparcial e sem exposição indevida.
+- D6.1 Minha liderança me dá suporte quando estou sobrecarregado ou com dificuldades operacionais.
+- D6.2 Consigo me comunicar facilmente com minha liderança para resolver problemas do dia a dia.
+- D6.3 As relações no meu ambiente de trabalho são cooperativas, com ajuda mútua e respeito.
+- D6.4 Quando surgem conflitos, eles são tratados de forma justa e sem me expor desnecessariamente.
 
 **D7 — Segurança psicológica** (todos `PROTETIVO`)
-- D7.1 Pode relatar erros, quase-erros, desvios ou dificuldades sem medo de punição injusta.
-- D7.2 Pode discordar tecnicamente de uma orientação quando percebe risco de erro, perda, acidente ou não conformidade.
-- D7.3 Sente que sua opinião prática é considerada nas decisões que afetam a rotina de trabalho.
+- D7.1 Posso relatar erros, quase-erros ou dificuldades sem medo de ser punido injustamente.
+- D7.2 Posso discordar de uma orientação quando percebo risco de erro, acidente ou problema, sem medo de represália.
+- D7.3 Sinto que minha opinião é levada em conta nas decisões que afetam meu dia a dia de trabalho.
 
 **D8 — Justiça organizacional** (todos `PROTETIVO`)
-- D8.1 Escalas, folgas e distribuição de tarefas são feitas com critérios claros e equilibrados.
-- D8.2 Regras e cobranças são aplicadas de forma consistente, sem favorecimento ou tratamento desigual.
-- D8.3 Mudanças de rotina, metas, sistema ou procedimento são comunicadas com antecedência suficiente.
+- D8.1 As escalas, folgas e a distribuição de tarefas seguem critérios claros e equilibrados.
+- D8.2 As regras e cobranças são aplicadas igualmente pra todo mundo, sem favorecimento.
+- D8.3 Quando há mudanças na rotina, nas metas ou nos procedimentos, sou avisado com antecedência.
 
 **D9 — Violência, assédio e discriminação** (⚠️ **polaridade mista** — cuidado especial no backend)
-- D9.1 Já sofreu agressão verbal, ameaça ou intimidação de cliente, fornecedor, terceiro ou colega durante o trabalho. → `RISCO`
-- D9.2 Já presenciou ou sofreu assédio moral, humilhação, exposição pública ou cobrança vexatória. → `RISCO`
-- D9.3 Há canais confiáveis e resposta efetiva para relato de conflito, assédio ou violência, sem retaliação. → `PROTETIVO`
-- D9.4 Há tratamento respeitoso e sem discriminação por gênero, raça, idade, deficiência, aparência, religião ou outra condição. → `PROTETIVO`
+- D9.1 Já sofri agressão verbal, ameaça ou intimidação de cliente, fornecedor, terceiro ou colega durante o trabalho. → `RISCO`
+- D9.2 Já presenciei ou sofri assédio moral, humilhação, exposição pública ou cobrança vexatória no trabalho. → `RISCO`
+- D9.3 Sei que existe um canal confiável pra relatar conflito, assédio ou violência, sem medo de retaliação. → `PROTETIVO`
+- D9.4 Sou tratado com respeito, sem discriminação por gênero, raça, idade, deficiência, aparência, religião ou outra condição. → `PROTETIVO`
+
+---
+
+### 5.1.1 COPSOQ Oficial (curta/média/longa) — transcrição direta do manual (2026-07-29)
+
+> O usuário forneceu o manual "COPSOQ Manual Portugal 2013" (Silva, C. et al., FCT/Análise
+> Exacta) como "fonte suprema" e pediu um terceiro instrumento — separado do COPSOQ adaptado
+> (Seção 5.1, mantido intocado) — que reproduzisse fielmente as 3 versões oficiais do
+> questionário, deixando o usuário escolher a profundidade por Aplicação.
+
+**Modelo**: novo `Instrumento` `COPSOQ_OFICIAL` (`seeds/copsoq_oficial.json`), com **35
+subescalas / 119 itens** (a versão longa completa). Cada `Item` ganhou um campo
+`profundidade` (`instrumentos.Profundidade`: curta/média/longa/em branco) = nível mais
+raso do manual em que aquele item aparece, determinado por **correspondência de conteúdo**
+entre as três listas publicadas (curta ⊆ média ⊆ longa), não por posição numérica — a
+posição de um item muda entre versões porque a versão maior insere itens no meio de uma
+subescala. `Aplicacao` ganhou um campo `profundidade` (mesmos 3 valores) que, quando
+preenchido, filtra quais itens/domínios entram no questionário
+(`calculo_risco.py::itens_da_aplicacao` / `dominios_da_aplicacao` atualizados pra
+considerar isso; `questionario.py::dominios_pendentes` e `views.py::_construir_form_dominio`
+usam o mesmo filtro). Confirmado por teste manual: profundidade curta = 41 itens/26
+domínios visíveis, média = 76/29, longa = 119/35 — bate exatamente com a Tabela 1 do
+manual.
+
+**Escala**: preservados os dois tipos reais do manual, nunca misturados num rótulo só —
+frequência (Nunca/quase nunca…Sempre) na maioria das subescalas, intensidade (Nada/quase
+nada…Extremamente) em Significado do trabalho, Compromisso, Satisfação, Insegurança
+laboral, Conflito trabalho-família e Conflito família-trabalho, e uma escala categorial
+própria (Excelente…Deficitária) só pra Saúde Geral. Cada subescala do seed declara sua
+própria `scale` (mesmo padrão já usado pelo ITRA — nenhuma mudança de infraestrutura
+precisou ser feita pra isso).
+
+**Pontos de corte**: usa diretamente os tercis genéricos do próprio manual (2,33 e 3,66 na
+escala 1–5) — não os thresholds do COPSOQ adaptado (2,5/3,5). Essa é a resposta à Fase 3
+do plano de ajustes (alinhar aos tercis oficiais): feita aqui, só pro instrumento novo; o
+COPSOQ adaptado não foi tocado.
+
+**Domínios que faltavam no adaptado**: Confiança horizontal/vertical, Conflito
+trabalho-família e família-trabalho, Auto-eficácia, e o bloco inteiro de saúde/efeito
+(Burnout, Stress, Sintomas depressivos, Problemas em dormir, Stress somático, Stress
+cognitivo) — todos existem agora, exclusivamente dentro deste instrumento novo.
+
+**Polaridade mista**: Confiança horizontal e Confiança vertical têm itens RISCO e
+PROTETIVO dentro da mesma subescala (igual ao D9 do COPSOQ adaptado) — inversão sempre
+item a item, nunca no agregado.
+
+**Ressalvas documentadas no próprio seed** (`source_note`): (1) onde a versão longa
+reformula o texto de um item que já existe na média/curta (mesmo conceito, redação
+diferente), foi mantida a redação média/curta e a diferença de fraseado não foi
+modelada como item extra; (2) algumas contagens por subescala da Tabela 1 do manual
+divergem em 1-2 itens da lista de itens efetivamente publicada — tratamos a lista de
+itens como fonte de verdade, não o resumo da tabela (provável artefato de OCR/edição do
+PDF de origem).
+
+**Formulário de Nova Aplicação**: campo "Profundidade" (`AplicacaoForm`) só aparece
+(JS, mesmo padrão da legenda dinâmica de instrumento) quando o instrumento escolhido tem
+itens com profundidade preenchida; obrigatório nesse caso (`clean()` do form).
+
+**Atualização de status (2026-07-29 — auditoria pedida pelo usuário após achar a
+comparação nacional "sumida")**: as 3 fases citadas abaixo como pendentes foram, na
+prática, todas resolvidas depois desta seção ter sido escrita — só ninguém tinha voltado
+aqui pra atualizar o texto, o que criou uma divergência real entre documentação e código:
+- **Valores normativos nacionais**: implementados em `relatorios/services/pdf.py::_media_nacional_comparavel`
+  e exibidos na coluna "Média nacional*" da tabela de resultados por domínio — **mas
+  só dentro do PDF gerado** (`relatorios/templates/relatorios/inventario.html`), nunca
+  na tela do painel (`aplicacao_detail.html`/`relatorio_detail.html` não mostram essa
+  comparação). Confirmado renderizando o HTML de um relatório real: os números aparecem
+  de fato (ex. domínio EQ: escore 28,33 vs média nacional 37,0). Se o usuário só olhar a
+  tela do painel sem gerar o PDF, não tem como ver essa comparação — isso não estava
+  claro e gerou a dúvida de 2026-07-29 (Seção 6.13 tem o contexto completo).
+- **Nota de confiabilidade (α de Cronbach)**: chegou a ser implementada no `note` de
+  cada subescala do seed, mas foi **removida deliberadamente** em 2026-07-29 (pedido do
+  usuário) por não ajudar quem responde nem quem lê o relatório — ver Seção 5.1.1
+  "Ajuste de clareza nas perguntas". Portanto não é mais um item pendente, é um item que
+  existiu e foi removido por decisão consciente.
+- **Aviso normativo de compromisso de ação**: implementado em `aplicacao_form.html`
+  ("⚠ Antes de aplicar: você está pronto pra agir sobre o resultado?"), visível na tela
+  de criação de Nova Aplicação.
+
+**Ajuste de clareza nas perguntas (2026-07-29)**: revisão de todas as 119 perguntas
+(curta/média/longa) e das escalas de resposta, no mesmo espírito da revisão feita no
+COPSOQ adaptado (Seção 5.1). Dois problemas reais encontrados: (1) o campo `note` de
+cada subescala guardava tanto documentação técnica (α de Cronbach, N da amostra) quanto
+informação necessária pra entender a pergunta (o "enunciado-guia" que precede um bloco
+de itens no manual, ex. "Com que frequência nas últimas 4 semanas sentiu-se...") — mas
+esse campo nunca é mostrado ao respondente (só existe pro rodapé do PDF/Admin), então
+itens como "Fisicamente exausto?" (BURN), "Triste?" (SDEP) ou "As suas perspectivas de
+trabalho?" (SAT) apareciam sozinhos no questionário público sem o enunciado que os torna
+compreensíveis. Corrigido incorporando o enunciado-guia diretamente no texto de cada item
+afetado (26 itens em SAT, PSONO, BURN, STR, SDEP e CO — ex. BURN.1 virou "Com que
+frequência, nas últimas 4 semanas, se sentiu fisicamente exausto?"), sem alterar o
+conceito medido nem a redação do manual além de completar a frase. (2) O `note` técnico
+(α de Cronbach, N=4162, referência ao manual) foi removido de todas as 35 subescalas —
+decisão do usuário: o campo não agrega nada pro fluxo do produto (não é mostrado ao
+respondente nem usado no cálculo) e só ocupava espaço; a informação de confiabilidade
+continua no manual original, citado em `source_note`. `reference` (média/DP nacional,
+usado por `_media_nacional_comparavel` no PDF) foi mantido intacto — é dado usado, não
+só documentação.
 
 ---
 
@@ -1275,6 +1385,320 @@ levantados na Seção 6.9 estão implementados.
 
 ---
 
+## 6.13 Catálogo de ações do COPSOQ Oficial (2026-07-29)
+
+> O usuário testou uma Aplicação de COPSOQ Oficial (profundidade média) e achou os
+> planos de ação gerados "muito genéricos" — esperava que tivessem sido elaborados de
+> verdade, como os do COPSOQ adaptado. Pedido para investigar e, uma vez confirmada a
+> causa, pesquisar na web e escrever recomendações reais por domínio.
+
+**Diagnóstico**: `seeds/catalogo_acoes.json` (Seção 6.9, Prompt 07) só cobre os 9
+domínios do COPSOQ adaptado (D1–D9) — foi extraído do Excel de referência antes do
+COPSOQ Oficial (Seção 5.1.1) existir. `_gerar_plano_de_acao_se_necessario`
+(`avaliacoes/services/calculo_risco.py`) busca `CatalogoAcao` por `(dominio, nivel)` e,
+sem entrada, cai no texto genérico de fallback ("Definir e executar medida corretiva
+para o domínio X...") — confirmado ao consultar os 29 `PlanoDeAcao` de uma Aplicação de
+teste: todos genéricos, porque nenhum dos 35 domínios do COPSOQ Oficial (`EQ`, `RT`,
+`EC`... `CO`) tinha `CatalogoAcao` cadastrado.
+
+**Solução**: novo seed `seeds/catalogo_acoes_copsoq_oficial.json` — 70 entradas (35
+domínios × Moderado/Elevado), carregado pelo mesmo `load_catalogo_acoes` (o comando já
+era genérico por `instrument_code` dentro do JSON, nenhuma mudança de código foi
+necessária). Cada ação foi elaborada com base em: (1) a hierarquia de controle de
+riscos psicossociais do NIOSH, adotada pelo Guia MTE de Fatores de Riscos Psicossociais
+— eliminação/redução na fonte > organização do trabalho > gestão/administrativo >
+resposta imediata para eventos graves, nunca medida individual como primeira linha
+(pesquisado e confirmado via web); (2) os modelos clássicos que fundamentam o próprio
+COPSOQ — demanda-controle (Karasek) e esforço-recompensa (Siegrist); (3) a definição de
+cada subescala no próprio manual COPSOQ Portugal 2013 (Seção 5.1.1). Domínios que são
+desfechos de saúde (`SG`, `PSONO`, `BURN`, `STR`, `SDEP`, `SSOM`, `SCOG`) têm ação
+voltada a encaminhamento ao SESMT/serviço de saúde ocupacional e correção da causa
+organizacional identificada — nunca tratamento clínico individual como substituto da
+prevenção. `CO` (Comportamentos ofensivos, com itens `evento_grave`) usa
+`resposta_imediata`, mesmo padrão do D9 do COPSOQ adaptado.
+
+`conftest.py::instrumentos_carregados` passou a carregar também esse segundo seed do
+catálogo. Os 29 `PlanoDeAcao` genéricos já existentes na Aplicação de teste do usuário
+foram apagados e recalculados manualmente (via shell) pra refletirem o catálogo novo —
+`_gerar_plano_de_acao_se_necessario` nunca sobrescreve um `PlanoDeAcao` já criado
+("recalcular não deve duplicar plano já existente"), então dados antigos gerados antes
+deste catálogo existir precisam desse mesmo passo manual se o usuário quiser vê-los
+atualizados.
+
+**Cobertura de teste**: suíte completa segue passando sem novos testes dedicados — é
+conteúdo de dado (seed), não lógica nova; a lógica de busca por `CatalogoAcao` já tinha
+cobertura própria desde o Prompt 07 (Seção 6.9).
+
+---
+
+## 6.14 Configurações de Classificação de Risco (2026-07-29)
+
+> Módulo que ficava como stub "em execução" (Seção 6.8) — o usuário pediu pra
+> construir de verdade a partir do que o CLAUDE.md já definia sobre `CriterioVersao`.
+
+Tela admin-only (`avaliacoes/painel_views.py::configuracoes_risco_list/detail/create/
+ratificar`) sobre o model `CriterioVersao` (Seção 7.8) — nunca edita uma versão
+existente (é um snapshot imutável, citado por Relatorios já gerados), só permite:
+(1) listar as versões existentes com status, N mínimo, limites, prevalência e quantas
+Aplicações usam cada uma; (2) ver o detalhe completo de uma versão — parâmetros
+gerais, severidade por classificação, matriz de risco (S×P → banda/prazo) e
+thresholds por domínio/instrumento; (3) ratificar uma versão pendente (marca
+`status=ratificado`, `ratificado_por`, `ratificado_em`); (4) criar uma versão NOVA
+(`CriterioVersaoForm`, `avaliacoes/forms.py`) clonando os thresholds/severidade/matriz
+(ancorados em `risk_engine.py`, nunca editáveis por aqui) da versão mais recente,
+deixando editáveis só os parâmetros numéricos de negócio (N mínimo, limiar de evento
+grave, limites de faixa, prevalência P1/P2, período de referência).
+
+**Achado durante a verificação**: depois de editar view/urls/templates, a página
+continuou mostrando o stub antigo mesmo com o código comprovadamente correto (testado
+via `django.test.Client`, que roda em processo separado e não prova nada sobre o
+servidor real). A causa era o processo do `runserver` da preview ter ficado preso
+numa reexecução anterior que tinha falhado (um `ImportError` transitório durante a
+refatoração do questionário, Seção 6.7 revisão de UX) — reiniciar o processo
+(`preview_stop` + `preview_start`) resolveu. Lição registrada: pra confirmar uma
+mudança de UI, testar no navegador real contra o processo real, não só via test
+client, e reiniciar o servidor sempre que o comportamento não bater com o código.
+
+**Cobertura de teste**: verificado manualmente (criar versão → thresholds/matriz
+copiados → detalhe → ratificar → status atualizado) e suíte completa (127 testes)
+sem alteração de lógica pré-existente.
+
+---
+
+## 6.15 Chaves de API do Claude — cadastro seguro multi-chave (2026-07-29)
+
+> Pedido do usuário: gerenciar várias chaves de API da Anthropic pelo painel (não só
+> uma via variável de ambiente fixa), nomeá-las, escolher qual está em uso, e nunca
+> arriscar vazamento — uma vez salva, a chave completa não pode ser vista de novo em
+> nenhuma tela.
+
+**Modelo** (`relatorios.models.ChaveApiClaude`): guarda só METADADO —
+`nome` (rótulo dado pelo usuário), `prefixo` (10 primeiros caracteres), `sufixo` (4
+últimos), `ativa` (só uma por vez) e quem/quando criou. **O valor completo da chave
+nunca é escrito neste model nem em nenhuma outra tabela** — é a decisão central desta
+feature, pra que um dump do banco, uma tela do Admin ou um bug de exibição jamais
+consigam vazar uma chave já cadastrada.
+
+**Onde o valor completo realmente mora**: só no arquivo `.env.local` do servidor (já
+fora do controle de versão — `.gitignore`), sob a variável
+`CLAUDE_API_KEY_<id da ChaveApiClaude>` — nome amarrado ao pk do registro de metadado,
+nunca ao nome dado pelo usuário (evita colisão/edição acidental).
+`relatorios/services/chaves_api.py` centraliza toda a lógica:
+- `salvar_chave(nome, valor_bruto, usuario)`: valida o formato (`sk-ant-...`), cria o
+  registro de metadado (prefixo/sufixo calculados na hora) e grava o valor completo no
+  `.env.local` via `dotenv.set_key()` — `valor_bruto` nunca é logado nem devolvido.
+- `definir_chave_ativa(chave_id)`: garante só uma `ativa=True` por vez.
+- `remover_chave(chave)`: apaga a linha do `.env.local` (`dotenv.unset_key()`) junto
+  com o registro de metadado.
+- `obter_valor_chave_ativa()`: lê o `.env.local` **direto do disco** a cada chamada
+  (`dotenv.dotenv_values()`, nunca `os.environ`) — assim trocar de chave ativa ou
+  cadastrar uma nova funciona na hora, sem precisar reiniciar o servidor (o processo
+  já tinha carregado o `.env.local` só uma vez, no boot, via `dotenv.load_dotenv()`
+  em `crarp/settings.py`).
+
+**Uso real**: `relatorios/services/analise_ia.py::gerar_parecer` (quando nenhum
+`client` é injetado — ou seja, no fluxo real do painel) chama
+`obter_valor_chave_ativa()` e constrói `anthropic.Anthropic(api_key=...)`
+explicitamente, em vez de deixar o SDK ler `ANTHROPIC_API_KEY` do ambiente sozinho.
+Sem chave ativa, levanta `RuntimeError` com mensagem clara — capturado pela view
+`relatorio_gerar_parecer_ia` (já existente) e mostrado como mensagem, nunca como
+erro 500.
+
+**Tela** (`painel_relatorios:chaves_api_list/create/ativar/remover`, admin-only,
+linkada a partir de "Relatórios" — mesmo escopo do parecer da IA, Seção 6.8): lista
+todas as chaves com nome, `prefixo••••••••sufixo`, qual está "Em uso", botão "Usar
+esta" pra trocar a ativa, e "Remover" com confirmação. Formulário de cadastro
+(`ChaveApiClaudeForm`, `relatorios/forms.py`) usa `forms.PasswordInput` — o valor
+digitado nem aparece em texto plano na tela de cadastro. Django Admin também registra
+`ChaveApiClaude` (`relatorios/admin.py`), mas só leitura/toggle de `ativa` —
+`has_add_permission` retorna `False`, pra não abrir um segundo caminho de cadastro que
+contorne o fluxo seguro do painel.
+
+**Verificado via teste automatizado (in-process, sem custo de API)**: cadastrar uma
+chave de teste, confirmar que o valor completo NUNCA aparece em nenhuma resposta HTTP
+(nem na tela de sucesso), confirmar que o banco só guarda prefixo/sufixo, confirmar
+que `obter_valor_chave_ativa()` resolve o valor certo pro uso interno, e confirmar que
+remover apaga a linha correspondente do `.env.local`.
+
+**Cobertura de teste**: suíte completa (127 testes, sem regressão). Testes dedicados
+pra este módulo ficam como próximo passo antes de prosseguir pra "gerar relatório por
+IA" de verdade.
+
+**Atualização de 2026-07-29 (mesmo dia)**: adicionada verificação de validade da
+chave — ao salvar, `relatorios/services/chaves_api.py::verificar_chave()` chama
+`anthropic.Anthropic(api_key=...).models.list(limit=1)` (autentica sem gerar tokens,
+sem custo) e persiste `ChaveApiClaude.valida`/`verificada_em`. A tela
+`chaves_api_list` reverifica automaticamente (mesma função) qualquer chave nunca
+checada ou checada há mais de 1 dia (`chave_precisa_reverificacao`,
+`INTERVALO_REVERIFICACAO = timedelta(days=1)`) — sem precisar de tarefa agendada
+separada, a própria visita à tela dispara a rechecagem quando necessário. Nova
+coluna "Válida" na tabela (badge verde/vermelho/âmbar "Verificando…").
+
+---
+
+## 6.16 Melhorias na tela de Relatório + system prompt do parecer via IA (2026-07-29)
+
+> Usuário reportou (com print) um bug visual real no stepper de `relatorio_detail.html`,
+> pediu card do parecer mais completo, e pediu revisão profunda do *system prompt* que
+> gera o parecer via IA, cruzando pesquisa na web (NR-01/MTE, COPSOQ, hierarquia de
+> controle NIOSH) com o manual "COPSOQ Manual Portugal 2013" fornecido como fonte.
+
+**Bug do stepper (confirmado pelo print)**: `etapa_pdf` (concluída) marcava a etapa 3
+como ✓ verde só por existir `relatorio.pdf_path`, mesmo sem nenhum parecer gerado —
+um PDF gerado manualmente antes do parecer existir (como o da Aplicação de teste,
+Seção 6.14) aparecia com ícone de "concluído" igual a um PDF de verdade completo,
+quebrando a leitura visual da hierarquia do fluxo. Corrigido em
+`relatorios/painel_views.py::relatorio_detail`: `etapa_pdf` agora exige
+`etapa_parecer AND pdf_path` — sem isso, novo flag `pdf_desatualizado` (PDF existe
+mas não reflete o parecer atual) mostra um "!" âmbar no step 3 com aviso explícito
+("O PDF atual foi gerado antes do parecer técnico existir...") em vez de um ✓ que
+mentia sobre o estado real. Assinatura também passou a checar `etapa_pdf` (não só
+`etapa_parecer`) antes de liberar o botão.
+
+**Feedback de carregamento nos botões**: `gerar_pdf_relatorio`/`gerar_e_salvar_parecer`
+continuam síncronos (decisão de 2026-07-17, sem Celery ainda) — o usuário relatou que
+o clique "parecia travado" sem indicação de que algo estava rodando. Adicionado JS
+puro (sem framework) em `relatorio_detail.html`: qualquer `<form class="form-com-
+carregamento">` desabilita o botão e troca o texto por `data-texto-carregando`
+("Gerando parecer…", "Gerando PDF…", "Assinando…") assim que o submit dispara — não
+muda a arquitetura síncrona, só dá a affordance visual que faltava durante a espera.
+
+**Card do parecer expandido**: antes só mostrava a síntese executiva + uma contagem
+("3 pareceres · 2 riscos · 5 recomendações"), sem dar pra ver o conteúdo sem abrir
+"Revisar/editar". Agora mostra direto no card: tabela de riscos prioritários (com
+badge de banda), tabela de recomendações (com badge de banda + hierarquia de
+controle), e um `<details>` recolhido com a tabela completa de pareceres por domínio
+(incluindo população exposta) — só a síntese e o aviso de minuta ficam sempre visíveis
+por padrão, o resto é expansível.
+
+**System prompt revisado** (`relatorios/services/analise_ia.py::SYSTEM_PROMPT` +
+`PARECER_TOOL`) — fundamentado em pesquisa na web (estrutura mínima de um laudo/
+inventário de risco psicossocial pra PGR: descrição do fator + população exposta +
+nível de risco + medida de controle; hierarquia de controle NIOSH adaptada a riscos
+psicossociais — eliminação > organização > gestão/administrativo > resposta imediata,
+adotada pelo Guia MTE) e no manual "COPSOQ Manual Portugal 2013" (seção "Intervenção
+psicossocial no local de trabalho", lista de boas práticas organizacionais de Di
+Marino & Karasek, 1992, e o princípio "o COPSOQ não deve ser usado se não se pretende
+agir face aos resultados encontrados"):
+1. Novo campo obrigatório `populacao_exposta` em `pareceres_por_dominio` (ex.: "12 de
+   15 trabalhadores do GHE") — derivado de `n_respondentes`, já presente no payload
+   mas antes não exigido no texto do parecer.
+2. Novo campo obrigatório `hierarquia_controle` (enum: `eliminacao`/`organizacao`/
+   `gestao`/`resposta_imediata`) em cada item de `recomendacoes` — obriga a IA a
+   classificar toda medida sugerida na mesma taxonomia já usada em `CatalogoAcao`
+   (Seção 6.9, Prompt 07), evitando que o texto livre do parecer fale uma linguagem
+   diferente do plano de ação estruturado do mesmo relatório. Regra explícita:
+   nunca sugerir suporte psicológico individual como PRIMEIRA linha quando a causa é
+   organizacional.
+3. Regra nova: a justificativa de um risco prioritário deve explicar severidade ×
+   probabilidade (evento grave confirmado? quantas evidências convergentes?), não só
+   repetir a banda final — reforça a lógica de triangulação (Denzin, 1970, já citada
+   na Seção 6.0) na própria redação do parecer.
+4. Regra nova: domínios que são desfechos de saúde (burnout, stress, sintomas
+   depressivos, sono, stress somático/cognitivo) devem ter a recomendação apontando
+   primeiro pra causa organizacional em outro domínio do mesmo GHE, e só depois pro
+   encaminhamento ao SESMT — nunca encaminhamento clínico como única medida.
+5. Lista explícita das boas práticas do manual COPSOQ (reduzir exigências
+   psicológicas, ampliar desenvolvimento e variedade, aumentar controle sobre o
+   tempo, ampliar participação, fortalecer apoio mútuo, clareza organizativa,
+   liderança não autoritária, eliminar competitividade destrutiva e discriminação,
+   equilíbrio trabalho-família) incorporada como referência de conteúdo pras
+   recomendações.
+
+`relatorios/services/parecer_form.py` (edição manual estruturada, Seção "Revisar/
+editar parecer") ganhou os mesmos 2 campos novos (`populacao_exposta` como campo de
+texto, `hierarquia_controle` como `<select>` com as 4 opções) — pra quem edita à mão
+não perder consistência com o que a IA gera.
+
+**Cobertura de teste**: os testes existentes de `gerar_parecer`/`gerar_e_salvar_parecer`
+(`relatorios/tests.py`) usam listas vazias nos 3 campos de array do parecer fake —
+como os novos campos obrigatórios só existem *dentro* dos itens de array, nenhum
+teste precisou mudar. Suíte completa segue passando.
+
+---
+
+## 6.17 Validação de cobertura do parecer + ajustes de UX do questionário (2026-07-29)
+
+> Usuário testou a geração real do parecer via IA (com Aplicação de 29 domínios,
+> Seção 6.14/6.15) e achou o resultado curto demais: a síntese executiva veio boa,
+> mas `pareceres_por_dominio`, `riscos_prioritarios` e `recomendacoes` vieram
+> **totalmente vazios**. Investigado e corrigido no mesmo dia.
+
+**Causa raiz**: `PARECER_TOOL` (JSON Schema) marca os 3 campos-lista como
+`"required"` no nível do objeto — isso só exige que a CHAVE exista, uma lista vazia
+`[]` já satisfaz o schema. Nada obrigava tecnicamente o modelo a preencher uma
+entrada por domínio; a regra só existia como texto no prompt, e o modelo (real,
+chamada de verdade contra a Anthropic) escolheu economizar espaço devolvendo listas
+vazias mesmo com 29 domínios fora de "Aceitável".
+
+**Correção em duas camadas** (`relatorios/services/analise_ia.py`):
+1. Regra 7 do `SYSTEM_PROMPT` reescrita de sugestão pra ordem impositiva: "gere uma
+   entrada em riscos_prioritarios E uma em recomendacoes para CADA domínio... não
+   resuma vários domínios numa única entrada nem deixe essas listas vazias ou
+   incompletas". `max_tokens` subiu de 4096 pra 8192 (reduz risco de o modelo cortar
+   pela metade por espaço).
+2. **Validação no backend** (`_dominios_fora_de_aceitavel` + `_validar_cobertura_parecer`,
+   chamada dentro de `gerar_parecer` antes de devolver o resultado): calcula o
+   conjunto `(ghe, dominio)` de todo domínio não suprimido com banda != "Aceitável"
+   e confere se cada um aparece em `riscos_prioritarios` E em `recomendacoes` — se
+   faltar qualquer um, levanta `RuntimeError` listando quantos faltam em cada lista,
+   em vez de persistir um parecer incompleto silenciosamente. `relatorio_gerar_parecer_ia`
+   (view já existente) já captura exceções genéricas e mostra como mensagem, então
+   nenhuma mudança de view foi necessária.
+
+**Achado ao testar contra a API real** (não só com cliente fake): mesmo com o prompt
+reforçado, o modelo real ainda devolveu listas vazias pra uma Aplicação de teste com
+**29 domínios, 28 deles com a mesma banda** — um caso extremo de repetição que não
+ocorre numa coleta real. A validação bloqueou corretamente (é o comportamento
+esperado: melhor falhar alto e visível do que aceitar incompleto), mas evidenciou
+que forçar 29 entradas individuais numa única chamada é pedir demais de um LLM.
+Decisão do usuário (priorizando economia de tokens): **não** adicionar retry
+automático (dobraria o custo de toda geração pra cobrir um caso raro) — em vez
+disso, a Aplicação de teste artificial (#8) e o Relatorio vinculado (#3) foram
+apagados, e uma nova Aplicação de teste (#10) foi criada com valores realistas e
+variados (não uniformes/aleatórios) usando o COPSOQ adaptado (9 domínios, não 29),
+pra representar um caso de teste plausível.
+
+**Cobertura de teste** (`relatorios/tests.py`): `test_gerar_e_salvar_parecer_persiste_sem_mudar_status`
+foi ajustado pra usar um parecer fake que cobre o domínio D1 (que sai como
+"Moderado", não suprimido, na fixture `relatorio_com_dominio_calculado`) em vez de
+listas vazias; novo teste `test_gerar_e_salvar_parecer_incompleto_levanta_erro`
+confirma que um parecer com listas vazias é rejeitado (`RuntimeError`, mensagem
+"incompleto") quando existe domínio fora de Aceitável. Suíte completa segue
+passando.
+
+**Correções de UX do questionário público** (`avaliacoes/templates/avaliacoes/questionario_pergunta.html`,
+mesmo dia, testado pelo usuário ao vivo):
+1. Clicar numa opção de resposta **não avança mais sozinho** — só marca a opção
+   selecionada visualmente. O avanço só acontece ao clicar em "Próximo" (antes, o
+   clique na resposta já disparava o envio automático depois de 260ms, rápido
+   demais pra conferir a escolha antes de seguir).
+2. Ao clicar em "Próximo", o botão fica desabilitado e o link "Anterior" é travado
+   (`pointer-events: none` + opacidade reduzida) até a próxima página carregar —
+   antes dava pra clicar em "Anterior" enquanto o POST de "Próximo" ainda estava
+   em trânsito, criando uma corrida entre as duas navegações. Um segundo clique em
+   "Próximo" durante o envio também é ignorado (`jaEnviando` + `preventDefault`).
+
+**Nota explicativa Banda × Semáforo** (achado ao ler o PDF gerado, mesmo dia):
+o usuário notou um "paradoxo" real de leitura — um domínio aparecia com 100% dos
+respondentes na faixa "Risco" na Seção 5 (Análise semáforo) mas com Banda
+"Moderado" na Seção 4 (Resultados por GHE e por domínio). Não é bug de cálculo: são
+duas métricas diferentes por design — a Banda (Severidade × Probabilidade, Seção
+7.5/7.6) só eleva a Probabilidade a partir de evidências organizacionais
+INDEPENDENTES do questionário (absenteísmo, turnover, CAT/CID, checklist de
+observação, evento grave confirmado — `avaliacoes/services/calculo_risco.py::contar_evidencias_convergentes`),
+nunca a partir da proporção de respondentes que relatou alta exposição (isso é a
+prevalência da Seção 5, Seção 6.9 Prompt 11). Sem evidência externa cadastrada, a
+probabilidade fica em 1 mesmo com severidade 3 — resultado matematicamente correto,
+mas nunca explicado em nenhuma tela. Adicionada nota cruzada em 3 lugares: PDF Seção
+4 (explica por que a Probabilidade não reflete a prevalência), PDF Seção 5 (explica
+que ali é só prevalência bruta, não a Banda) e no `<details>` já existente da tela
+`semaforo_riscos.html` do painel — todas convidando o profissional a cadastrar
+Indicador Indireto/checklist quando a prevalência alta for confirmada por outras
+fontes, em vez de tratar a divergência como erro.
+
+---
+
 ## 6.10 Diagnóstico de UX/UI e correções do fluxo de relatório (2026-07-28)
 
 > O usuário (que também é quem construiu o sistema) testou o ciclo completo como
@@ -1427,6 +1851,198 @@ vez de gravar `RespostaChecklistTriangulacao` direto na `Aplicacao`.
 
 ---
 
+## 6.12 Correção: entrevista não é checklist, e "não conforme" não é genérico (2026-07-29)
+
+> O usuário notou, testando `/painel/aplicacoes/<pk>/checklist-triangulacao/`, que "as
+> perguntas feitas são sem lógica com as respostas". Investigação encontrou dois bugs
+> reais, não um.
+
+**Bug 1 — itens de entrevista forçados num formato de conformidade que não se aplica.**
+Os 6 itens `tipo=entrevista` (`seeds/checklist_triangulacao.json`) são perguntas abertas
+de verdade ("Quais são os períodos de maior demanda e por quê?", "Como são distribuídas
+tarefas, pausas, folgas, prioridades e cobranças?") — não afirmações de checklist. O
+formulário do link público, porém, pedia Conforme/Não conforme + evidência pros 16
+itens igualmente, inclusive pras 6 perguntas de entrevista, o que não faz sentido
+("conforme" o quê, numa pergunta aberta?). Só os 10 itens `tipo=observacao` ("Dimensionamento
+de pessoal compatível com a demanda real.", "Não há cobrança vexatória ou exposição
+pública.") são afirmações reais de checklist, onde Conforme/Não conforme se aplica.
+
+**Bug 2 — "não conforme" de qualquer item inflava a probabilidade de TODOS os domínios.**
+`calculo_risco.py::contar_evidencias_convergentes` contava qualquer resposta "Não
+conforme" (mesmo de uma pergunta de entrevista mal-formatada) como evidência
+complementar pra QUALQUER domínio sendo calculado — sem vínculo com o que aquele item
+realmente representa. Diferente do `IndicadorIndireto`, que já tinha
+`dominio_relacionado` desde a Seção 4.2, o checklist nunca ganhou esse mesmo vínculo.
+
+**O que mudou:**
+
+1. **Formulário do link (`checklist_views.py::_construir_form_grupo`)**: itens
+   `tipo=entrevista` agora só têm um campo de texto livre (resposta da entrevista, sem
+   conformidade); itens `tipo=observacao` continuam com Conforme/Não conforme +
+   evidência. Salvos como sempre em `RespostaChecklistTriangulacao.evidencia` — pra
+   entrevista, `conformidade` nunca é setada (fica no default `nao_avaliado`, que
+   simplesmente não se aplica a esse tipo de item).
+2. **`ItemChecklistTriangulacao.dominio_codigo_relacionado`** (novo campo, CharField —
+   não FK): guarda o código literal do domínio COPSOQ que um item de observação
+   representa (ex. "D9"). Não é FK porque o catálogo de 16 itens é único e
+   compartilhado entre instrumentos (COPSOQ usa "D1".."D9"; ITRA usa códigos de escala
+   completamente diferentes como "EACT"), então a comparação em
+   `contar_evidencias_convergentes` só "acerta" quando o domínio calculado é do COPSOQ e
+   tem esse código — em branco = evidência geral, conta pra qualquer domínio (mesma
+   semântica do `IndicadorIndireto.dominio_relacionado` nulo). Mapeamento definido pelos
+   10 itens de observação: "Dimensionamento de pessoal..." → D1; "Pausas e acesso a
+   banheiro/hidratação..." → D3; "Prioridades, responsabilidades e mudanças
+   comunicadas..." → D8; "Não há cobrança vexatória..." e "Há canal de relato..." → D9;
+   "Fluxo físico e informacional..." e "Tarefas simultâneas e interrupções..." → D1;
+   "Integração e treinamento..." e "Tratamento entre liderança/colegas/clientes..." →
+   D6; "Registros mínimos de acompanhamento..." → geral (em branco).
+3. **`contar_evidencias_convergentes`**: filtro agora exige `item__tipo="observacao"` (nunca
+   conta entrevista) E (`item__dominio_codigo_relacionado=""` OU igual ao
+   `dominio.codigo` calculado).
+4. **`avaliacoes/painel_views.py::checklist_triangulacao`**: a tabela de resultados
+   mostra as respostas de entrevista mesmo sem conformidade avaliada (antes o filtro
+   `exclude(conformidade=NAO_AVALIADO)` as escondia por completo, já que entrevista
+   nunca tem conformidade preenchida); a coluna "Conformidade" mostra "— (pergunta
+   aberta)" nessas linhas em vez de um badge Conforme/Não conforme.
+5. **Migration** `avaliacoes/migrations/0019_itemchecklisttriangulacao_dominio_codigo_relacionado.py`
+   + seed e `load_checklist_triangulacao` atualizados com a chave `dominio_relacionado`
+   por item.
+
+**Cobertura de teste** (`avaliacoes/tests.py`): `test_checklist_entrevista_nao_conforme_nao_conta_como_evidencia`
+(mesmo forçado via ORM, entrevista nunca conta) e
+`test_checklist_observacao_nao_conforme_so_afeta_dominio_mapeado` (não conforme em D9
+afeta D9, não afeta D1).
+
+---
+
+## 6.13 Reestruturação do PDF para credibilidade profissional (2026-07-29)
+
+> O usuário revisou a Seção 2 "Base técnica e legal utilizada" do PDF e encontrou um
+> vazamento grave de linguagem interna de desenvolvedor num documento que vai pra
+> empresa cliente: a tabela citava literalmente `Critério de cálculo: v2.0`, `Status:
+> Aguardando ratificação` e uma `Descrição` com o texto "Snapshot inicial gerado a
+> partir de risk_engine.py e dos thresholds importados via load_instrumentos.
+> Aguardando ratificação formal do profissional responsável do PGR (CLAUDE.md Seção
+> 7.3, princípio 9)..." — nome de arquivo `.py` e referência a este próprio documento
+> vazando pro cliente final, sem nenhuma credibilidade. Pediu reestruturação completa
+> da ordem e do conteúdo do PDF.
+
+**O que mudou** (`relatorios/templates/relatorios/inventario.html`,
+`relatorios/services/pdf.py`, `relatorios/services/analise_ia.py`):
+
+1. **Seção 2 "Base técnica e legal utilizada" reescrita por completo.** A tabela de
+   `criterio_versao.codigo/status/descricao` foi removida — esse é dado de
+   versionamento interno (Seção 7.8), nunca deveria estar visível pro cliente. Entrou
+   fundamentação teórica real do COPSOQ (Copenhagen Psychosocial Questionnaire):
+   origem (Kristensen & Borg, Instituto Nacional de Saúde Ocupacional da Dinamarca),
+   adaptação portuguesa (Carlos Fernandes da Silva, Universidade de Aveiro, 2013),
+   definição de fatores de risco psicossocial e o princípio normativo do próprio
+   manual de que o instrumento não deve ser usado sem intenção real de agir sobre os
+   resultados. A base legal (NR-01, Portarias 1.419/2024 e 765/2025) e a tabela de
+   instrumentos por GHE foram mantidas.
+2. **Seção 3 "Metodologia" passou a declarar explicitamente a variante do COPSOQ
+   aplicada por GHE** (adaptado, oficial curta, oficial média ou oficial longa) — nova
+   função `pdf.py::_variante_instrumento(aplicacao)` mapeia `Instrumento.codigo` +
+   `Aplicacao.profundidade` (quando `COPSOQ_OFICIAL`) pro nome de negócio
+   correspondente, evitando expor código técnico de instrumento no documento.
+3. **Seção "Parecer técnico" movida da posição 8 pra posição 4**, logo após
+   Metodologia — o resultado da análise (gerada por IA, mas nunca identificada como
+   tal no documento) passou a ser o primeiro conteúdo analítico que o leitor vê, antes
+   das tabelas brutas de escore. Restante renumerado: Resultados por GHE e por domínio
+   (5), Análise semáforo (6), Evidências complementares (7), Entrevista e observação
+   (8); Plano de ação (9) e Assinatura (10) mantidos.
+4. **Nova regra 10 no `SYSTEM_PROMPT`** (`analise_ia.py`): proíbe o uso do caractere
+   hífen ou travessão (`-`, `–`, `—`) em qualquer campo de texto gerado pela IA, sob
+   qualquer circunstância — inclusive dentro de palavra composta ou lista — orientando
+   a reescrever com vírgula, "e", parênteses ou dois pontos. A mesma regra reforça,
+   de novo, que o texto nunca deve sugerir que foi redigido por IA/modelo de
+   linguagem — regra que já existia implicitamente (o `<h2>` da seção nunca teve
+   "(IA)"), agora explícita no prompt.
+
+**Cobertura de teste**: suíte completa de `relatorios` segue passando sem alteração —
+a mudança é de conteúdo/ordem de template e de uma regra adicional de prompt, sem
+alterar nenhum contrato de dado (`_contexto_relatorio` ganhou só a chave
+`variante_instrumento`, aditiva).
+
+---
+
+## 6.14 Banda de risco passa a vir da prevalência, não mais de Severidade × Probabilidade (2026-07-29)
+
+> O usuário notou que exibir "Matriz de risco (Severidade × Probabilidade)" ao lado de
+> "Análise semáforo" (prevalência) confundia mais do que ajudava — as duas seções podiam
+> divergir (ver nota histórica na Seção 7.5/7.6 abaixo) sem nenhuma explicação que não
+> fosse "falta evidência cadastrada". Pediu análise contra o manual COPSOQ e contra a
+> web, e explicitou: já que a planilha de referência do projeto (fonte de verdade) usa
+> semáforo, e o próprio manual COPSOQ usa semáforo (não Severidade × Probabilidade), o
+> critério certo é abandonar a matriz S×P e usar só a prevalência.
+
+**Diagnóstico confirmado por pesquisa**: o manual COPSOQ Portugal 2013 (p. 15) define a
+classificação oficial do instrumento como uma "interpretação semáforo" por tercis
+(cortes 2,33/3,66 na escala 1-5): verde (favorável), amarelo (intermédio), vermelho
+(risco para a saúde) — não existe, em nenhum lugar do manual, o conceito de Severidade ×
+Probabilidade. A regra que este projeto usava para converter "evidências convergentes"
+em Probabilidade (0 evidências → P1, 1 → P2, 2+ → P3) era uma convenção de engenharia
+sem fonte científica ou normativa citável — só a ideia geral de "risco = severidade ×
+probabilidade" é praxe comum de GRO/NR-01 (confirmado via busca na web), a regra
+específica de contagem de evidências nunca teve essa base.
+
+**O que mudou:**
+
+1. **`avaliacoes/risk_engine_lib/risk_engine.py`**: nova função
+   `calcular_risco_por_prevalencia(prioridade, severidade, evento_grave_confirmado)` e
+   `BANDA_POR_PRIORIDADE` (P3→Aceitável, P2→Moderado, P1→Alto). A Banda passa a ser
+   diretamente a Prioridade por prevalência (Seção 6.9, Prompt 11) — a mesma lógica
+   "semáforo" do manual. Único escalonamento automático mantido: evento grave
+   confirmado (violência, ameaça, assédio moral ou discriminação relatados) força
+   Banda = Crítico sempre, independente da prevalência — não é a regra antiga de
+   contagem de evidências, é uma salvaguarda de segurança que não depende dela.
+   `probabilidade`/`score` (campos do model `ClassificacaoRisco`) continuam
+   preenchidos, mas só como número informativo (proxy da prioridade: P1=3, P2=2,
+   P3=1) — não decidem mais a Banda. As funções antigas (`calcular_probabilidade`,
+   `calcular_risco`, `MATRIZ_RISCO`) foram mantidas no arquivo (nunca mais chamadas
+   por `calculo_risco.py` para decidir Banda) só como registro histórico de como
+   Aplicacoes calculadas antes de 2026-07-29 chegaram ao resultado que têm.
+2. **`avaliacoes/services/calculo_risco.py::calcular_dominio`**: `ClassificacaoRisco`
+   agora é persistida com o resultado de `calcular_risco_por_prevalencia`, não mais do
+   antigo `avaliar_dominio(...).resultado_risco`. `contar_evidencias_convergentes()` e
+   o campo `ClassificacaoRisco.evidencias_convergentes` continuam existindo e sendo
+   calculados (IndicadorIndireto + checklist de observação "Não conforme") — mas
+   agora são só contexto informativo pro parecer técnico e pro plano de ação, não
+   entram mais no cálculo da Banda.
+3. **Nova função compartilhada `avaliacoes/services/calculo_risco.py::criterio_classificacao_linhas`**:
+   usada tanto pelo PDF (`relatorios/services/pdf.py`) quanto pela tela de
+   Configurações de risco do painel — evita duplicar a tabela do critério em dois
+   lugares.
+4. **PDF (`relatorios/templates/relatorios/inventario.html`)**: a "Matriz de risco de
+   referência (Severidade × Probabilidade)" na Seção 5 foi substituída por "Critério
+   de classificação da Banda" (Prioridade → condição de prevalência → Banda → prazo).
+   A coluna "Probabilidade" da tabela de domínios virou "% em risco" (percentual de
+   respondentes na faixa elevada). As notas de rodapé das Seções 5 e 6 que explicavam
+   a divergência Banda×prevalência foram reescritas — agora explicam que as duas
+   seções usam o mesmo critério, só em recortes diferentes (por GHE vs. agregado por
+   Unidade), porque a divergência deixou de existir.
+5. **Painel**: `avaliacoes/templates/painel/semaforo_riscos.html`,
+   `aplicacao_detail.html` e `diagnostico_ghe.html` tiveram as explicações de
+   divergência reescritas pelo mesmo motivo. `indicadores_indiretos.html` deixou claro
+   que evidências complementares não mudam mais a Banda (só o evento grave
+   confirmado o faz). `configuracoes_risco_detail.html` ganhou a nova tabela de
+   critério por prevalência em destaque; a antiga matriz S×P foi movida para dentro
+   de um `<details>` "legado, não usado desde 2026-07-29", mantida só como registro
+   histórico.
+6. **`relatorios/services/analise_ia.py`**: payload enviado à IA
+   (`montar_payload_relatorio`) trocou `severidade`/`probabilidade`/`score` por
+   `percentual_elevados`/`prioridade` por domínio. Regra 4 do `SYSTEM_PROMPT` e a
+   descrição do campo `justificativa` no `PARECER_TOOL` foram reescritas para pedir
+   que a IA justifique riscos prioritários pela prevalência (e por evento grave
+   confirmado, quando houver), não mais por "severidade × probabilidade".
+
+**Cobertura de teste**: `avaliacoes/risk_engine_lib/test_risk_engine.py` ganhou 5 testes
+novos para `calcular_risco_por_prevalencia` (P1→Alto, P2→Moderado, P3→Aceitável, evento
+grave força Crítico mesmo com P3, AGRUPAR levanta erro). Suíte completa reexecutada após
+a mudança.
+
+---
+
 ## 7. Backend — cálculo da matriz de risco (valores definitivos, sem exemplos ilustrativos)
 
 A implementação de referência completa está no arquivo **`risk_engine.py`** entregue junto com
@@ -1482,7 +2098,14 @@ Moderado -> S = 2
 Elevado  -> S = 3
 ```
 
-### 7.5 Probabilidade (P) — regra definitiva
+### 7.5 Probabilidade (P) — regra histórica, substituída em 2026-07-29
+
+> **Esta seção descreve a regra original (mantida por rastreabilidade), mas ela não
+> decide mais a Banda de nenhum cálculo novo — ver Seção 6.14.** A partir de
+> 2026-07-29, a Banda vem diretamente da Prioridade por prevalência (P1/P2/P3),
+> mesma lógica "semáforo" do manual COPSOQ, porque a regra abaixo não tinha fonte
+> científica/normativa citável e divergia da planilha de referência do projeto e do
+> próprio manual do instrumento.
 
 ```
 SE houver evento grave confirmado
@@ -1502,7 +2125,12 @@ SENÃO, contar evidências complementares convergentes com o domínio em risco:
    2 ou mais evidências        -> P = 3
 ```
 
-### 7.6 Matriz de risco — todas as 9 combinações definidas (nenhuma omitida)
+### 7.6 Matriz de risco — histórica, substituída em 2026-07-29 (ver Seção 6.14)
+
+> Critério de Banda em vigor hoje: `avaliacoes/risk_engine_lib/risk_engine.py::BANDA_POR_PRIORIDADE`
+> (P3→Aceitável, P2→Moderado, P1→Alto, evento grave confirmado→Crítico sempre). A
+> tabela abaixo é mantida só como registro de como Aplicacoes calculadas antes de
+> 2026-07-29 chegaram ao resultado que têm.
 
 | Severidade (S) | Probabilidade (P) | Score (S×P) | Banda | Prazo do plano de ação |
 |---|---|---|---|---|

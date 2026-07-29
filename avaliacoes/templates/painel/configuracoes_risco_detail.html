@@ -1,0 +1,132 @@
+{% extends "painel/_base.html" %}
+{% block titulo %}Critério {{ criterio.codigo }}{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+    <a class="voltar" href="{% url 'painel_avaliacoes:configuracoes_risco' %}" title="Voltar para Configurações de risco">&larr; Voltar</a>
+    <h1>Critério de cálculo — {{ criterio.codigo }}</h1>
+    <p class="subtitulo">
+        {% if criterio.status == "ratificado" %}
+        <span class="badge aceitavel">Ratificado</span>
+        por {{ criterio.ratificado_por }} em {{ criterio.ratificado_em|date:"d/m/Y H:i" }}
+        {% else %}
+        <span class="badge moderado">Aguardando ratificação do profissional responsável</span>
+        {% endif %}
+        — usado por {{ n_aplicacoes }} aplicação(ões).
+    </p>
+</div>
+
+<div class="cartao">
+    <h2>Parâmetros gerais</h2>
+    <details style="font-size: 12.5px; color: #777; margin-bottom: 10px;">
+        <summary style="cursor: pointer;">Por que esses números não podem ser editados aqui?</summary>
+        <p>
+            Um Relatorio já gerado cita a versão do critério com que foi calculado —
+            editar os números de uma versão existente quebraria essa rastreabilidade
+            (exigida pela NR-01). Se algum parâmetro precisa mudar, crie uma nova versão
+            a partir desta.
+        </p>
+    </details>
+    <table>
+        <tbody>
+            <tr><th>Descrição</th><td>{{ criterio.descricao|default:"—" }}</td></tr>
+            <tr><th>N mínimo de respondentes (confidencialidade)</th><td>{{ criterio.n_minimo_respondentes }}</td></tr>
+            <tr><th>Limiar de evento grave</th><td>{{ criterio.limiar_evento_grave }}</td></tr>
+            <tr><th>Limite máximo — Baixo</th><td>{{ criterio.limite_baixo }}</td></tr>
+            <tr><th>Limite mínimo — Elevado</th><td>{{ criterio.limite_elevado }}</td></tr>
+            <tr><th>Prevalência P1</th><td>{{ criterio.prevalencia_p1 }}</td></tr>
+            <tr><th>Prevalência P2</th><td>{{ criterio.prevalencia_p2 }}</td></tr>
+            <tr><th>Período de referência</th><td>{{ criterio.periodo_referencia|default:"—" }}</td></tr>
+            <tr><th>Criado em</th><td>{{ criterio.criado_em|date:"d/m/Y H:i" }}</td></tr>
+        </tbody>
+    </table>
+
+    {% if pode_ratificar %}
+    <form method="post" action="{% url 'painel_avaliacoes:configuracoes_risco_ratificar' criterio.pk %}"
+          onsubmit="return confirm('Ratificar esta versão? Isso confirma que o profissional responsável validou estes parâmetros.');"
+          style="margin-top: 16px;">
+        {% csrf_token %}
+        <button type="submit" class="botao">Ratificar esta versão</button>
+    </form>
+    {% endif %}
+</div>
+
+<div class="cartao">
+    <h2>Critério de classificação da Banda</h2>
+    <p style="font-size: 12.5px; color: #777;">
+        A Banda de cada domínio vem diretamente da prevalência (percentual de
+        respondentes na faixa elevada) — mesma lógica "semáforo" do manual COPSOQ
+        Portugal 2013. Achado de 2026-07-29: a antiga matriz Severidade × Probabilidade
+        não tinha fonte científica/normativa citável na sua regra de conversão de
+        evidências em probabilidade e divergia do semáforo, então deixou de decidir a
+        Banda.
+    </p>
+    <table>
+        <thead><tr><th>Prioridade</th><th>Condição</th><th>Banda</th><th>Prazo (dias)</th></tr></thead>
+        <tbody>
+        {% for linha in criterio_classificacao_linhas %}
+            <tr>
+                <td>{{ linha.prioridade }}</td>
+                <td>{{ linha.condicao }}</td>
+                <td><span class="badge {{ linha.banda|slugify }}">{{ linha.banda }}</span></td>
+                <td>{{ linha.prazo_dias|default:"—" }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="cartao">
+    <details style="font-size: 12.5px; color: #777;">
+        <summary style="cursor: pointer;">Matriz de risco legada (Severidade × Probabilidade) — não usada desde 2026-07-29</summary>
+        <p>
+            Mantida aqui só como registro histórico de como as Aplicacoes calculadas
+            antes de 2026-07-29 chegaram à Banda que têm — não é mais usada por
+            nenhum cálculo novo.
+        </p>
+        <h3>Severidade por classificação</h3>
+        <table>
+            <thead><tr><th>Classificação</th><th>Severidade (S)</th></tr></thead>
+            <tbody>
+            {% for classificacao, severidade in criterio.severidade_por_classificacao.items %}
+                <tr><td>{{ classificacao }}</td><td>{{ severidade }}</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <table>
+            <thead><tr><th>Severidade</th><th>Probabilidade</th><th>Banda</th><th>Prazo (dias)</th></tr></thead>
+            <tbody>
+            {% for linha in matriz_linhas %}
+                {% for celula in linha.celulas %}
+                <tr>
+                    {% if forloop.first %}<td rowspan="{{ linha.celulas|length }}">{{ linha.severidade }}</td>{% endif %}
+                    <td>{{ celula.probabilidade }}</td>
+                    <td><span class="badge {{ celula.banda|slugify }}">{{ celula.banda }}</span></td>
+                    <td>{{ celula.prazo_dias|default:"—" }}</td>
+                </tr>
+                {% endfor %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </details>
+</div>
+
+<div class="cartao">
+    <h2>Thresholds por domínio</h2>
+    {% for grupo in thresholds_por_instrumento %}
+    <h3 style="font-size: 13px; color: var(--slate-600); margin-top: 18px;">{{ grupo.instrumento }}</h3>
+    <table>
+        <thead><tr><th>Domínio</th><th>Baixo até</th><th>Moderado até</th><th>Elevado a partir de</th></tr></thead>
+        <tbody>
+        {% for codigo, valores in grupo.dominios %}
+            <tr>
+                <td>{{ codigo }}</td>
+                <td>{{ valores.baixo_max }}</td>
+                <td>{{ valores.moderado_max }}</td>
+                <td>&gt; {{ valores.moderado_max }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endfor %}
+</div>
+{% endblock %}

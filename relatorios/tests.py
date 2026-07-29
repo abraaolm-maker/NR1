@@ -90,8 +90,8 @@ def test_montar_payload_relatorio_estrutura_e_supressao(relatorio_com_dominio_ca
     dominios = {d["dominio"]: d for d in payload["ghes"][0]["dominios"]}
 
     assert dominios["D1"]["escore"] == 75.0
-    # severidade 3 (Elevado) x probabilidade 1 (0 evidências convergentes) -> Moderado
-    assert dominios["D1"]["banda"] == "Moderado"
+    # 5 respondentes uniformes, todos elevados -> prevalência 100% -> Prioridade P1 -> Banda Alto
+    assert dominios["D1"]["banda"] == "Alto"
     assert dominios["D1"]["suprimido_por_confidencialidade"] is False
 
     # domínio com N < mínimo nunca deve vazar escore pra IA, só a flag de supressão
@@ -120,13 +120,43 @@ def test_gerar_parecer_sem_tool_use_levanta_erro():
 
 @pytest.mark.django_db
 def test_gerar_e_salvar_parecer_persiste_sem_mudar_status(relatorio_com_dominio_calculado):
-    fake_response = _FakeResponse([_FakeToolUseBlock("gerar_parecer_tecnico", PARECER_DE_TESTE)])
+    # D1 sai como banda "Moderado" (não suprimido) — a validação de cobertura
+    # (achado de 2026-07-29: IA devolvia riscos_prioritarios/recomendacoes vazios
+    # mesmo com domínios fora de Aceitável) exige uma entrada por domínio nessas
+    # duas listas pra todo domínio não-Aceitável e não suprimido.
+    parecer_cobrindo_d1 = {
+        **PARECER_DE_TESTE,
+        "riscos_prioritarios": [
+            {"ghe": "Equipe Teste", "dominio": "D1", "banda": "Moderado", "justificativa": "Teste."}
+        ],
+        "recomendacoes": [
+            {
+                "ghe": "Equipe Teste",
+                "dominio": "D1",
+                "banda": "Moderado",
+                "hierarquia_controle": "organizacao",
+                "medida_preventiva": "Teste.",
+            }
+        ],
+    }
+    fake_response = _FakeResponse([_FakeToolUseBlock("gerar_parecer_tecnico", parecer_cobrindo_d1)])
     client = _FakeAnthropicClient(fake_response)
 
     relatorio = gerar_e_salvar_parecer(relatorio_com_dominio_calculado.pk, client=client)
 
-    assert relatorio.parecer_ia == PARECER_DE_TESTE
+    assert relatorio.parecer_ia == parecer_cobrindo_d1
     assert relatorio.status == StatusRelatorio.AGUARDANDO_REVISAO
+
+
+@pytest.mark.django_db
+def test_gerar_e_salvar_parecer_incompleto_levanta_erro(relatorio_com_dominio_calculado):
+    """D1 está fora de Aceitável (banda Moderado) — um parecer com listas vazias
+    deve ser rejeitado, não persistido silenciosamente (achado de 2026-07-29)."""
+    fake_response = _FakeResponse([_FakeToolUseBlock("gerar_parecer_tecnico", PARECER_DE_TESTE)])
+    client = _FakeAnthropicClient(fake_response)
+
+    with pytest.raises(RuntimeError, match="incompleto"):
+        gerar_e_salvar_parecer(relatorio_com_dominio_calculado.pk, client=client)
 
 
 @pytest.mark.django_db

@@ -1,0 +1,193 @@
+{% extends "avaliacoes/_base_questionario.html" %}
+
+{% block titulo %}{{ dominio.nome }}{% endblock %}
+
+{% block extra_estilo %}
+    .topo-pergunta {
+        display: flex; align-items: flex-start; justify-content: space-between;
+        gap: 12px; margin-bottom: 16px;
+    }
+    .titulo-dominio {
+        font-family: "Plus Jakarta Sans", sans-serif; font-size: 13px; font-weight: 700;
+        color: var(--teal-700); text-transform: uppercase; letter-spacing: .06em;
+        animation: entra-domino .45s ease both;
+    }
+    .contador-pergunta {
+        font-size: 11.5px; font-weight: 600; color: var(--slate-400);
+        white-space: nowrap; padding-top: 1px;
+    }
+    .barra-progresso {
+        height: 7px;
+        background: var(--slate-100);
+        border-radius: 4px;
+        margin-bottom: 28px;
+        overflow: hidden;
+    }
+    .barra-progresso .preenchido {
+        height: 100%;
+        width: 0%;
+        border-radius: 4px;
+        transition: width .55s cubic-bezier(.4,0,.2,1), background-color .55s ease;
+    }
+    .pergunta-texto {
+        font-family: "Plus Jakarta Sans", sans-serif; font-size: 21px; font-weight: 600;
+        color: var(--slate-900); letter-spacing: -0.01em; line-height: 1.35;
+        margin: 0 0 26px; animation: entra-pergunta .4s cubic-bezier(.2,.7,.3,1) both;
+    }
+    .opcoes { display: flex; flex-direction: column; gap: 10px; }
+    .opcao {
+        position: relative;
+        display: flex; align-items: center; gap: 12px;
+        border: 1.5px solid var(--slate-200);
+        border-radius: 10px;
+        padding: 14px 16px;
+        cursor: pointer;
+        background: #fff;
+        transition: border-color .18s ease, background-color .18s ease, transform .12s ease, box-shadow .18s ease;
+        animation: entra-opcao .38s cubic-bezier(.2,.7,.3,1) both;
+    }
+    .opcao:hover { border-color: var(--teal-500); background: var(--teal-50); }
+    .opcao:active { transform: scale(0.988); }
+    .opcao input[type="radio"] {
+        appearance: none; -webkit-appearance: none;
+        width: 20px; height: 20px; min-width: 20px;
+        border: 2px solid var(--slate-300); border-radius: 50%;
+        display: grid; place-content: center; margin: 0; cursor: pointer;
+        transition: border-color .18s ease;
+    }
+    .opcao input[type="radio"]::before {
+        content: ""; width: 10px; height: 10px; border-radius: 50%;
+        transform: scale(0); transition: transform .15s cubic-bezier(.4,0,.2,1);
+        background: var(--teal-600);
+    }
+    .opcao input[type="radio"]:checked::before { transform: scale(1); }
+    .opcao input[type="radio"]:checked { border-color: var(--teal-600); }
+    .opcao.selecionada {
+        border-color: var(--teal-600); background: var(--teal-50);
+        box-shadow: 0 0 0 3px rgba(20,184,166,0.12);
+    }
+    .opcao-rotulo { font-size: 14.5px; font-weight: 500; color: var(--slate-800); user-select: none; }
+    .opcao:nth-child(1) { animation-delay: .02s; }
+    .opcao:nth-child(2) { animation-delay: .07s; }
+    .opcao:nth-child(3) { animation-delay: .12s; }
+    .opcao:nth-child(4) { animation-delay: .17s; }
+    .opcao:nth-child(5) { animation-delay: .22s; }
+    .opcao:nth-child(6) { animation-delay: .27s; }
+    @keyframes entra-pergunta { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes entra-opcao { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes entra-domino { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: translateX(0); } }
+    .rodape-pergunta {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-top: 28px;
+    }
+    .indicador-envio {
+        font-size: 12px; color: var(--teal-600); font-weight: 600;
+        opacity: 0; transition: opacity .2s ease;
+        display: flex; align-items: center; gap: 6px;
+    }
+    .indicador-envio.ativo { opacity: 1; }
+    .ponto-girando {
+        width: 13px; height: 13px; border-radius: 50%;
+        border: 2px solid var(--teal-100); border-top-color: var(--teal-600);
+        animation: girar .6s linear infinite;
+    }
+    @keyframes girar { to { transform: rotate(360deg); } }
+    .cartao { transition: opacity .2s ease; }
+    .cartao.saindo { opacity: 0; }
+{% endblock %}
+
+{% block conteudo %}
+<div class="topo-pergunta">
+    <div class="titulo-dominio">{{ dominio.nome }}</div>
+    <div class="contador-pergunta">Pergunta {{ progresso.atual }} de {{ progresso.total }}</div>
+</div>
+<div class="barra-progresso">
+    <div class="preenchido" id="barra-preenchida" data-largura="{{ percentual_progresso }}" style="background-color: {{ cor_barra_progresso }};"></div>
+</div>
+
+{% if dominio.nota %}
+<p class="aviso">{{ dominio.nota }}</p>
+{% endif %}
+
+<form method="post" id="form-pergunta">
+    {% csrf_token %}
+    <p class="pergunta-texto">{{ form.resposta.label }}</p>
+
+    <div class="opcoes">
+        {% for valor, rotulo in form.resposta.field.choices %}
+        <label class="opcao" data-valor="{{ valor }}">
+            <input type="radio" name="resposta" value="{{ valor }}"
+                {% if form.resposta.value|stringformat:"s" == valor|stringformat:"s" %}checked{% endif %}>
+            <span class="opcao-rotulo">{{ rotulo }}</span>
+        </label>
+        {% endfor %}
+    </div>
+    {% if form.resposta.errors %}<p class="erro-campo">{{ form.resposta.errors }}</p>{% endif %}
+
+    <div class="rodape-pergunta">
+        <a href="{{ url_anterior }}" class="botao botao-secundario" id="link-anterior">Anterior</a>
+        <span class="indicador-envio" id="indicador-envio"><span class="ponto-girando"></span> Avançando…</span>
+        <button type="submit" id="botao-proximo">Próximo</button>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_script %}
+<script>
+(function () {
+    var barra = document.getElementById("barra-preenchida");
+    requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+            barra.style.width = barra.dataset.largura + "%";
+        });
+    });
+
+    var form = document.getElementById("form-pergunta");
+    var opcoes = document.querySelectorAll(".opcao");
+    var indicador = document.getElementById("indicador-envio");
+    var cartao = document.querySelector(".cartao");
+    var linkAnterior = document.getElementById("link-anterior");
+    var botaoProximo = document.getElementById("botao-proximo");
+    var jaEnviando = false;
+
+    function marcarSelecionada(radioSelecionado) {
+        opcoes.forEach(function (opcao) {
+            opcao.classList.toggle("selecionada", opcao.querySelector("input").checked);
+        });
+    }
+
+    opcoes.forEach(function (opcao) {
+        var radio = opcao.querySelector("input[type=radio]");
+        if (radio.checked) { opcao.classList.add("selecionada"); }
+        radio.addEventListener("change", function () {
+            // Só marca a opção escolhida — não avança sozinho. O envio real só
+            // acontece quando o usuário clica em "Próximo" (pedido do usuário,
+            // 2026-07-29: clicar na resposta selecionava e já avançava demais rápido
+            // pra quem quer conferir a escolha antes de seguir).
+            marcarSelecionada(radio);
+        });
+    });
+
+    form.addEventListener("submit", function (evento) {
+        if (jaEnviando) {
+            // Já enviou uma vez — bloqueia qualquer segundo clique em "Próximo"
+            // (o botão continua submit por padrão do HTML, então sem isso um clique
+            // duplo dispararia dois POSTs).
+            evento.preventDefault();
+            return;
+        }
+        jaEnviando = true;
+        indicador.classList.add("ativo");
+        // Trava "Anterior" e "Próximo" assim que o envio começa — pedido do usuário,
+        // 2026-07-29: dava pra clicar em "Anterior" enquanto o "Próximo" ainda
+        // estava processando, criando uma corrida entre as duas navegações.
+        botaoProximo.disabled = true;
+        if (linkAnterior) {
+            linkAnterior.style.pointerEvents = "none";
+            linkAnterior.style.opacity = "0.5";
+            linkAnterior.setAttribute("aria-disabled", "true");
+        }
+    });
+})();
+</script>
+{% endblock %}

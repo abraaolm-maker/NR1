@@ -1,24 +1,41 @@
-"""Suporte ao fluxo público do questionário (CLAUDE.md Etapa 7.2).
+"""Suporte ao fluxo público do questionário (CLAUDE.md Etapa 7.2 / revisão de UX de
+2026-07-29 — uma pergunta por página em vez de um domínio inteiro por página, pra
+aumentar a concentração de quem responde).
 
-Resolve "o que falta responder" pra permitir retomar de onde parou (mesmo link,
-reaberto depois) sem repetir domínios já completos."""
+A ordem é uma lista única e plana de itens, cruzando todos os domínios da Aplicacao
+(na ordem de `dominios_da_aplicacao` e depois `itens_da_aplicacao` dentro de cada
+domínio) — não existe mais "domínio atual"; existe "item atual dentro da sequência
+inteira". O título do domínio mostrado na tela muda sozinho quando o item muda de
+domínio, sem precisar de nenhum estado extra: cada página só olha pro domínio do
+item que está mostrando."""
 
 from avaliacoes.models import Respondente, Resposta
-from avaliacoes.services.calculo_risco import dominios_da_aplicacao
-from instrumentos.models import Dominio
+from avaliacoes.services.calculo_risco import dominios_da_aplicacao, itens_da_aplicacao
+from instrumentos.models import Item
 
 
-def dominios_pendentes(respondente: Respondente) -> list[Dominio]:
-    """Domínios aplicáveis à Aplicacao deste Respondente que ainda têm pelo menos um
-    item sem Resposta registrada por ele."""
-    pendentes = []
-    for dominio in dominios_da_aplicacao(respondente.aplicacao):
-        item_ids = set(dominio.itens.values_list("item_id", flat=True))
-        respondidos = set(
-            Resposta.objects.filter(respondente=respondente, item__dominio=dominio).values_list(
-                "item__item_id", flat=True
-            )
-        )
-        if item_ids - respondidos:
-            pendentes.append(dominio)
-    return pendentes
+def itens_em_ordem(aplicacao) -> list[Item]:
+    """Lista plana e ordenada de todos os itens aplicáveis à Aplicacao (já filtrados
+    por profundidade quando o instrumento usa esse conceito — CLAUDE.md Seção 5.1.1)."""
+    itens = []
+    for dominio in dominios_da_aplicacao(aplicacao):
+        itens.extend(itens_da_aplicacao(aplicacao, dominio))
+    return itens
+
+
+def proximo_item_pendente(respondente: Respondente) -> Item | None:
+    """Primeiro item da sequência que este respondente ainda não respondeu, ou None
+    se todos já foram respondidos (nesse caso o fluxo segue pras perguntas abertas)."""
+    respondidos = set(Resposta.objects.filter(respondente=respondente).values_list("item_id", flat=True))
+    for item in itens_em_ordem(respondente.aplicacao):
+        if item.pk not in respondidos:
+            return item
+    return None
+
+
+def posicao_item(aplicacao, item: Item) -> dict:
+    """1-based: {'atual': N, 'total': T} — usado pra 'Pergunta N de T' e pra barra
+    de progresso. Item que não pertence à Aplicacao não aparece na lista (index()
+    levantaria ValueError de propósito, é bug de chamada, não deveria acontecer)."""
+    todos = itens_em_ordem(aplicacao)
+    return {"atual": todos.index(item) + 1, "total": len(todos)}

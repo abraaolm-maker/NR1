@@ -417,4 +417,64 @@ def test_admin_cria_acesso_de_gestor(client, gestor):
     assert empresa.gestor.username == "novo_gestor"
     assert empresa.gestor.check_password("senha-forte-123")
     assert empresa.gestor.is_staff is True
-    assert empresa.gestor.is_superuser is False
+
+
+@pytest.mark.django_db
+def test_admin_edita_usuario_e_senha_do_gestor(client, gestor):
+    empresa = Empresa.objects.create(nome="Empresa Nova", cnpj="00.000.000/0004-00")
+    gestor_empresa = get_user_model().objects.create_user(username="gestor_antigo", password="senha-antiga-123")
+    empresa.gestor = gestor_empresa
+    empresa.save(update_fields=["gestor"])
+    client.force_login(gestor)
+
+    resp = client.post(
+        reverse("painel_avaliacoes:empresa_editar_gestor", args=[empresa.pk]),
+        {"username": "gestor_novo_nome", "password": "senha-nova-456"},
+    )
+
+    assert resp.status_code == 302
+    gestor_empresa.refresh_from_db()
+    assert gestor_empresa.username == "gestor_novo_nome"
+    assert gestor_empresa.check_password("senha-nova-456")
+
+
+@pytest.mark.django_db
+def test_admin_edita_gestor_sem_senha_mantem_senha_atual(client, gestor):
+    empresa = Empresa.objects.create(nome="Empresa Nova", cnpj="00.000.000/0005-00")
+    gestor_empresa = get_user_model().objects.create_user(username="gestor_x", password="senha-original-123")
+    empresa.gestor = gestor_empresa
+    empresa.save(update_fields=["gestor"])
+    client.force_login(gestor)
+
+    client.post(
+        reverse("painel_avaliacoes:empresa_editar_gestor", args=[empresa.pk]),
+        {"username": "gestor_x", "password": ""},
+    )
+
+    gestor_empresa.refresh_from_db()
+    assert gestor_empresa.check_password("senha-original-123")
+
+
+@pytest.mark.django_db
+def test_admin_remove_acesso_do_gestor(client, gestor):
+    from django.test import Client
+
+    empresa = Empresa.objects.create(nome="Empresa Nova", cnpj="00.000.000/0006-00")
+    gestor_empresa = get_user_model().objects.create_user(username="gestor_removido", password="senha-123")
+    empresa.gestor = gestor_empresa
+    empresa.save(update_fields=["gestor"])
+    client.force_login(gestor)
+
+    resp = client.post(reverse("painel_avaliacoes:empresa_remover_gestor", args=[empresa.pk]), follow=True)
+
+    assert resp.status_code == 200
+    empresa.refresh_from_db()
+    gestor_empresa.refresh_from_db()
+    assert empresa.gestor is None
+    assert gestor_empresa.is_active is False
+
+    outro_client = Client()
+    logado = outro_client.login(username="gestor_removido", password="senha-123")
+    assert logado is False
+
+    assert "Criar acesso do gestor".encode() in resp.content

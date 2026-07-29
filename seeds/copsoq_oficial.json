@@ -1,0 +1,1576 @@
+{
+  "instrument_code": "COPSOQ_OFICIAL",
+  "instrument_name": "COPSOQ Oficial",
+  "instrument_description": "Transcrição do Copenhagen Psychosocial Questionnaire (COPSOQ II), versão portuguesa (Silva, C. et al., 2011/2013) — 35 subescalas, com 3 profundidades selecionáveis por Aplicação: Curta (41 itens/23 subescalas), Média (76 itens/29 subescalas) e Longa (119 itens/35 subescalas). Use quando quiser fidelidade estrita ao instrumento validado internacionalmente, escolhendo o nível de detalhe conforme o tempo disponível dos respondentes.",
+  "source_note": "Copenhagen Psychosocial Questionnaire (COPSOQ II) — Versão Portuguesa, adaptado por Carlos Fernandes da Silva (Universidade de Aveiro) a partir da versão original de Kristensen, T. et al. (2000), manual 'COPSOQ Manual Portugal 2013' (FCT / Análise Exacta). Itens transcritos das versões curta/média/longa publicadas no manual. Pontos de corte: tercis genéricos do manual (2,33 e 3,66 na escala 1-5), não específicos por subescala (o manual não publica cortes numéricos por subescala, só o método de tercis). Cada item traz 'profundidade' (curta/media/longa) = nível mais raso do documento em que ele aparece, definido por correspondência de CONTEÚDO entre as três listas publicadas, não por posição numérica. Onde a versão longa reformula o texto de um item já existente na média (mesmo conceito, redação diferente), foi mantida a redação da média/curta para esse item e a diferença de fraseado não foi modelada — ver CLAUDE.md. Algumas contagens de itens por subescala divergem em 1-2 itens da Tabela 1 do manual (aparentam ser artefatos de OCR/edição do PDF de origem); a lista de itens efetivamente publicada em cada versão foi tratada como fonte de verdade, não o resumo da tabela.",
+  "scales": [
+    {
+      "scale_code": "EQ",
+      "scale_name": "Exigências quantitativas",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Nunca/quase nunca",
+          "2": "Raramente",
+          "3": "Às vezes",
+          "4": "Frequentemente",
+          "5": "Sempre"
+        }
+      },
+      "thresholds": {
+        "baixo_max": 2.33,
+        "moderado_max": 3.66
+      },
+      "items": [
+        {
+          "id": "EQ.1",
+          "text": "O seu trabalho se acumula porque as tarefas são mal distribuídas?",
+          "polarity": "RISCO",
+          "profundidade": "curta"
+        },
+        {
+          "id": "EQ.2",
+          "text": "Com que frequência você não tem tempo para terminar todas as tarefas do seu trabalho?",
+          "polarity": "RISCO",
+          "profundidade": "curta"
+        },
+        {
+          "id": "EQ.3",
+          "text": "Você precisa fazer horas extras?",
+          "polarity": "RISCO",
+          "profundidade": "media"
+        }
+      ],
+      "reference": {
+        "media": 2.48,
+        "dp": 0.86
+      }
+    },
+    {
+      "scale_code": "RT",
+      "scale_name": "Ritmo de trabalho",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Nunca/quase nunca",
+          "2": "Raramente",
+          "3": "Às vezes",
+          "4": "Frequentemente",
+          "5": "Sempre"
+        }
+      },
+      "thresholds": {
+        "baixo_max": 2.33,
+        "moderado_max": 3.66
+      },
+      "items": [
+        {
+          "id": "RT.1",
+          "text": "Você precisa trabalhar muito rápido?",
+          "polarity": "RISCO",
+          "profundidade": "curta"
+        }
+      ],
+      "reference": {
+        "media": 3.18,
+        "dp": 1.0
+      }
+    },
+    {
+      "scale_code": "EC",
+      "scale_name": "Exigências cognitivas",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Nunca/quase nunca",
+          "2": "Raramente",
+          "3": "Às vezes",
+          "4": "Frequentemente",
+          "5": "Sempre"
+        }
+      },
+      "thresholds": {
+        "baixo_max": 2.33,
+        "moderado_max": 3.66
+      },
+      "items": [
+        {
+          "id": "EC.1",
+          "text": "O seu trabalho exige que você fique atento o tempo todo?",
+          "polarity": "RISCO",
+          "profundidade": "curta"
+        },
+        {
+          "id": "EC.2",
+          "text": "O seu trabalho exige que você seja bom em propor ideias novas?",
+          "polarity": "RISCO",
+          "profundidade": "media"
+        },
+        {
+          "id": "EC.3",
+          "text": "O seu trabalho exige que você tome decisões difíceis?",
+          "polarity": "RISCO",
+          "profundidade": "curta"
+        }
+      ],
+      "reference": {
+        "media": 3.79,
+        "dp": 0.71
+      }
+    },
+    {
+      "scale_code": "EE",
+      "scale_name": "Exigências emocionais",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Nunca/quase nunca",
+          "2": "Raramente",
+          "3": "Às vezes",
+          "4": "Frequentemente",
+          "5": "Sempre"
+        }
+      },
+      "thresholds": {
+        "baixo_max": 2.33,
+        "moderado_max": 3.66
+      },
+      "items": [
+        {
+          "id": "EE.1",
+          "text": "O seu trabalho exige muito emocionalmente de você?",
+          "polarity": "RISCO",
+          "profundidade": "curta"
+        },
+        {
+          "id": "EE.2",
+          "text": "O seu trabalho coloca você em situações emocionalmente difíceis ou perturbadoras?",
+          "polarity": "RISCO",
+          "profundidade": "longa"
+        },
+        {
+          "id": "EE.3",
+          "text": "Você se sente emocionalmente envolvido com o seu trabalho?",
+          "polarity": "RISCO",
+          "profundidade": "longa"
+        }
+      ],
+      "reference": {
+        "media": 3.42,
+        "dp": 1.15
+      }
+    },
+    {
+      "scale_code": "EEE",
+      "scale_name": "Exigências para esconder emoções",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Nunca/quase nunca",
+          "2": "Raramente",
+          "3": "Às vezes",
+          "4": "Frequentemente",
+          "5": "Sempre"
+        }
+      },
+      "thresholds": {
+        "baixo_max": 2.33,
+        "moderado_max": 3.66
+      },
+      "items": [
+        {
+          "id": "EEE.1",
+          "text": "O seu trabalho exige que você não diga o que pensa?",
+          "polarity": "RISCO",
+          "profundidade": "longa"
+        },
+        {
+          "id": "EEE.2",
+          "text": "O seu trabalho exige que você esconda o que sente?",
+          "polarity": "RISCO",
+          "profundidade": "longa"
+        },
+        {
+          "id": "EEE.3",
+          "text": "No seu trabalho, exigem que você trate todo mundo do mesmo jeito, mesmo quando você não concorda com isso?",
+          "polarity": "RISCO",
+          "profundidade": "longa"
+        },
+        {
+          "id": "EEE.4",
+          "text": "No seu trabalho, exigem que você seja simpático com todos, mesmo quando as pessoas não são simpáticas com você?",
+          "polarity": "RISCO",
+          "profundidade": "longa"
+        }
+      ]
+    },
+    {
+      "scale_code": "IT",
+      "scale_name": "Influência no trabalho",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Nunca/quase nunca",
+          "2": "Raramente",
+          "3": "Às vezes",
+          "4": "Frequentemente",
+          "5": "Sempre"
+        }
+      },
+      "thresholds": {
+        "baixo_max": 2.33,
+        "moderado_max": 3.66
+      },
+      "items": [
+        {
+          "id": "IT.1",
+          "text": "Você tem bastante liberdade para decidir como fazer o seu trabalho?",
+          "polarity": "PROTETIVO",
+          "profundidade": "curta"
+        },
+        {
+          "id": "IT.2",
+          "text": "Você participa da escolha das pessoas com quem trabalha?",
+          "polarity": "PROTETIVO",
+          "profundidade": "media"
+        },
+        {
+          "id": "IT.3",
+          "text": "Você pode influenciar a quantidade de trabalho que recebe?",
+          "polarity": "PROTETIVO",
+          "profundidade": "media"
+        },
+        {
+          "id": "IT.4",
+          "text": "Você tem alguma influência sobre o tipo de tarefa que faz?",
+          "polarity": "PROTETIVO",
+          "profundidade": "media"
+        }
+      ],
+      "reference": {
+        "media": 2.83,
+        "dp": 0.89
+      }
+    },
+    {
+      "scale_code": "PD",
+      "scale_name": "Possibilidades de desenvolvimento",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Nunca/quase nunca",
+          "2": "Raramente",
+          "3": "Às vezes",
+          "4": "Frequentemente",
+          "5": "Sempre"
+        }
+      },
+      "thresholds": {
+        "baixo_max": 2.33,
+        "moderado_max": 3.66
+      },
+      "items": [
+        {
+          "id": "PD.1",
+          "text": "O seu trabalho exige que você tenha iniciativa?",
+          "polarity": "PROTETIVO",
+          "profundidade": "curta"
+        },
+        {
+          "id": "PD.2",
+          "text": "O seu trabalho permite que você aprenda coisas novas?",
+          "polarity": "PROTETIVO",
+          "profundidade": "curta"
+        },
+        {
+          "id": "PD.3",
+          "text": "O seu trabalho permite que você use as suas habilidades?",
+          "polarity": "PROTETIVO",
+          "profundidade": "media"
+        }
+      ],
+      "reference": {
+        "media": 3.85,
+        "dp": 0.81
+      }
+    },
+    {
+      "scale_code": "VT",
+      "scale_name": "Variação no trabalho",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Nunca/quase nunca",
+          "2": "Raramente",
+          "3": "Às vezes",
+          "4": "Frequentemente",
+          "5": "Sempre"
+        }
+      },
+      "thresholds": {
+        "baixo_max": 2.33,
+        "moderado_max": 3.66
+      },
+      "items": [
+        {
+          "id": "VT.1",
+          "text": "O seu trabalho tem tarefas variadas, e não é sempre a mesma coisa?",
+          "polarity": "PROTETIVO",
+          "profundidade": "longa"
+        }
+      ]
+    },
+    {
+      "scale_code": "PREV",
+      "scale_name": "Previsibilidade",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Nunca/quase nunca",
+          "2": "Raramente",
+          "3": "Às vezes",
+          "4": "Frequentemente",
+          "5": "Sempre"
+        }
+      },
+      "thresholds": {
+        "baixo_max": 2.33,
+        "moderado_max": 3.66
+      },
+      "items": [
+        {
+          "id": "PREV.1",
+          "text": "No seu local de trabalho, você é avisado com antecedência sobre decisões importantes ou mudanças?",
+          "polarity": "PROTETIVO",
+          "profundidade": "curta"
+        },
+        {
+          "id": "PREV.2",
+          "text": "Você recebe todas as informações que precisa para fazer bem o seu trabalho?",
+          "polarity": "PROTETIVO",
+          "profundidade": "curta"
+        }
+      ],
+      "reference": {
+        "media": 3.23,
+        "dp": 0.92
+      }
+    },
+    {
+      "scale_code": "TPL",
+      "scale_name": "Transparência do papel laboral desempenhado",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Nunca/quase nunca",
+          "2": "Raramente",
+          "3": "Às vezes",
+          "4": "Frequentemente",
+          "5": "Sempre"
+        }
+      },
+      "thresholds": {
+        "baixo_max": 2.33,
+        "moderado_max": 3.66
+      },
+      "items": [
+        {
+          "id": "TPL.1",
+          "text": "As metas e os objetivos das suas tarefas no trabalho são claros pra você?",
+          "polarity": "PROTETIVO",
+          "profundidade": "media"
+        },
+        {
+          "id": "TPL.2",
+          "text": "Você sabe exatamente quais são as suas responsabilidades no trabalho?",
+          "polarity": "PROTETIVO",
+          "profundidade": "curta"
+        },
+        {
+          "id": "TPL.3",
+          "text": "Você sabe exatamente o que esperam de você no trabalho?",
+          "polarity": "PROTETIVO",
+          "profundidade": "media"
+        }
+      ],
+      "reference": {
+        "media": 4.19,
+        "dp": 0.72
+      }
+    },
+    {
+      "scale_code": "REC",
+      "scale_name": "Recompensas",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Nunca/quase nunca",
+          "2": "Raramente",
+          "3": "Às vezes",
+          "4": "Frequentemente",
+          "5": "Sempre"
+        }
+      },
+      "thresholds": {
+        "baixo_max": 2.33,
+        "moderado_max": 3.66
+      },
+      "items": [
+        {
+          "id": "REC.1",
+          "text": "A gerência reconhece e valoriza o seu trabalho?",
+          "polarity": "PROTETIVO",
+          "profundidade": "curta"
+        },
+        {
+          "id": "REC.2",
+          "text": "A gerência do seu local de trabalho te respeita?",
+          "polarity": "PROTETIVO",
+          "profundidade": "media"
+        },
+        {
+          "id": "REC.3",
+          "text": "Você é tratado de forma justa no seu local de trabalho?",
+          "polarity": "PROTETIVO",
+          "profundidade": "curta"
+        },
+        {
+          "id": "REC.4",
+          "text": "O seu emprego oferece boas perspectivas de crescimento profissional no futuro?",
+          "polarity": "PROTETIVO",
+          "profundidade": "longa"
+        }
+      ],
+      "reference": {
+        "media": 3.71,
+        "dp": 0.87
+      }
+    },
+    {
+      "scale_code": "CONFL",
+      "scale_name": "Conflitos de papéis laborais",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Nunca/quase nunca",
+          "2": "Raramente",
+          "3": "Às vezes",
+          "4": "Frequentemente",
+          "5": "Sempre"
+        }
+      },
+      "thresholds": {
+        "baixo_max": 2.33,
+        "moderado_max": 3.66
+      },
+      "items": [
+        {
+          "id": "CONFL.1",
+          "text": "No seu trabalho, você faz coisas que algumas pessoas aprovam e outras não?",
+          "polarity": "RISCO",
+          "profundidade": "media"
+        },
+        {
+          "id": "CONFL.2",
+          "text": "No seu trabalho, pedem para você fazer coisas contraditórias?",
+          "polarity": "RISCO",
+          "profundidade": "longa"
+        },
+        {
+          "id": "CONFL.3",
+          "text": "Às vezes você precisa fazer as coisas de um jeito que acha que deveria ser diferente?",
+          "polarity": "RISCO",
+          "profundidade": "media"
+        },
+        {
+          "id": "CONFL.4",
+          "text": "Às vezes você precisa fazer coisas que considera desnecessárias?",
+          "polarity": "RISCO",
+          "profundidade": "media"
+        }
+      ],
+      "reference": {
+        "media": 2.94,
+        "dp": 0.69
+      }
+    },
+    {
+      "scale_code": "ASC",
+      "scale_name": "Apoio social de colegas",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Nunca/quase nunca",
+          "2": "Raramente",
+          "3": "Às vezes",
+          "4": "Frequentemente",
+          "5": "Sempre"
+        }
+      },
+      "thresholds": {
+        "baixo_max": 2.33,
+        "moderado_max": 3.66
+      },
+      "items": [
+        {
+          "id": "ASC.1",
+          "text": "Com que frequência você recebe ajuda e apoio dos seus colegas de trabalho?",
+          "polarity": "PROTETIVO",
+          "profundidade": "media"
+        },
+        {
+          "id": "ASC.2",
+          "text": "Com que frequência os seus colegas estão dispostos a te ouvir sobre problemas do trabalho?",
+          "polarity": "PROTETIVO",
+          "profundidade": "media"
+        },
+        {
+          "id": "ASC.3",
+          "text": "Com que frequência os seus colegas conversam com você sobre como está o seu desempenho no trabalho?",
+          "polarity": "PROTETIVO",
+          "profundidade": "media"
+        }
+      ],
+      "reference": {
+        "media": 3.44,
+        "dp": 0.77
+      }
+    },
+    {
+      "scale_code": "ASS",
+      "scale_name": "Apoio social de superiores",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Nunca/quase nunca",
+          "2": "Raramente",
+          "3": "Às vezes",
+          "4": "Frequentemente",
+          "5": "Sempre"
+        }
+      },
+      "thresholds": {
+        "baixo_max": 2.33,
+        "moderado_max": 3.66
+      },
+      "items": [
+        {
+          "id": "ASS.1",
+          "text": "Com que frequência o seu chefe direto conversa com você sobre como está indo o seu trabalho?",
+          "polarity": "PROTETIVO",
+          "profundidade": "media"
+        },
+        {
+          "id": "ASS.2",
+          "text": "Com que frequência você recebe ajuda e apoio do seu chefe direto?",
+          "polarity": "PROTETIVO",
+          "profundidade": "curta"
+        },
+        {
+          "id": "ASS.3",
+          "text": "Com que frequência o seu chefe direto conversa com você sobre o seu desempenho no trabalho?",
+          "polarity": "PROTETIVO",
+          "profundidade": "media"
+        }
+      ],
+      "reference": {
+        "media": 3.13,
+        "dp": 0.97
+      }
+    },
+    {
+      "scale_code": "CST",
+      "scale_name": "Comunidade social no trabalho",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Nunca/quase nunca",
+          "2": "Raramente",
+          "3": "Às vezes",
+          "4": "Frequentemente",
+          "5": "Sempre"
+        }
+      },
+      "thresholds": {
+        "baixo_max": 2.33,
+        "moderado_max": 3.66
+      },
+      "items": [
+        {
+          "id": "CST.1",
+          "text": "Existe um bom relacionamento, de amizade e respeito, entre você e os seus colegas de trabalho?",
+          "polarity": "PROTETIVO",
+          "profundidade": "curta"
+        },
+        {
+          "id": "CST.2",
+          "text": "Existe uma boa cooperação entre os colegas de trabalho?",
+          "polarity": "PROTETIVO",
+          "profundidade": "media"
+        },
+        {
+          "id": "CST.3",
+          "text": "No seu local de trabalho, você se sente parte de uma equipe, e não sozinho?",
+          "polarity": "PROTETIVO",
+          "profundidade": "media"
+        }
+      ],
+      "reference": {
+        "media": 3.97,
+        "dp": 0.81
+      }
+    },
+    {
+      "scale_code": "QL",
+      "scale_name": "Qualidade da liderança",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Nunca/quase nunca",
+          "2": "Raramente",
+          "3": "Às vezes",
+          "4": "Frequentemente",
+          "5": "Sempre"
+        }
+      },
+      "thresholds": {
+        "baixo_max": 2.33,
+        "moderado_max": 3.66
+      },
+      "items": [
+        {
+          "id": "QL.1",
+          "text": "O seu chefe direto oferece boas oportunidades de desenvolvimento para você e para o grupo?",
+          "polarity": "PROTETIVO",
+          "profundidade": "curta"
+        },
+        {
+          "id": "QL.2",
+          "text": "O seu chefe direto se preocupa com a satisfação da equipe no trabalho?",
+          "polarity": "PROTETIVO",
+          "profundidade": "media"
+        },
+        {
+          "id": "QL.3",
+          "text": "O seu chefe direto é bom em planejar o trabalho?",
+          "polarity": "PROTETIVO",
+          "profundidade": "curta"
+        },
+        {
+          "id": "QL.4",
+          "text": "O seu chefe direto é bom em resolver conflitos?",
+          "polarity": "PROTETIVO",
+          "profundidade": "media"
+        }
+      ],
+      "reference": {
+        "media": 3.49,
+        "dp": 0.93
+      }
+    },
+    {
+      "scale_code": "CH",
+      "scale_name": "Confiança horizontal",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Nunca/quase nunca",
+          "2": "Raramente",
+          "3": "Às vezes",
+          "4": "Frequentemente",
+          "5": "Sempre"
+        }
+      },
+      "thresholds": {
+        "baixo_max": 2.33,
+        "moderado_max": 3.66
+      },
+      "items": [
+        {
+          "id": "CH.1",
+          "text": "Os funcionários escondem informações uns dos outros?",
+          "polarity": "RISCO",
+          "profundidade": "media"
+        },
+        {
+          "id": "CH.2",
+          "text": "Os funcionários escondem informações da gerência?",
+          "polarity": "RISCO",
+          "profundidade": "media"
+        },
+        {
+          "id": "CH.3",
+          "text": "De um modo geral, os funcionários confiam uns nos outros?",
+          "polarity": "PROTETIVO",
+          "profundidade": "media"
+        }
+      ],
+      "reference": {
+        "media": 2.79,
+        "dp": 0.64
+      }
+    },
+    {
+      "scale_code": "CV",
+      "scale_name": "Confiança vertical",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Nunca/quase nunca",
+          "2": "Raramente",
+          "3": "Às vezes",
+          "4": "Frequentemente",
+          "5": "Sempre"
+        }
+      },
+      "thresholds": {
+        "baixo_max": 2.33,
+        "moderado_max": 3.66
+      },
+      "items": [
+        {
+          "id": "CV.1",
+          "text": "A gerência confia que os funcionários fazem o trabalho bem-feito?",
+          "polarity": "PROTETIVO",
+          "profundidade": "curta"
+        },
+        {
+          "id": "CV.2",
+          "text": "Você confia nas informações que a gerência passa para você?",
+          "polarity": "PROTETIVO",
+          "profundidade": "curta"
+        },
+        {
+          "id": "CV.3",
+          "text": "A gerência esconde informações dos funcionários?",
+          "polarity": "RISCO",
+          "profundidade": "media"
+        }
+      ],
+      "reference": {
+        "media": 3.6,
+        "dp": 0.6
+      }
+    },
+    {
+      "scale_code": "JR",
+      "scale_name": "Justiça e respeito",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Nunca/quase nunca",
+          "2": "Raramente",
+          "3": "Às vezes",
+          "4": "Frequentemente",
+          "5": "Sempre"
+        }
+      },
+      "thresholds": {
+        "baixo_max": 2.33,
+        "moderado_max": 3.66
+      },
+      "items": [
+        {
+          "id": "JR.1",
+          "text": "No seu trabalho, os conflitos são resolvidos de forma justa?",
+          "polarity": "PROTETIVO",
+          "profundidade": "curta"
+        },
+        {
+          "id": "JR.2",
+          "text": "Os funcionários são valorizados quando fazem um bom trabalho?",
+          "polarity": "PROTETIVO",
+          "profundidade": "longa"
+        },
+        {
+          "id": "JR.3",
+          "text": "A gerência leva a sério as sugestões dos funcionários?",
+          "polarity": "PROTETIVO",
+          "profundidade": "media"
+        },
+        {
+          "id": "JR.4",
+          "text": "O trabalho é distribuído de forma igual entre os funcionários?",
+          "polarity": "PROTETIVO",
+          "profundidade": "curta"
+        }
+      ],
+      "reference": {
+        "media": 3.37,
+        "dp": 0.81
+      }
+    },
+    {
+      "scale_code": "RS",
+      "scale_name": "Responsabilidade social",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Nunca/quase nunca",
+          "2": "Raramente",
+          "3": "Às vezes",
+          "4": "Frequentemente",
+          "5": "Sempre"
+        }
+      },
+      "thresholds": {
+        "baixo_max": 2.33,
+        "moderado_max": 3.66
+      },
+      "items": [
+        {
+          "id": "RS.1",
+          "text": "No seu trabalho, homens e mulheres são tratados da mesma forma?",
+          "polarity": "PROTETIVO",
+          "profundidade": "longa"
+        },
+        {
+          "id": "RS.2",
+          "text": "No seu trabalho, há espaço para funcionários de raças e religiões diferentes?",
+          "polarity": "PROTETIVO",
+          "profundidade": "longa"
+        },
+        {
+          "id": "RS.3",
+          "text": "No seu trabalho, há espaço para funcionários com doenças ou deficiências?",
+          "polarity": "PROTETIVO",
+          "profundidade": "longa"
+        },
+        {
+          "id": "RS.4",
+          "text": "No seu trabalho, há espaço para funcionários mais velhos (terceira idade)?",
+          "polarity": "PROTETIVO",
+          "profundidade": "longa"
+        }
+      ]
+    },
+    {
+      "scale_code": "AE",
+      "scale_name": "Auto-eficácia",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Totalmente falso",
+          "2": "Um pouco falso",
+          "3": "Nem verdadeiro nem falso",
+          "4": "Um pouco verdadeiro",
+          "5": "Totalmente verdadeiro"
+        }
+      },
+      "thresholds": {
+        "baixo_max": 2.33,
+        "moderado_max": 3.66
+      },
+      "items": [
+        {
+          "id": "AE.1",
+          "text": "Eu sou sempre capaz de resolver os meus problemas no trabalho, se eu me esforçar o suficiente.",
+          "polarity": "PROTETIVO",
+          "profundidade": "curta"
+        },
+        {
+          "id": "AE.2",
+          "text": "É fácil para mim seguir os meus planos e alcançar os meus objetivos.",
+          "polarity": "PROTETIVO",
+          "profundidade": "media"
+        },
+        {
+          "id": "AE.3",
+          "text": "Mesmo quando as pessoas trabalham contra mim, eu encontro um jeito de conseguir o que eu quero.",
+          "polarity": "PROTETIVO",
+          "profundidade": "longa"
+        },
+        {
+          "id": "AE.4",
+          "text": "Eu me sinto confiante para lidar com situações inesperadas.",
+          "polarity": "PROTETIVO",
+          "profundidade": "longa"
+        },
+        {
+          "id": "AE.5",
+          "text": "Quando eu tenho um problema, eu geralmente encontro várias formas de resolvê-lo.",
+          "polarity": "PROTETIVO",
+          "profundidade": "longa"
+        },
+        {
+          "id": "AE.6",
+          "text": "Não importa o que aconteça, eu geralmente encontro soluções para os meus problemas.",
+          "polarity": "PROTETIVO",
+          "profundidade": "longa"
+        }
+      ],
+      "reference": {
+        "media": 3.9,
+        "dp": 0.67
+      }
+    },
+    {
+      "scale_code": "ST",
+      "scale_name": "Significado do trabalho",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Nada/quase nada",
+          "2": "Um pouco",
+          "3": "Moderadamente",
+          "4": "Muito",
+          "5": "Extremamente"
+        }
+      },
+      "thresholds": {
+        "baixo_max": 2.33,
+        "moderado_max": 3.66
+      },
+      "items": [
+        {
+          "id": "ST.1",
+          "text": "Quanto significado o seu trabalho tem para você?",
+          "polarity": "PROTETIVO",
+          "profundidade": "curta"
+        },
+        {
+          "id": "ST.2",
+          "text": "Quão importante você sente que é o seu trabalho?",
+          "polarity": "PROTETIVO",
+          "profundidade": "curta"
+        },
+        {
+          "id": "ST.3",
+          "text": "Quão motivado e envolvido você se sente com o seu trabalho?",
+          "polarity": "PROTETIVO",
+          "profundidade": "media"
+        }
+      ],
+      "reference": {
+        "media": 4.03,
+        "dp": 0.72
+      }
+    },
+    {
+      "scale_code": "CLT",
+      "scale_name": "Compromisso face ao local de trabalho",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Nada/quase nada",
+          "2": "Um pouco",
+          "3": "Moderadamente",
+          "4": "Muito",
+          "5": "Extremamente"
+        }
+      },
+      "thresholds": {
+        "baixo_max": 2.33,
+        "moderado_max": 3.66
+      },
+      "items": [
+        {
+          "id": "CLT.1",
+          "text": "O quanto você gosta de falar com outras pessoas sobre o seu local de trabalho?",
+          "polarity": "PROTETIVO",
+          "profundidade": "media"
+        },
+        {
+          "id": "CLT.2",
+          "text": "O quanto você sente que os problemas do seu local de trabalho também são problemas seus?",
+          "polarity": "PROTETIVO",
+          "profundidade": "curta"
+        },
+        {
+          "id": "CLT.3",
+          "text": "Quão importante é o seu local de trabalho para você, pessoalmente?",
+          "polarity": "PROTETIVO",
+          "profundidade": "longa"
+        }
+      ],
+      "reference": {
+        "media": 3.4,
+        "dp": 0.9
+      }
+    },
+    {
+      "scale_code": "SAT",
+      "scale_name": "Satisfação no trabalho",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Nada/quase nada",
+          "2": "Um pouco",
+          "3": "Moderadamente",
+          "4": "Muito",
+          "5": "Extremamente"
+        }
+      },
+      "thresholds": {
+        "baixo_max": 2.33,
+        "moderado_max": 3.66
+      },
+      "items": [
+        {
+          "id": "SAT.1",
+          "text": "Quão satisfeito está com as suas perspectivas de trabalho?",
+          "polarity": "PROTETIVO",
+          "profundidade": "media"
+        },
+        {
+          "id": "SAT.2",
+          "text": "Quão satisfeito está com as condições físicas do seu local de trabalho?",
+          "polarity": "PROTETIVO",
+          "profundidade": "media"
+        },
+        {
+          "id": "SAT.3",
+          "text": "Quão satisfeito está com a forma como as suas capacidades são utilizadas?",
+          "polarity": "PROTETIVO",
+          "profundidade": "media"
+        },
+        {
+          "id": "SAT.4",
+          "text": "Quão satisfeito está, de uma forma global, com o seu trabalho?",
+          "polarity": "PROTETIVO",
+          "profundidade": "curta"
+        }
+      ],
+      "reference": {
+        "media": 3.37,
+        "dp": 0.75
+      }
+    },
+    {
+      "scale_code": "IL",
+      "scale_name": "Insegurança laboral",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Nada/quase nada",
+          "2": "Um pouco",
+          "3": "Moderadamente",
+          "4": "Muito",
+          "5": "Extremamente"
+        }
+      },
+      "thresholds": {
+        "baixo_max": 2.33,
+        "moderado_max": 3.66
+      },
+      "items": [
+        {
+          "id": "IL.1",
+          "text": "Quanto você se preocupa em ficar desempregado?",
+          "polarity": "RISCO",
+          "profundidade": "curta"
+        },
+        {
+          "id": "IL.2",
+          "text": "Quanto você se preocupa que uma nova tecnologia faça você perder o seu lugar no trabalho?",
+          "polarity": "RISCO",
+          "profundidade": "longa"
+        },
+        {
+          "id": "IL.3",
+          "text": "Quanto você se preocupa achando que seria difícil conseguir outro emprego se ficasse desempregado?",
+          "polarity": "RISCO",
+          "profundidade": "longa"
+        },
+        {
+          "id": "IL.4",
+          "text": "Quanto você se preocupa em ser transferido para outro local de trabalho contra a sua vontade?",
+          "polarity": "RISCO",
+          "profundidade": "longa"
+        }
+      ],
+      "reference": {
+        "media": 3.13,
+        "dp": 1.47
+      }
+    },
+    {
+      "scale_code": "SG",
+      "scale_name": "Saúde geral",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Deficitária",
+          "2": "Razoável",
+          "3": "Boa",
+          "4": "Muito boa",
+          "5": "Excelente"
+        }
+      },
+      "thresholds": {
+        "baixo_max": 2.33,
+        "moderado_max": 3.66
+      },
+      "items": [
+        {
+          "id": "SG.1",
+          "text": "Em geral, sente que a sua saúde é:",
+          "polarity": "PROTETIVO",
+          "profundidade": "curta"
+        }
+      ],
+      "reference": {
+        "media": 3.44,
+        "dp": 0.91
+      }
+    },
+    {
+      "scale_code": "CTF",
+      "scale_name": "Conflito trabalho-família",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Nada/quase nada",
+          "2": "Um pouco",
+          "3": "Moderadamente",
+          "4": "Muito",
+          "5": "Extremamente"
+        }
+      },
+      "thresholds": {
+        "baixo_max": 2.33,
+        "moderado_max": 3.66
+      },
+      "items": [
+        {
+          "id": "CTF.1",
+          "text": "O quanto o seu trabalho toma tanta energia sua que atrapalha a sua vida pessoal?",
+          "polarity": "RISCO",
+          "profundidade": "curta"
+        },
+        {
+          "id": "CTF.2",
+          "text": "O quanto o seu trabalho toma tanto do seu tempo que atrapalha a sua vida pessoal?",
+          "polarity": "RISCO",
+          "profundidade": "curta"
+        },
+        {
+          "id": "CTF.3",
+          "text": "O quanto a sua família e os seus amigos acham que você trabalha demais?",
+          "polarity": "RISCO",
+          "profundidade": "media"
+        }
+      ],
+      "reference": {
+        "media": 2.67,
+        "dp": 1.05
+      }
+    },
+    {
+      "scale_code": "CFT",
+      "scale_name": "Conflito família-trabalho",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Nada/quase nada",
+          "2": "Um pouco",
+          "3": "Moderadamente",
+          "4": "Muito",
+          "5": "Extremamente"
+        }
+      },
+      "thresholds": {
+        "baixo_max": 2.33,
+        "moderado_max": 3.66
+      },
+      "items": [
+        {
+          "id": "CFT.1",
+          "text": "O quanto a sua vida pessoal toma tanta energia sua que atrapalha o seu trabalho?",
+          "polarity": "RISCO",
+          "profundidade": "longa"
+        },
+        {
+          "id": "CFT.2",
+          "text": "O quanto a sua vida pessoal toma tanto do seu tempo que atrapalha o seu trabalho?",
+          "polarity": "RISCO",
+          "profundidade": "longa"
+        }
+      ]
+    },
+    {
+      "scale_code": "PSONO",
+      "scale_name": "Problemas em dormir",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Nunca/quase nunca",
+          "2": "Raramente",
+          "3": "Às vezes",
+          "4": "Frequentemente",
+          "5": "Sempre"
+        }
+      },
+      "thresholds": {
+        "baixo_max": 2.33,
+        "moderado_max": 3.66
+      },
+      "items": [
+        {
+          "id": "PSONO.1",
+          "text": "Com que frequência, nas últimas 4 semanas, você teve dificuldade para adormecer?",
+          "polarity": "RISCO",
+          "profundidade": "media"
+        },
+        {
+          "id": "PSONO.2",
+          "text": "Com que frequência, nas últimas 4 semanas, você acordou várias vezes durante a noite e depois não conseguiu adormecer de novo?",
+          "polarity": "RISCO",
+          "profundidade": "curta"
+        },
+        {
+          "id": "PSONO.3",
+          "text": "Com que frequência, nas últimas 4 semanas, você dormiu mal e não conseguiu descansar direito?",
+          "polarity": "RISCO",
+          "profundidade": "longa"
+        },
+        {
+          "id": "PSONO.4",
+          "text": "Com que frequência, nas últimas 4 semanas, você acordou cedo demais e depois teve dificuldade para dormir de novo?",
+          "polarity": "RISCO",
+          "profundidade": "longa"
+        }
+      ],
+      "reference": {
+        "media": 2.46,
+        "dp": 1.05
+      }
+    },
+    {
+      "scale_code": "BURN",
+      "scale_name": "Burnout (extenuação)",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Nunca/quase nunca",
+          "2": "Raramente",
+          "3": "Às vezes",
+          "4": "Frequentemente",
+          "5": "Sempre"
+        }
+      },
+      "thresholds": {
+        "baixo_max": 2.33,
+        "moderado_max": 3.66
+      },
+      "items": [
+        {
+          "id": "BURN.1",
+          "text": "Com que frequência, nas últimas 4 semanas, você se sentiu fisicamente exausto?",
+          "polarity": "RISCO",
+          "profundidade": "curta"
+        },
+        {
+          "id": "BURN.2",
+          "text": "Com que frequência, nas últimas 4 semanas, você se sentiu emocionalmente exausto?",
+          "polarity": "RISCO",
+          "profundidade": "curta"
+        },
+        {
+          "id": "BURN.3",
+          "text": "Com que frequência, nas últimas 4 semanas, você se sentiu cansado?",
+          "polarity": "RISCO",
+          "profundidade": "longa"
+        },
+        {
+          "id": "BURN.4",
+          "text": "Com que frequência, nas últimas 4 semanas, você se sentiu esgotado?",
+          "polarity": "RISCO",
+          "profundidade": "longa"
+        }
+      ],
+      "reference": {
+        "media": 2.7,
+        "dp": 0.97
+      }
+    },
+    {
+      "scale_code": "STR",
+      "scale_name": "Stress",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Nunca/quase nunca",
+          "2": "Raramente",
+          "3": "Às vezes",
+          "4": "Frequentemente",
+          "5": "Sempre"
+        }
+      },
+      "thresholds": {
+        "baixo_max": 2.33,
+        "moderado_max": 3.66
+      },
+      "items": [
+        {
+          "id": "STR.1",
+          "text": "Com que frequência, nas últimas 4 semanas, você se sentiu irritado?",
+          "polarity": "RISCO",
+          "profundidade": "curta"
+        },
+        {
+          "id": "STR.2",
+          "text": "Com que frequência, nas últimas 4 semanas, você se sentiu ansioso?",
+          "polarity": "RISCO",
+          "profundidade": "curta"
+        },
+        {
+          "id": "STR.3",
+          "text": "Com que frequência, nas últimas 4 semanas, você teve dificuldade para relaxar?",
+          "polarity": "RISCO",
+          "profundidade": "longa"
+        },
+        {
+          "id": "STR.4",
+          "text": "Com que frequência, nas últimas 4 semanas, você se sentiu tenso?",
+          "polarity": "RISCO",
+          "profundidade": "longa"
+        }
+      ],
+      "reference": {
+        "media": 2.7,
+        "dp": 0.9
+      }
+    },
+    {
+      "scale_code": "SDEP",
+      "scale_name": "Sintomas depressivos",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Nunca/quase nunca",
+          "2": "Raramente",
+          "3": "Às vezes",
+          "4": "Frequentemente",
+          "5": "Sempre"
+        }
+      },
+      "thresholds": {
+        "baixo_max": 2.33,
+        "moderado_max": 3.66
+      },
+      "items": [
+        {
+          "id": "SDEP.1",
+          "text": "Com que frequência, nas últimas 4 semanas, você se sentiu triste?",
+          "polarity": "RISCO",
+          "profundidade": "curta"
+        },
+        {
+          "id": "SDEP.2",
+          "text": "Com que frequência, nas últimas 4 semanas, você sentiu falta de interesse pelas coisas do dia a dia?",
+          "polarity": "RISCO",
+          "profundidade": "media"
+        },
+        {
+          "id": "SDEP.3",
+          "text": "Com que frequência, nas últimas 4 semanas, você sentiu falta de confiança em si mesmo?",
+          "polarity": "RISCO",
+          "profundidade": "longa"
+        },
+        {
+          "id": "SDEP.4",
+          "text": "Com que frequência, nas últimas 4 semanas, você sentiu culpa ou peso na consciência?",
+          "polarity": "RISCO",
+          "profundidade": "longa"
+        }
+      ],
+      "reference": {
+        "media": 2.35,
+        "dp": 0.91
+      }
+    },
+    {
+      "scale_code": "SSOM",
+      "scale_name": "Stress somático",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Nunca/quase nunca",
+          "2": "Raramente",
+          "3": "Às vezes",
+          "4": "Frequentemente",
+          "5": "Sempre"
+        }
+      },
+      "thresholds": {
+        "baixo_max": 2.33,
+        "moderado_max": 3.66
+      },
+      "items": [
+        {
+          "id": "SSOM.1",
+          "text": "Com que frequência, nas últimas 4 semanas, você sentiu dores de barriga?",
+          "polarity": "RISCO",
+          "profundidade": "longa"
+        },
+        {
+          "id": "SSOM.2",
+          "text": "Com que frequência, nas últimas 4 semanas, você sentiu aperto ou dor no peito?",
+          "polarity": "RISCO",
+          "profundidade": "longa"
+        },
+        {
+          "id": "SSOM.3",
+          "text": "Com que frequência, nas últimas 4 semanas, você sentiu dores de cabeça?",
+          "polarity": "RISCO",
+          "profundidade": "longa"
+        },
+        {
+          "id": "SSOM.4",
+          "text": "Com que frequência, nas últimas 4 semanas, você sentiu palpitações (coração acelerado)?",
+          "polarity": "RISCO",
+          "profundidade": "longa"
+        },
+        {
+          "id": "SSOM.5",
+          "text": "Com que frequência, nas últimas 4 semanas, você sentiu tensão em vários músculos do corpo?",
+          "polarity": "RISCO",
+          "profundidade": "longa"
+        }
+      ]
+    },
+    {
+      "scale_code": "SCOG",
+      "scale_name": "Stress cognitivo",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Nunca/quase nunca",
+          "2": "Raramente",
+          "3": "Às vezes",
+          "4": "Frequentemente",
+          "5": "Sempre"
+        }
+      },
+      "thresholds": {
+        "baixo_max": 2.33,
+        "moderado_max": 3.66
+      },
+      "items": [
+        {
+          "id": "SCOG.1",
+          "text": "Com que frequência, nas últimas 4 semanas, você teve dificuldade em se concentrar?",
+          "polarity": "RISCO",
+          "profundidade": "longa"
+        },
+        {
+          "id": "SCOG.2",
+          "text": "Com que frequência, nas últimas 4 semanas, você teve dificuldade em tomar decisões?",
+          "polarity": "RISCO",
+          "profundidade": "longa"
+        },
+        {
+          "id": "SCOG.3",
+          "text": "Com que frequência, nas últimas 4 semanas, você teve dificuldade em se lembrar das coisas?",
+          "polarity": "RISCO",
+          "profundidade": "longa"
+        },
+        {
+          "id": "SCOG.4",
+          "text": "Com que frequência, nas últimas 4 semanas, você teve dificuldade em pensar com clareza?",
+          "polarity": "RISCO",
+          "profundidade": "longa"
+        }
+      ]
+    },
+    {
+      "scale_code": "CO",
+      "scale_name": "Comportamentos ofensivos",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Nunca/quase nunca",
+          "2": "Raramente",
+          "3": "Às vezes",
+          "4": "Frequentemente",
+          "5": "Sempre"
+        }
+      },
+      "thresholds": {
+        "baixo_max": 2.33,
+        "moderado_max": 3.66
+      },
+      "items": [
+        {
+          "id": "CO.1",
+          "text": "Nos últimos 12 meses, no seu local de trabalho, você se envolveu em conflitos ou discussões?",
+          "polarity": "RISCO",
+          "profundidade": "longa"
+        },
+        {
+          "id": "CO.2",
+          "text": "Nos últimos 12 meses, no seu local de trabalho, você foi alvo de rumores ou calúnias?",
+          "polarity": "RISCO",
+          "profundidade": "longa"
+        },
+        {
+          "id": "CO.3",
+          "text": "Nos últimos 12 meses, no seu local de trabalho, você foi alvo de insultos ou provocações verbais?",
+          "polarity": "RISCO",
+          "profundidade": "curta"
+        },
+        {
+          "id": "CO.4",
+          "text": "Nos últimos 12 meses, no seu local de trabalho, você foi vítima de assédio sexual indesejado?",
+          "polarity": "RISCO",
+          "evento_grave": true,
+          "profundidade": "curta"
+        },
+        {
+          "id": "CO.5",
+          "text": "Nos últimos 12 meses, no seu local de trabalho, você foi ameaçado de violência?",
+          "polarity": "RISCO",
+          "evento_grave": true,
+          "profundidade": "curta"
+        },
+        {
+          "id": "CO.6",
+          "text": "Nos últimos 12 meses, no seu local de trabalho, você sofreu violência física?",
+          "polarity": "RISCO",
+          "evento_grave": true,
+          "profundidade": "curta"
+        }
+      ],
+      "reference": {
+        "media": 1.23,
+        "dp": 0.48
+      }
+    }
+  ]
+}

@@ -341,6 +341,15 @@ class Aplicacao(models.Model):
         "planilha 'Alertas_agregados' do Excel de referência. Recalculado em "
         "calculo_risco.py::calcular_aplicacao().",
     )
+    profundidade = models.CharField(
+        max_length=10,
+        blank=True,
+        default="",
+        verbose_name="Profundidade do questionário",
+        help_text="Só usado quando o instrumento é o COPSOQ Oficial (curta/média/longa) — "
+        "define quais itens (instrumentos.Item.profundidade) entram no questionário. Em "
+        "branco para instrumentos que não usam níveis.",
+    )
 
     def __str__(self) -> str:
         return f"{self.instrumento.codigo} @ {self.ghe} ({self.get_status_display()})"
@@ -645,11 +654,32 @@ class ConformidadeChecklist(models.TextChoices):
 class ItemChecklistTriangulacao(models.Model):
     """Item pré-definido do checklist de triangulação — carregado via seed
     (`seeds/checklist_triangulacao.json`), os 16 itens (6 entrevista + 10 observação)
-    valem pra qualquer GHE/Aplicacao, não são customizados por empresa."""
+    valem pra qualquer GHE/Aplicacao, não são customizados por empresa.
+
+    Achado em 2026-07-29: os itens `tipo=entrevista` são perguntas abertas ("Quais são
+    os períodos de maior demanda e por quê?"), não afirmações de conformidade — não faz
+    sentido pedir Conforme/Não conforme pra elas. Só itens `tipo=observacao` (afirmações
+    de checklist de verdade) têm uma resposta de conformidade válida.
+
+    `dominio_codigo_relacionado`: só se aplica a itens de observação. Guarda o código
+    literal do domínio COPSOQ que o item representa (ex. "D9"), não uma FK — o catálogo
+    é único e compartilhado entre instrumentos (COPSOQ e ITRA têm códigos de domínio
+    diferentes), então a comparação em `calculo_risco.py::contar_evidencias_convergentes`
+    só "acerta" quando o domínio calculado tem esse mesmo código (COPSOQ). Em branco =
+    evidência geral, conta pra qualquer domínio calculado (mesma semântica do
+    `IndicadorIndireto.dominio_relacionado` nulo)."""
 
     tipo = models.CharField(max_length=15, choices=TipoChecklist.choices)
     texto = models.TextField()
     ordem = models.PositiveSmallIntegerField(default=0)
+    dominio_codigo_relacionado = models.CharField(
+        max_length=20,
+        blank=True,
+        default="",
+        verbose_name="Domínio relacionado (código)",
+        help_text="Só usado em itens de observação. Código do domínio COPSOQ (ex. \"D9\"). "
+        "Em branco = evidência geral, conta pra qualquer domínio calculado.",
+    )
 
     class Meta:
         ordering = ["tipo", "ordem"]

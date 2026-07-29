@@ -5,17 +5,17 @@ as linhas existentes + 3 linhas em branco por lista, e o parse na volta usa a me
 contagem pra saber quantos índices ler.
 
 `parecer_ia` tem 3 campos-lista com formatos fixos (ver `analise_ia.py::PARECER_TOOL`):
-  pareceres_por_dominio: [{ghe, instrumento, dominio, classificacao, banda, parecer}]
+  pareceres_por_dominio: [{ghe, instrumento, dominio, classificacao, banda, populacao_exposta, parecer}]
   riscos_prioritarios:   [{ghe, dominio, banda, justificativa}]
-  recomendacoes:         [{ghe, dominio, banda, medida_preventiva}]
+  recomendacoes:         [{ghe, dominio, banda, hierarquia_controle, medida_preventiva}]
 """
 
 LINHAS_EM_BRANCO = 3
 
 CAMPOS_POR_LISTA = {
-    "dominio": ["ghe", "instrumento", "dominio", "classificacao", "banda", "parecer"],
+    "dominio": ["ghe", "instrumento", "dominio", "classificacao", "banda", "populacao_exposta", "parecer"],
     "risco": ["ghe", "dominio", "banda", "justificativa"],
-    "recom": ["ghe", "dominio", "banda", "medida_preventiva"],
+    "recom": ["ghe", "dominio", "banda", "hierarquia_controle", "medida_preventiva"],
 }
 
 CHAVE_POR_PREFIXO = {

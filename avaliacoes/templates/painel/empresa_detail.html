@@ -21,6 +21,14 @@
     <h2>Acesso do gestor</h2>
     {% if empresa.gestor %}
     <p>Usuário: <strong>{{ empresa.gestor.username }}</strong></p>
+    <p>
+        <a href="{% url 'painel_avaliacoes:empresa_editar_gestor' empresa.pk %}" class="botao secundario">Editar acesso</a>
+        <form method="post" action="{% url 'painel_avaliacoes:empresa_remover_gestor' empresa.pk %}" style="display:inline;"
+            onsubmit="return confirm('Remover o acesso de {{ empresa.gestor.username }}? Essa pessoa não vai mais conseguir entrar no painel.');">
+            {% csrf_token %}
+            <button type="submit" class="botao secundario">Remover acesso</button>
+        </form>
+    </p>
     {% else %}
     <p style="font-size: 13px; color: var(--slate-500);">
         Esta empresa ainda não tem um usuário gestor — sem ele, ninguém do lado do

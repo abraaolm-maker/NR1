@@ -10,8 +10,16 @@
 <div class="cartao">
     <p>
         Período: {{ relatorio.periodo_inicio }} – {{ relatorio.periodo_fim }}<br>
-        Status: <strong>{{ relatorio.get_status_display }}</strong><br>
-        Critério: {{ relatorio.criterio_versao.codigo }} ({{ relatorio.criterio_versao.get_status_display }})
+        Status:
+        {% if relatorio.status == "assinado" %}<span class="badge aceitavel">Assinado</span>
+        {% else %}<span class="badge moderado">{{ relatorio.get_status_display }}</span>{% endif %}
+        <br>
+        Critério: {{ relatorio.criterio_versao.codigo }}
+        {% if relatorio.criterio_versao.status == "ratificado" %}
+        <span class="badge aceitavel">Ratificado</span>
+        {% else %}
+        <span class="badge moderado">Aguardando ratificação</span>
+        {% endif %}
         {% if relatorio.assinado_por %}<br>Assinado por {{ relatorio.assinado_por.get_full_name|default:relatorio.assinado_por }} em {{ relatorio.assinado_em }}{% endif %}
     </p>
     {% if relatorio.criterio_versao.status != "ratificado" %}
@@ -50,13 +58,14 @@
             <div style="position: absolute; top: 12px; left: -50%; width: 100%; height: 2px; background: {% if etapa.concluida or etapa.atual %}var(--teal-500){% else %}var(--slate-200){% endif %};"></div>
             {% endif %}
             <div style="position: relative; width: 26px; height: 26px; border-radius: 50%; margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;
-                {% if etapa.concluida %}background: var(--teal-500); color: #fff;
+                {% if forloop.counter == 3 and pdf_desatualizado %}background: var(--amber-100); color: var(--amber-700); border: 2px solid var(--amber-500);
+                {% elif etapa.concluida %}background: var(--teal-500); color: #fff;
                 {% elif etapa.atual %}background: #fff; color: var(--teal-700); border: 2px solid var(--teal-500);
                 {% else %}background: var(--slate-100); color: var(--slate-400);{% endif %}">
-                {% if etapa.concluida %}✓{% else %}{{ forloop.counter }}{% endif %}
+                {% if forloop.counter == 3 and pdf_desatualizado %}!{% elif etapa.concluida %}✓{% else %}{{ forloop.counter }}{% endif %}
             </div>
-            <div style="font-size: 11px; color: {% if etapa.atual %}var(--teal-700){% else %}var(--slate-500){% endif %}; font-weight: {% if etapa.atual %}600{% else %}400{% endif %};">
-                {{ etapa.nome }}
+            <div style="font-size: 11px; color: {% if forloop.counter == 3 and pdf_desatualizado %}var(--amber-700){% elif etapa.atual %}var(--teal-700){% else %}var(--slate-500){% endif %}; font-weight: {% if etapa.atual %}600{% else %}400{% endif %};">
+                {{ etapa.nome }}{% if forloop.counter == 3 and pdf_desatualizado %} (desatualizado){% endif %}
             </div>
         </div>
         {% endfor %}
@@ -67,18 +76,72 @@
     <h2>Parecer técnico (IA)</h2>
     {% if relatorio.parecer_ia %}
         <p><strong>Síntese executiva:</strong> {{ relatorio.parecer_ia.sintese_executiva }}</p>
-        <p>{{ relatorio.parecer_ia.pareceres_por_dominio|length }} parecer(es) por domínio ·
-           {{ relatorio.parecer_ia.riscos_prioritarios|length }} risco(s) prioritário(s) ·
-           {{ relatorio.parecer_ia.recomendacoes|length }} recomendação(ões)</p>
-        <p class="rodape-nota" style="color:#777; font-size: 12.5px;">{{ relatorio.parecer_ia.aviso_minuta }}</p>
+
+        {% if relatorio.parecer_ia.riscos_prioritarios %}
+        <h3 style="font-size: 13px; color: var(--slate-600); margin-top: 18px;">Riscos prioritários</h3>
+        <table>
+            <thead><tr><th>GHE</th><th>Domínio</th><th>Banda</th><th>Justificativa</th></tr></thead>
+            <tbody>
+            {% for risco in relatorio.parecer_ia.riscos_prioritarios %}
+                <tr>
+                    <td>{{ risco.ghe }}</td>
+                    <td>{{ risco.dominio }}</td>
+                    <td><span class="badge {{ risco.banda|slugify }}">{{ risco.banda }}</span></td>
+                    <td style="font-size: 12.5px;">{{ risco.justificativa }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+
+        {% if relatorio.parecer_ia.recomendacoes %}
+        <h3 style="font-size: 13px; color: var(--slate-600); margin-top: 18px;">Recomendações</h3>
+        <table>
+            <thead><tr><th>GHE</th><th>Domínio</th><th>Banda</th><th>Hierarquia</th><th>Medida preventiva</th></tr></thead>
+            <tbody>
+            {% for rec in relatorio.parecer_ia.recomendacoes %}
+                <tr>
+                    <td>{{ rec.ghe }}</td>
+                    <td>{{ rec.dominio }}</td>
+                    <td><span class="badge {{ rec.banda|slugify }}">{{ rec.banda }}</span></td>
+                    <td style="font-size: 12px; color: var(--slate-500);">{{ rec.hierarquia_controle|default:"—" }}</td>
+                    <td style="font-size: 12.5px;">{{ rec.medida_preventiva }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+
+        <details style="margin-top: 14px;">
+            <summary style="cursor: pointer; font-size: 12.5px; color: var(--slate-500);">
+                Ver pareceres por domínio ({{ relatorio.parecer_ia.pareceres_por_dominio|length }})
+            </summary>
+            <table style="margin-top: 8px;">
+                <thead><tr><th>GHE</th><th>Domínio</th><th>Classificação</th><th>Banda</th><th>População exposta</th><th>Parecer</th></tr></thead>
+                <tbody>
+                {% for p in relatorio.parecer_ia.pareceres_por_dominio %}
+                    <tr>
+                        <td>{{ p.ghe }}</td>
+                        <td>{{ p.dominio }}</td>
+                        <td>{{ p.classificacao }}</td>
+                        <td><span class="badge {{ p.banda|slugify }}">{{ p.banda }}</span></td>
+                        <td style="font-size: 12px; color: var(--slate-500);">{{ p.populacao_exposta|default:"—" }}</td>
+                        <td style="font-size: 12.5px;">{{ p.parecer }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </details>
+
+        <p class="rodape-nota" style="color:#777; font-size: 12.5px; margin-top: 14px;">{{ relatorio.parecer_ia.aviso_minuta }}</p>
     {% else %}
         <p>Nenhum parecer gerado ainda.</p>
     {% endif %}
 
-    <p style="display:flex; gap:10px; flex-wrap:wrap;">
-        <form method="post" action="{% url 'painel_relatorios:relatorio_gerar_parecer_ia' relatorio.pk %}">
+    <p style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+        <form method="post" action="{% url 'painel_relatorios:relatorio_gerar_parecer_ia' relatorio.pk %}" class="form-com-carregamento">
             {% csrf_token %}
-            <button type="submit" class="botao {% if etapa_parecer %}secundario{% endif %}">
+            <button type="submit" class="botao {% if etapa_parecer %}secundario{% endif %}" data-texto-carregando="Gerando parecer…">
                 {% if etapa_parecer %}Gerar parecer novamente{% else %}Gerar parecer via IA{% endif %}
             </button>
         </form>
@@ -97,15 +160,20 @@
     <p>Nenhum PDF gerado ainda.</p>
     {% endif %}
 
-    {% if not etapa_parecer %}
+    {% if pdf_desatualizado %}
+    <p style="font-size: 12.5px; color: var(--amber-700); background: var(--amber-100); padding: 8px 12px; border-radius: 6px; margin-bottom: 10px;">
+        O PDF atual foi gerado antes do parecer técnico existir — a Seção de parecer nele está em
+        branco. Gere o PDF de novo depois de criar o parecer.
+    </p>
+    {% elif not etapa_parecer %}
     <p style="font-size: 12.5px; color: var(--amber-700); background: var(--amber-100); padding: 8px 12px; border-radius: 6px; margin-bottom: 10px;">
         Ainda não há parecer técnico — o PDF pode ser gerado, mas a Seção de parecer sairá em branco.
         Recomendado gerar o parecer primeiro.
     </p>
     {% endif %}
-    <form method="post" action="{% url 'painel_relatorios:relatorio_gerar_pdf' relatorio.pk %}" style="display:inline;">
+    <form method="post" action="{% url 'painel_relatorios:relatorio_gerar_pdf' relatorio.pk %}" style="display:inline;" class="form-com-carregamento">
         {% csrf_token %}
-        <button type="submit" class="botao {% if not etapa_parecer or etapa_pdf %}secundario{% endif %}">
+        <button type="submit" class="botao {% if not etapa_parecer or etapa_pdf %}secundario{% endif %}" data-texto-carregando="Gerando PDF…">
             {% if etapa_pdf %}Gerar PDF novamente{% else %}Gerar PDF{% endif %}
         </button>
     </form>
@@ -115,18 +183,37 @@
         <p style="font-size: 12.5px; color: var(--slate-500); margin-top: 12px;">
             Assinatura bloqueada — gere o parecer técnico antes de assinar.
         </p>
+        {% elif not etapa_pdf %}
+        <p style="font-size: 12.5px; color: var(--slate-500); margin-top: 12px;">
+            Assinatura bloqueada — gere o PDF (atualizado com o parecer) antes de assinar.
+        </p>
         {% elif not tem_perfil %}
         <p class="aviso" style="background:#fdecea; color:#922; padding:10px; border-radius:6px; font-size:13px;">
             Você precisa cadastrar seu <a href="{% url 'painel_relatorios:meu_perfil' %}">perfil profissional</a>
             (conselho + registro) antes de assinar.
         </p>
         {% else %}
-        <form method="post" action="{% url 'painel_relatorios:relatorio_assinar' relatorio.pk %}" style="display:inline;"
+        <form method="post" action="{% url 'painel_relatorios:relatorio_assinar' relatorio.pk %}" style="display:inline;" class="form-com-carregamento"
             onsubmit="return confirm('Assinar este relatório? Isso marca o documento como final (não é possível desfazer pelo painel).');">
             {% csrf_token %}
-            <button type="submit" class="botao">Assinar relatório</button>
+            <button type="submit" class="botao" data-texto-carregando="Assinando…">Assinar relatório</button>
         </form>
         {% endif %}
     {% endif %}
 </div>
+
+<script>
+document.querySelectorAll(".form-com-carregamento").forEach(function (form) {
+    form.addEventListener("submit", function (evento) {
+        if (evento.defaultPrevented) { return; }
+        var botao = form.querySelector("button[type=submit]");
+        if (!botao) { return; }
+        botao.disabled = true;
+        botao.dataset.textoOriginal = botao.textContent;
+        botao.textContent = botao.dataset.textoCarregando || "Processando…";
+        botao.style.opacity = "0.75";
+        botao.style.cursor = "wait";
+    });
+});
+</script>
 {% endblock %}

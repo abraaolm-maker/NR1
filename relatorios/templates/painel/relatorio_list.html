@@ -2,11 +2,18 @@
 {% block titulo %}Relatórios{% endblock %}
 {% block conteudo %}
 <div class="cartao">
-    <h1>Relatórios</h1>
-    <p style="font-size: 13px; color: #777;">
-        Um relatório reúne uma ou mais coletas (Aplicações) encerradas de uma mesma
-        Unidade num único Inventário de Risco Psicossocial.
-    </p>
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap: 16px;">
+        <div>
+            <h1>Relatórios</h1>
+            <p style="font-size: 13px; color: #777;">
+                Um relatório reúne uma ou mais coletas (Aplicações) encerradas de uma mesma
+                Unidade num único Inventário de Risco Psicossocial.
+            </p>
+        </div>
+        <a href="{% url 'painel_relatorios:chaves_api_list' %}" class="botao secundario pequeno" style="white-space: nowrap;">
+            Chaves de API do Claude
+        </a>
+    </div>
 </div>
 
 <div class="cartao" {% if aplicacoes_prontas %}style="border-color: var(--teal-100); background: var(--teal-50);"{% endif %}>

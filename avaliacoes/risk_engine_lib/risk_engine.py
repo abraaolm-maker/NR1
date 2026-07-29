@@ -93,6 +93,23 @@ PREVALENCIA_P2 = 0.25
 LIMITE_BAIXO_DEFAULT = 37.5
 LIMITE_ELEVADO_DEFAULT = 62.5
 
+# Banda de risco a partir da Prioridade por prevalência (P1/P2/P3), não mais da matriz
+# Severidade × Probabilidade acima (achado de 2026-07-29: a regra de "evidências
+# convergentes -> probabilidade 1/2/3" não tinha nenhuma fonte científica ou normativa
+# citável, era uma convenção de engenharia deste projeto sem lastro, e gerava um
+# resultado divergente do semáforo do próprio manual COPSOQ e da planilha de
+# referência do projeto — um domínio podia sair 100% "Risco" no semáforo/prevalência e
+# ainda assim "Moderado" na Banda, sem nenhuma explicação que não fosse "falta
+# evidência cadastrada"). A partir de agora a Banda é diretamente a mesma classificação
+# tripartida do manual COPSOQ (Portugal 2013, p. 15: "interpretação semáforo"),
+# reaproveitando a Prioridade que já é calculada a partir da prevalência de
+# respondentes na faixa elevada (Seção 6.9 do CLAUDE.md).
+BANDA_POR_PRIORIDADE: dict[Prioridade, BandaRisco] = {
+    Prioridade.P3: BandaRisco.ACEITAVEL,
+    Prioridade.P2: BandaRisco.MODERADO,
+    Prioridade.P1: BandaRisco.ALTO,
+}
+
 
 # ---------------------------------------------------------------------------
 # Estruturas de dados de entrada/saída
@@ -302,6 +319,45 @@ def calcular_risco(
         severidade=severidade,
         probabilidade=probabilidade,
         score=score,
+        banda=banda,
+        prazo_dias_plano_de_acao=prazo,
+        evento_grave_confirmado=evento_grave_confirmado,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Banda de risco a partir da prevalência (substitui a matriz Severidade × Probabilidade
+# como critério principal, achado de 2026-07-29 — ver comentário de BANDA_POR_PRIORIDADE)
+# ---------------------------------------------------------------------------
+
+def calcular_risco_por_prevalencia(
+    prioridade: Prioridade,
+    severidade: int,
+    evento_grave_confirmado: bool,
+) -> ResultadoRisco:
+    """Banda = diretamente a Prioridade por prevalência (P1/P2/P3), igual à
+    interpretação "semáforo" do próprio manual COPSOQ (verde/amarelo/vermelho por
+    tercil) e à planilha de referência do projeto. Único escalonamento automático:
+    evento_grave_confirmado (violência/assédio/discriminação relatado, Seção 7.5) força
+    Banda = Crítico sempre, independente da prevalência — um relato grave confirmado
+    nunca pode ficar mascarado por uma prevalência baixa. `probabilidade`/`score` são
+    mantidos no resultado só como número informativo (proxy da prioridade: P1=3,
+    P2=2, P3=1) — não são mais o critério que decide a banda."""
+    if prioridade == Prioridade.AGRUPAR:
+        raise ValueError("Prioridade AGRUPAR (suprimido) não gera Banda — trate a supressão antes de chamar.")
+
+    if evento_grave_confirmado:
+        banda = BandaRisco.CRITICO
+    else:
+        banda = BANDA_POR_PRIORIDADE[prioridade]
+
+    probabilidade_proxy = {Prioridade.P1: 3, Prioridade.P2: 2, Prioridade.P3: 1}[prioridade]
+    prazo = PRAZO_DIAS_POR_BANDA[banda]
+
+    return ResultadoRisco(
+        severidade=severidade,
+        probabilidade=probabilidade_proxy,
+        score=severidade * probabilidade_proxy,
         banda=banda,
         prazo_dias_plano_de_acao=prazo,
         evento_grave_confirmado=evento_grave_confirmado,

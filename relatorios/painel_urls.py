@@ -25,5 +25,9 @@ urlpatterns = [
     ),
     path("relatorios/<int:pk>/gerar-pdf/", painel_views.relatorio_gerar_pdf, name="relatorio_gerar_pdf"),
     path("relatorios/<int:pk>/assinar/", painel_views.relatorio_assinar, name="relatorio_assinar"),
+    path("chaves-api/", painel_views.chaves_api_list, name="chaves_api_list"),
+    path("chaves-api/nova/", painel_views.chaves_api_create, name="chaves_api_create"),
+    path("chaves-api/<int:pk>/ativar/", painel_views.chaves_api_ativar, name="chaves_api_ativar"),
+    path("chaves-api/<int:pk>/remover/", painel_views.chaves_api_remover, name="chaves_api_remover"),
     path("meu-perfil/", painel_views.meu_perfil, name="meu_perfil"),
 ]

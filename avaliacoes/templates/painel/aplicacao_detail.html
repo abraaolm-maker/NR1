@@ -167,28 +167,32 @@
 <div class="cartao">
     <h2>Resultados por domínio</h2>
     {% if escores %}
-    <details style="font-size: 12.5px; color: #777; margin-bottom: 10px;">
-        <summary style="cursor: pointer;">Qual a diferença entre Classificação e Banda?</summary>
-        <p>
-            <strong>Classificação</strong> é o nível bruto deste domínio (Baixo/Moderado/Elevado),
-            calculado só a partir das respostas. <strong>Banda</strong> é o resultado final depois de
-            cruzar esse nível com a probabilidade de o problema realmente acontecer (evidências como
-            absenteísmo, turnover, relatos — ver "Evidências complementares" no GHE) — é a Banda que
-            define se precisa de ação e em quanto tempo. As duas podem ser diferentes: uma
-            Classificação "Moderado" sem evidências de probabilidade vira uma Banda "Aceitável"; a
-            mesma Classificação com evidências fortes pode virar "Alto" ou "Crítico".
-        </p>
-    </details>
+    <div style="border: 1px solid var(--slate-200); border-left: 4px solid var(--slate-400); background: var(--slate-50); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 12px; font-size: 12.5px; color: var(--slate-700);">
+        <strong style="display:block; margin-bottom: 4px; color: var(--slate-900);">Qual a diferença entre Classificação e Banda?</strong>
+        <strong>Classificação</strong> é o nível da média deste domínio (Baixo/Moderado/Elevado) —
+        só descreve a resposta média, não decide nada sozinha.
+        <strong>Banda</strong> é o que decide se precisa de ação e em quanto tempo: vem do
+        percentual de respondentes cuja resposta individual caiu na faixa elevada (a mesma
+        prevalência do "Semáforo de riscos") —
+        <span class="badge alto" style="display:inline;">Alto</span> quando a maioria está
+        exposta (100% inclusive), <span class="badge moderado" style="display:inline;">Moderado</span>
+        quando é uma minoria significativa, <span class="badge aceitavel" style="display:inline;">Aceitável</span>
+        quando são poucos. A Banda <span class="badge critico" style="display:inline;">Crítico</span>
+        não vem do percentual — só um relato confirmado de evento grave (violência, ameaça,
+        assédio moral ou discriminação) eleva automaticamente pra Crítico, mesmo que a
+        prevalência esteja baixa.
+    </div>
     <table>
-        <thead><tr><th>Domínio</th><th>Escore</th><th>Classificação</th><th>Banda</th><th>N</th></tr></thead>
+        <thead><tr><th>Domínio</th><th>Escore</th><th>Média nacional*</th><th>Classificação</th><th>Banda</th><th>N</th></tr></thead>
         <tbody>
         {% for escore in escores %}
             <tr>
                 <td>{{ escore.dominio.codigo }} — {{ escore.dominio.nome }}</td>
                 {% if escore.suprimido_por_confidencialidade %}
-                    <td colspan="3">Suprimido por confidencialidade — mínimo de {{ n_minimo }} respostas</td>
+                    <td colspan="4">Suprimido por confidencialidade — mínimo de {{ n_minimo }} respostas</td>
                 {% else %}
                     <td>{{ escore.escore }}</td>
+                    <td>{{ escore.media_nacional|default:"—" }}</td>
                     <td>{{ escore.classificacao }}</td>
                     <td><span class="badge {{ escore.classificacao_risco.banda|slugify }}">{{ escore.classificacao_risco.banda }}</span></td>
                 {% endif %}
@@ -197,6 +201,12 @@
         {% endfor %}
         </tbody>
     </table>
+    <p style="font-size: 11.5px; color: #888; margin-top: 8px;">
+        * Média nacional (referência): valor publicado no manual COPSOQ Portugal 2013
+        (N=4.162 trabalhadores portugueses), normalizado pra mesma escala 0-100 e mesma
+        direção do Escore (maior = mais risco). Só existe pra domínios do COPSOQ Oficial
+        com valor publicado e polaridade única — aparece "—" nos demais.
+    </p>
     {% else %}
     <p>Nenhum resultado calculado ainda — aparece automaticamente conforme os respondentes forem terminando.</p>
     {% endif %}

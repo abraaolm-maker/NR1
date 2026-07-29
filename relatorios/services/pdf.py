@@ -23,6 +23,7 @@ from django.utils import timezone
 from weasyprint import HTML
 
 from avaliacoes.models import ConformidadeChecklist, RespostaChecklistTriangulacao
+from avaliacoes.services.calculo_risco import BANDA_ORDEM, criterio_classificacao_linhas, media_nacional_comparavel
 from avaliacoes.services.semaforo import calcular_semaforo, leitura_resumida
 from relatorios.models import Relatorio, StatusRelatorio
 
@@ -33,25 +34,71 @@ BANDA_CSS = {
     "Crítico": "critico",
 }
 
+def _planos_ordenados(ghes: list[dict]) -> list[dict]:
+    """Seção 8 (Plano de ação) lista as medidas do mais urgente pro menos urgente —
+    Crítico primeiro, depois Alto, Moderado — em vez da ordem de cadastro por GHE/
+    domínio, que não tinha relação nenhuma com prioridade de ação."""
+    planos = []
+    for item in ghes:
+        for d in item["dominios"]:
+            for plano in d["planos_de_acao"]:
+                planos.append(
+                    {
+                        "plano": plano,
+                        "ghe_nome": item["ghe"].nome,
+                        "dominio_codigo": d["escore_dominio"].dominio.codigo,
+                        "banda": d["classificacao_risco"].banda,
+                        "banda_css": d["banda_css"],
+                    }
+                )
+    planos.sort(key=lambda p: BANDA_ORDEM.get(p["banda"], 0), reverse=True)
+    return planos
 
-def _matriz_linhas(criterio_versao) -> list[dict]:
-    """3 linhas (severidade 1,2,3), cada uma já com as 3 células (probabilidade 1,2,3)
-    em ordem — o template só itera listas, sem precisar indexar dict por chave
-    computada (Django templates não fazem isso sem um filtro custom)."""
-    celulas_por_par: dict[tuple[int, int], dict] = {}
-    for entrada in criterio_versao.matriz_risco:
-        celulas_por_par[(entrada["severidade"], entrada["probabilidade"])] = {
-            "banda": entrada["banda"],
-            "banda_css": BANDA_CSS.get(entrada["banda"], ""),
-            "prazo_dias": entrada["prazo_dias"],
-        }
-    return [
-        {
-            "severidade": severidade,
-            "celulas": [celulas_por_par[(severidade, probabilidade)] for probabilidade in (1, 2, 3)],
-        }
-        for severidade in (1, 2, 3)
-    ]
+VARIANTE_POR_PROFUNDIDADE = {
+    "curta": "COPSOQ oficial, versão curta",
+    "media": "COPSOQ oficial, versão média",
+    "longa": "COPSOQ oficial, versão longa",
+}
+
+
+def _variante_instrumento(aplicacao) -> str:
+    """Nome de negócio da variante do questionário aplicada neste GHE, pra exibir na
+    Seção 3 (Metodologia) do relatório — nunca o código técnico do instrumento."""
+    codigo = aplicacao.instrumento.codigo
+    if codigo == "COPSOQ_OFICIAL":
+        return VARIANTE_POR_PROFUNDIDADE.get(aplicacao.profundidade, "COPSOQ oficial")
+    if codigo == "COPSOQ_RR_REVESTIR":
+        return "COPSOQ adaptado"
+    return aplicacao.instrumento.nome
+
+
+def _dominios_criticos_por_evento_grave(ghes: list[dict]) -> list[dict]:
+    """Domínios deste relatório especificamente elevados a Crítico por evento grave
+    confirmado (não por prevalência) — usado pra tornar as caixas explicativas das
+    Seções 4 e 5 concretas em vez de um texto genérico igual em todo relatório: cada
+    documento cita, com nome, se isso realmente aconteceu neste ciclo ou não."""
+    dominios = []
+    for item in ghes:
+        for d in item["dominios"]:
+            cr = d["classificacao_risco"]
+            if cr is not None and cr.evento_grave_confirmado:
+                dominios.append(
+                    {
+                        "ghe_nome": item["ghe"].nome,
+                        "dominio_codigo": d["escore_dominio"].dominio.codigo,
+                        "dominio_nome": d["escore_dominio"].dominio.nome,
+                    }
+                )
+    return dominios
+
+
+def _criterio_classificacao_linhas(criterio_versao) -> list[dict]:
+    """Wrapper fino sobre `calculo_risco.criterio_classificacao_linhas`, só adicionando
+    a classe CSS do badge (usada apenas no template do PDF)."""
+    linhas = criterio_classificacao_linhas(criterio_versao)
+    for linha in linhas:
+        linha["banda_css"] = BANDA_CSS.get(linha["banda"], "")
+    return linhas
 
 
 def _contexto_relatorio(relatorio: Relatorio, minuta: bool) -> dict:
@@ -72,6 +119,7 @@ def _contexto_relatorio(relatorio: Relatorio, minuta: bool) -> dict:
                     "planos_de_acao": (
                         classificacao_risco.planos_de_acao.all() if classificacao_risco else []
                     ),
+                    "media_nacional": media_nacional_comparavel(escore.dominio),
                 }
             )
 
@@ -88,6 +136,7 @@ def _contexto_relatorio(relatorio: Relatorio, minuta: bool) -> dict:
                 "indicadores": indicadores,
                 "dominios": dominios,
                 "checklist_triangulacao": checklist_triangulacao,
+                "variante_instrumento": _variante_instrumento(aplicacao),
             }
         )
 
@@ -106,7 +155,9 @@ def _contexto_relatorio(relatorio: Relatorio, minuta: bool) -> dict:
         "ghes": ghes,
         "minuta": minuta,
         "perfil_assinante": perfil_assinante,
-        "matriz_linhas": _matriz_linhas(relatorio.criterio_versao),
+        "criterio_classificacao_linhas": _criterio_classificacao_linhas(relatorio.criterio_versao),
+        "planos_ordenados": _planos_ordenados(ghes),
+        "dominios_criticos_evento_grave": _dominios_criticos_por_evento_grave(ghes),
         "linhas_semaforo": linhas_semaforo,
         "resumo_semaforo": resumo_semaforo,
         "n_total_semaforo": n_total_semaforo,

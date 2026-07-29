@@ -24,13 +24,13 @@
     h1 { font-size: 22px; margin-bottom: 4px; }
     h2 {
         font-size: 15px;
-        margin-top: 24px;
-        margin-bottom: 8px;
+        margin-top: 14px;
+        margin-bottom: 6px;
         padding-bottom: 4px;
         border-bottom: 2px solid #2b3a55;
         color: #2b3a55;
     }
-    h3 { font-size: 12.5px; margin-top: 14px; margin-bottom: 4px; color: #2b3a55; }
+    h3 { font-size: 12.5px; margin-top: 10px; margin-bottom: 4px; color: #2b3a55; }
 
     .capa {
         text-align: center;
@@ -46,7 +46,6 @@
     .capa .meta { margin-top: 24px; font-size: 12px; color: #444; }
     .capa .meta div { margin-bottom: 4px; }
 
-    .secao { page-break-before: always; }
     .capa { page-break-after: always; }
 
     table {
@@ -73,8 +72,8 @@
     }
     .aceitavel { background: #3a9d5d; }
     .moderado { background: #d1a316; }
-    .alto { background: #e07b1a; }
-    .critico { background: #c0392b; }
+    .alto { background: #c0392b; }
+    .critico { background: #c0392b; border: 2px solid #e07b1a; }
 
     .matriz-tabela td, .matriz-tabela th { text-align: center; }
     .matriz-cel { color: #fff; font-weight: bold; }
@@ -86,6 +85,25 @@
         padding: 8px 10px;
         font-size: 10.5px;
         margin-top: 12px;
+    }
+
+    .caixa-explicativa {
+        border: 1px solid #2b3a55;
+        border-left: 5px solid #2b3a55;
+        background: #eef1f6;
+        color: #1a1a1a;
+        padding: 10px 14px;
+        font-size: 10.5px;
+        margin: 10px 0 14px;
+    }
+    .caixa-explicativa .titulo {
+        font-weight: bold;
+        color: #2b3a55;
+        display: block;
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        font-size: 10px;
+        letter-spacing: .04em;
     }
 
     .ficha-acao {
@@ -173,19 +191,33 @@
     {% endif %}
 </div>
 
-<!-- 2. BASE TÉCNICA E LEGAL -->
+<!-- 1. BASE TÉCNICA E LEGAL -->
 <div class="secao">
-    <h2>2. Base técnica e legal utilizada</h2>
+    <h2>1. Base técnica e legal utilizada</h2>
     <p>
         Avaliação realizada em conformidade com o Capítulo 1.5 da NR-01 (GRO/PGR), conforme
         alteração da Portaria MTE nº 1.419/2024, com prazo de vigência plena definido pela
-        Portaria MTE nº 765/2025.
+        Portaria MTE nº 765/2025, que passou a exigir a identificação e a avaliação técnica
+        dos fatores de risco psicossocial relacionados ao trabalho dentro do Gerenciamento
+        de Riscos Ocupacionais.
     </p>
-    <table>
-        <tr><th>Critério de cálculo (versão)</th><td>{{ relatorio.criterio_versao.codigo }}</td></tr>
-        <tr><th>Status do critério</th><td>{{ relatorio.criterio_versao.get_status_display }}</td></tr>
-        <tr><th>Descrição</th><td>{{ relatorio.criterio_versao.descricao }}</td></tr>
-    </table>
+    <p>
+        O instrumento de coleta utilizado neste ciclo é o COPSOQ (Copenhagen Psychosocial
+        Questionnaire), desenvolvido originalmente por Tage S. Kristensen e Vilhelm Borg no
+        Instituto Nacional de Saúde Ocupacional da Dinamarca, com validação e adaptação para
+        a língua portuguesa conduzida por Carlos Fernandes da Silva e equipe da Universidade
+        de Aveiro (Portugal, 2013). O COPSOQ define fatores de risco psicossociais como
+        características da organização, do conteúdo e da gestão do trabalho, e dos seus
+        contextos sociais e ambientais, que têm o potencial de causar danos psicológicos,
+        sociais ou físicos ao trabalhador.
+    </p>
+    <p>
+        O propósito do instrumento não é apenas descritivo: o próprio manual de referência
+        estabelece que ele existe para viabilizar ação preventiva, e não deve ser aplicado
+        quando não houver intenção de agir sobre os resultados encontrados. Por esse motivo,
+        cada domínio avaliado neste documento é acompanhado, quando aplicável, de uma medida
+        preventiva sugerida (Seção 8, Plano de ação).
+    </p>
     <h3>Instrumentos utilizados por GHE</h3>
     <table>
         <thead><tr><th>GHE</th><th>Instrumento</th><th>Tipo de aplicação</th></tr></thead>
@@ -201,15 +233,25 @@
     </table>
 </div>
 
-<!-- 3. METODOLOGIA -->
+<!-- 2. METODOLOGIA -->
 <div class="secao">
-    <h2>3. Metodologia</h2>
+    <h2>2. Metodologia</h2>
     <p>
-        Coleta realizada por GHE (Grupo Homogêneo de Exposição), com questionário validado
-        (COPSOQ adaptado ou ITRA conforme indicado por GHE), aplicação anônima ou identificada
-        conforme registrado, e cálculo determinístico de escore, classificação e matriz de
-        risco por domínio/subescala.
+        Coleta realizada por GHE (Grupo Homogêneo de Exposição), com aplicação anônima ou
+        identificada conforme registrado, e cálculo determinístico de escore, classificação
+        e matriz de risco por domínio/subescala, atualizado a cada novo ciclo de coleta.
     </p>
+    <table>
+        <thead><tr><th>GHE</th><th>Variante do questionário aplicada</th></tr></thead>
+        <tbody>
+        {% for item in ghes %}
+            <tr>
+                <td>{{ item.ghe.nome }}</td>
+                <td>{{ item.variante_instrumento }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
     <table>
         <thead><tr><th>GHE</th><th>Domínio/subescala</th><th>N respondentes</th><th>Observação</th></tr></thead>
         <tbody>
@@ -231,24 +273,94 @@
     </table>
 </div>
 
+<!-- 3. PARECER TÉCNICO -->
+<div class="secao">
+    <h2>3. Parecer técnico</h2>
+    {% if relatorio.parecer_ia %}
+        <h3>Síntese executiva</h3>
+        <p>{{ relatorio.parecer_ia.sintese_executiva }}</p>
+
+        <h3>Pareceres por domínio</h3>
+        <table>
+            <thead><tr><th>GHE</th><th>Instrumento</th><th>Domínio</th><th>Classificação</th><th>Banda</th><th>Parecer</th></tr></thead>
+            <tbody>
+            {% for p in relatorio.parecer_ia.pareceres_por_dominio %}
+                <tr>
+                    <td>{{ p.ghe }}</td><td>{{ p.instrumento }}</td><td>{{ p.dominio }}</td>
+                    <td>{{ p.classificacao }}</td><td>{{ p.banda }}</td><td>{{ p.parecer }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <h3>Riscos prioritários</h3>
+        <table>
+            <thead><tr><th>GHE</th><th>Domínio</th><th>Banda</th><th>Justificativa</th></tr></thead>
+            <tbody>
+            {% for r in relatorio.parecer_ia.riscos_prioritarios %}
+                <tr><td>{{ r.ghe }}</td><td>{{ r.dominio }}</td><td>{{ r.banda }}</td><td>{{ r.justificativa }}</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <h3>Recomendações</h3>
+        <table>
+            <thead><tr><th>GHE</th><th>Domínio</th><th>Banda</th><th>Medida preventiva</th></tr></thead>
+            <tbody>
+            {% for r in relatorio.parecer_ia.recomendacoes %}
+                <tr><td>{{ r.ghe }}</td><td>{{ r.dominio }}</td><td>{{ r.banda }}</td><td>{{ r.medida_preventiva }}</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <p class="rodape-nota">{{ relatorio.parecer_ia.aviso_minuta }}</p>
+    {% else %}
+        <p>Parecer técnico ainda não gerado para este relatório.</p>
+    {% endif %}
+</div>
+
 <!-- 4. RESULTADOS POR GHE E POR DOMÍNIO -->
 <div class="secao">
     <h2>4. Resultados por GHE e por domínio</h2>
 
-    <h3>Matriz de risco de referência (Severidade × Probabilidade)</h3>
-    <table class="matriz-tabela" style="width: 60%;">
+    <div class="caixa-explicativa">
+        <span class="titulo">Como ler a coluna "Banda"</span>
+        <strong>% em risco</strong> é quantas pessoas responderam que sentem alta
+        exposição àquele fator (ex.: ritmo de trabalho, pressão por prazos). Quanto
+        mais gente marca alta exposição, mais séria fica a Banda:
+        poucas pessoas → <strong>Aceitável</strong>; uma parte relevante →
+        <strong>Moderado</strong>; a maioria ou todo mundo → <strong>Alto</strong>
+        (prazo de 30 dias pra agir). A Banda <strong>Crítico</strong> não vem do
+        percentual — ela é acionada quando <strong>pelo menos 1 pessoa</strong>
+        relatou concretamente um episódio grave (violência, ameaça, assédio moral ou
+        discriminação), e nesse caso o prazo cai pra 15 dias com aviso imediato à
+        liderança/CIPA. Por isso um domínio pode aparecer com poucos ou nenhum
+        respondente na faixa de risco (escore médio baixo, % em risco baixo ou até
+        0%) e ainda assim sair como Crítico: a média do grupo não anula nem dilui um
+        relato individual grave — 1 relato confirmado já é suficiente, mesmo que
+        todos os demais respondentes tenham respondido bem nesse domínio.
+        {% if dominios_criticos_evento_grave %}
+        <br><br><strong>Neste relatório, isso realmente ocorreu em:</strong>
+        {% for dc in dominios_criticos_evento_grave %}{{ dc.ghe_nome }} — {{ dc.dominio_codigo }} ({{ dc.dominio_nome }}){% if not forloop.last %}; {% endif %}{% endfor %}.
+        {% else %}
+        <br><br><strong>Neste relatório, nenhum domínio foi elevado a Crítico por
+        evento grave</strong> — a explicação acima é só uma referência de como o
+        critério funciona, caso venha a ocorrer em ciclos futuros.
+        {% endif %}
+    </div>
+
+    <h3>Critério de classificação da Banda</h3>
+    <table style="width: 75%;">
         <thead>
-            <tr><th></th><th>Probabilidade 1</th><th>Probabilidade 2</th><th>Probabilidade 3</th></tr>
+            <tr><th>Prioridade</th><th>Condição</th><th>Banda</th><th>Prazo do plano de ação</th></tr>
         </thead>
         <tbody>
-        {% for linha in matriz_linhas %}
+        {% for linha in criterio_classificacao_linhas %}
             <tr>
-                <th>Severidade {{ linha.severidade }}</th>
-                {% for cel in linha.celulas %}
-                    <td class="matriz-cel {{ cel.banda_css }}">
-                        {{ cel.banda }}<br><small>{{ cel.prazo_dias|default:"—" }}{% if cel.prazo_dias %}d{% endif %}</small>
-                    </td>
-                {% endfor %}
+                <td>{{ linha.prioridade }}</td>
+                <td>{{ linha.condicao }}</td>
+                <td><span class="badge {{ linha.banda_css }}">{{ linha.banda }}</span></td>
+                <td>{{ linha.prazo_dias|default:"Sem prazo — monitoramento no próximo ciclo" }}{% if linha.prazo_dias %} dias{% endif %}</td>
             </tr>
         {% endfor %}
         </tbody>
@@ -260,8 +372,8 @@
         <table>
             <thead>
                 <tr>
-                    <th>Domínio</th><th>Escore</th><th>Classificação</th><th>Severidade</th>
-                    <th>Probabilidade</th><th>Banda</th><th>Prazo (dias)</th>
+                    <th>Domínio</th><th>Escore</th><th>Média nacional*</th><th>Classificação</th><th>% em risco</th>
+                    <th>Banda</th><th>Prazo (dias)</th>
                 </tr>
             </thead>
             <tbody>
@@ -272,9 +384,9 @@
                         <td colspan="6">Suprimido por confidencialidade (N &lt; mínimo)</td>
                     {% else %}
                         <td>{{ d.escore_dominio.escore }}</td>
+                        <td>{{ d.media_nacional|default:"—" }}</td>
                         <td>{{ d.escore_dominio.classificacao }}</td>
-                        <td>{{ d.escore_dominio.severidade }}</td>
-                        <td>{{ d.classificacao_risco.probabilidade }}</td>
+                        <td>{% widthratio d.escore_dominio.percentual_elevados 1 100 %}%</td>
                         <td><span class="badge {{ d.banda_css }}">{{ d.classificacao_risco.banda }}</span></td>
                         <td>{{ d.classificacao_risco.prazo_dias_plano_de_acao|default:"—" }}</td>
                     {% endif %}
@@ -282,6 +394,22 @@
             {% endfor %}
             </tbody>
         </table>
+        {% if item.dominios %}
+        <p class="rodape-nota">
+            * Média nacional (referência): valor normalizado à mesma escala 0-100 e mesma
+            direção (maior = mais risco) do Escore desta aplicação, calculado a partir da
+            média bruta publicada no manual de referência do instrumento (quando disponível
+            e o domínio não tiver polaridade mista). "—" = sem valor de referência publicado
+            pra este domínio, ou domínio de polaridade mista (não comparável de forma direta).
+        </p>
+        {% endif %}
+        {% for d in item.dominios %}
+            {% if d.escore_dominio.dominio.nota %}
+            <p class="rodape-nota">
+                <strong>{{ d.escore_dominio.dominio.codigo }}:</strong> {{ d.escore_dominio.dominio.nota }}
+            </p>
+            {% endif %}
+        {% endfor %}
     </div>
     {% endfor %}
 </div>
@@ -289,6 +417,29 @@
 <!-- 5. ANÁLISE SEMÁFORO -->
 <div class="secao">
     <h2>5. Análise semáforo</h2>
+
+    <div class="caixa-explicativa">
+        <span class="titulo">Vermelho aqui não é automaticamente "Crítico" — e o inverso também vale</span>
+        O vermelho mostra quantas pessoas relataram alta exposição àquele fator —
+        é a mesma informação que define a Banda "Alto" na Seção 4 (Resultados por GHE
+        e por domínio), só que agregada por Unidade em vez de por GHE. Um domínio
+        100% vermelho aqui é sério e sai como Banda "Alto" (30 dias pra agir). Mas o
+        inverso também acontece: um domínio pode aparecer <strong>quase todo verde
+        aqui</strong> e ainda sair como Banda <strong>Crítico</strong> na Seção 4 —
+        porque o Crítico não depende da média do grupo, depende só de existir
+        <strong>pelo menos 1 relato individual</strong> de evento grave (violência,
+        ameaça, assédio moral ou discriminação). Um caso grave isolado não aparece
+        neste gráfico (que mostra médias), mas sozinho já é suficiente pra elevar a
+        Banda — ver a nota da Seção 4.
+        {% if dominios_criticos_evento_grave %}
+        <br><br><strong>Neste ciclo, isso aconteceu em:</strong>
+        {% for dc in dominios_criticos_evento_grave %}{{ dc.ghe_nome }} — {{ dc.dominio_codigo }} ({{ dc.dominio_nome }}){% if not forloop.last %}; {% endif %}{% endfor %}.
+        {% else %}
+        <br><br><strong>Neste ciclo, não ocorreu nenhum caso desse tipo</strong> — a
+        explicação acima é só uma referência de como o critério funciona.
+        {% endif %}
+    </div>
+
     <p>
         Distribuição percentual dos respondentes em 3 faixas por domínio, agregando
         todas as Aplicações desta Unidade. Um GHE suprimido isoladamente entra na
@@ -354,7 +505,7 @@
                 <td>{% widthratio linha.pct_risco 1 100 %}%</td>
                 <td>{% widthratio linha.pct_intermediario 1 100 %}%</td>
                 <td>{% widthratio linha.pct_favoravel 1 100 %}%</td>
-                <td><span class="badge {% if linha.prioridade == "P1" %}critico{% elif linha.prioridade == "P2" %}moderado{% else %}aceitavel{% endif %}">{{ linha.prioridade }}</span></td>
+                <td><span class="badge {% if linha.prioridade == "P1" %}alto{% elif linha.prioridade == "P2" %}moderado{% else %}aceitavel{% endif %}">{{ linha.prioridade }}</span></td>
                 <td>{{ linha.media_risco }}</td>
                 {% endif %}
             </tr>
@@ -426,86 +577,43 @@
     {% endfor %}
 </div>
 
-<!-- 8. PARECER TÉCNICO -->
+<!-- 8. PLANO DE AÇÃO -->
 <div class="secao">
-    <h2>8. Parecer técnico</h2>
-    {% if relatorio.parecer_ia %}
-        <h3>Síntese executiva</h3>
-        <p>{{ relatorio.parecer_ia.sintese_executiva }}</p>
-
-        <h3>Pareceres por domínio</h3>
-        <table>
-            <thead><tr><th>GHE</th><th>Instrumento</th><th>Domínio</th><th>Classificação</th><th>Banda</th><th>Parecer</th></tr></thead>
-            <tbody>
-            {% for p in relatorio.parecer_ia.pareceres_por_dominio %}
-                <tr>
-                    <td>{{ p.ghe }}</td><td>{{ p.instrumento }}</td><td>{{ p.dominio }}</td>
-                    <td>{{ p.classificacao }}</td><td>{{ p.banda }}</td><td>{{ p.parecer }}</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-
-        <h3>Riscos prioritários</h3>
-        <table>
-            <thead><tr><th>GHE</th><th>Domínio</th><th>Banda</th><th>Justificativa</th></tr></thead>
-            <tbody>
-            {% for r in relatorio.parecer_ia.riscos_prioritarios %}
-                <tr><td>{{ r.ghe }}</td><td>{{ r.dominio }}</td><td>{{ r.banda }}</td><td>{{ r.justificativa }}</td></tr>
-            {% endfor %}
-            </tbody>
-        </table>
-
-        <h3>Recomendações</h3>
-        <table>
-            <thead><tr><th>GHE</th><th>Domínio</th><th>Banda</th><th>Medida preventiva</th></tr></thead>
-            <tbody>
-            {% for r in relatorio.parecer_ia.recomendacoes %}
-                <tr><td>{{ r.ghe }}</td><td>{{ r.dominio }}</td><td>{{ r.banda }}</td><td>{{ r.medida_preventiva }}</td></tr>
-            {% endfor %}
-            </tbody>
-        </table>
-
-        <p class="rodape-nota">{{ relatorio.parecer_ia.aviso_minuta }}</p>
-    {% else %}
-        <p>Parecer técnico ainda não gerado para este relatório.</p>
-    {% endif %}
-</div>
-
-<!-- 9. PLANO DE AÇÃO -->
-<div class="secao">
-    <h2>9. Plano de ação</h2>
-    {% for item in ghes %}
-        {% for d in item.dominios %}
-            {% for plano in d.planos_de_acao %}
-            <div class="ficha-acao">
-                <div class="ficha-titulo">
-                    {{ plano.codigo|default:"—" }} — {{ item.ghe.nome }} —
-                    {{ d.escore_dominio.dominio.codigo }} / <span class="badge {{ d.banda_css }}">{{ d.classificacao_risco.banda }}</span>
-                </div>
-                <table>
-                    <tr><td class="rotulo">Medida escolhida</td><td>{{ plano.medida }}</td></tr>
-                    <tr><td class="rotulo">Hierarquia de controle</td><td>{{ plano.get_hierarquia_display|default:"—" }}</td></tr>
-                    <tr><td class="rotulo">Evidência do diagnóstico</td><td>{{ plano.evidencia_diagnostico|default:"—" }}</td></tr>
-                    <tr><td class="rotulo">Indicador de acompanhamento</td><td>{{ plano.indicador|default:"—" }}</td></tr>
-                    <tr><td class="rotulo">Meta</td><td>{{ plano.meta|default:"—" }}</td></tr>
-                    <tr><td class="rotulo">Responsável</td><td>{{ plano.responsavel|default:"A definir" }}</td></tr>
-                    <tr><td class="rotulo">Prazo</td><td>{{ plano.prazo|default:"—" }}</td></tr>
-                    <tr><td class="rotulo">Status</td><td>{{ plano.get_status_display }}</td></tr>
-                    <tr><td class="rotulo">Evidência de execução</td><td>{{ plano.evidencia_execucao|default:"—" }}</td></tr>
-                    <tr><td class="rotulo">Verificação de eficácia</td><td>{{ plano.verificacao_eficacia|default:"—" }}</td></tr>
-                    <tr><td class="rotulo">Data da revisão</td><td>{{ plano.data_revisao|default:"—" }}</td></tr>
-                    <tr><td class="rotulo">Observações</td><td>{{ plano.observacoes|default:"—" }}</td></tr>
-                </table>
+    <h2>8. Plano de ação</h2>
+    <div class="caixa-explicativa">
+        <span class="titulo">Ordem de leitura</span>
+        As medidas abaixo estão listadas da mais urgente para a menos urgente:
+        Crítico primeiro, depois Alto, depois Moderado.
+    </div>
+    {% for entrada in planos_ordenados %}
+        {% with plano=entrada.plano %}
+        <div class="ficha-acao">
+            <div class="ficha-titulo">
+                {{ plano.codigo|default:"—" }} — {{ entrada.ghe_nome }} —
+                {{ entrada.dominio_codigo }} / <span class="badge {{ entrada.banda_css }}">{{ entrada.banda }}</span>
             </div>
-            {% endfor %}
-        {% endfor %}
+            <table>
+                <tr><td class="rotulo">Medida escolhida</td><td>{{ plano.medida }}</td></tr>
+                <tr><td class="rotulo">Hierarquia de controle</td><td>{{ plano.get_hierarquia_display|default:"—" }}</td></tr>
+                <tr><td class="rotulo">Evidência do diagnóstico</td><td>{{ plano.evidencia_diagnostico|default:"—" }}</td></tr>
+                <tr><td class="rotulo">Indicador de acompanhamento</td><td>{{ plano.indicador|default:"—" }}</td></tr>
+                <tr><td class="rotulo">Meta</td><td>{{ plano.meta|default:"—" }}</td></tr>
+                <tr><td class="rotulo">Responsável</td><td>{{ plano.responsavel|default:"A definir" }}</td></tr>
+                <tr><td class="rotulo">Prazo</td><td>{{ plano.prazo|default:"—" }}</td></tr>
+                <tr><td class="rotulo">Status</td><td>{{ plano.get_status_display }}</td></tr>
+                <tr><td class="rotulo">Evidência de execução</td><td>{{ plano.evidencia_execucao|default:"—" }}</td></tr>
+                <tr><td class="rotulo">Verificação de eficácia</td><td>{{ plano.verificacao_eficacia|default:"—" }}</td></tr>
+                <tr><td class="rotulo">Data da revisão</td><td>{{ plano.data_revisao|default:"—" }}</td></tr>
+                <tr><td class="rotulo">Observações</td><td>{{ plano.observacoes|default:"—" }}</td></tr>
+            </table>
+        </div>
+        {% endwith %}
     {% endfor %}
 </div>
 
-<!-- 10. ASSINATURA -->
+<!-- 9. ASSINATURA -->
 <div class="secao">
-    <h2>10. Assinatura do responsável técnico</h2>
+    <h2>9. Assinatura do responsável técnico</h2>
     <div class="assinatura">
         {% if minuta %}
             <div class="linha pendente">Aguardando assinatura do profissional responsável</div>

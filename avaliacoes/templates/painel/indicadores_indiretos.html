@@ -5,19 +5,21 @@
     <a class="voltar" href="{% url 'painel_avaliacoes:ghe_detail' ghe.pk %}" title="Voltar para {{ ghe.nome }}">&larr; Voltar</a>
     <h1>Evidências complementares</h1>
     <p class="subtitulo">
-        {{ ghe.nome }} — absenteísmo, turnover, CAT/CID-F ou relato de entrevista acima da
-        média aumentam a probabilidade de um risco ser classificado como Moderado/Alto/Crítico.
+        {{ ghe.nome }} — absenteísmo, turnover, CAT/CID-F ou relato de entrevista registrados
+        como contexto complementar ao resultado do questionário.
     </p>
 </div>
 
 <div class="cartao">
     <details style="font-size: 12.5px; color: #777;">
-        <summary style="cursor: pointer;">Como isso afeta o cálculo?</summary>
+        <summary style="cursor: pointer;">Isso muda a Banda de risco?</summary>
         <p>
-            0 evidências = probabilidade 1; 1 evidência = probabilidade 2; 2 ou mais =
-            probabilidade 3. Sem nenhuma evidência, a Banda de risco quase sempre fica
-            "Aceitável" mesmo com domínios classificados como Elevados — é este cadastro
-            que fecha essa lacuna.
+            Não. A Banda de cada domínio vem da prevalência de respostas na faixa elevada
+            (a mesma lógica do "Semáforo de riscos", ver CLAUDE.md Seção 7 — achado de
+            2026-07-29). Estas evidências ficam registradas como contexto de apoio ao
+            parecer técnico e ao plano de ação, mas não alteram o cálculo da Banda —
+            exceto um relato de evento grave confirmado (violência, assédio, discriminação),
+            que eleva a Banda do domínio pra Crítico automaticamente.
         </p>
     </details>
 </div>

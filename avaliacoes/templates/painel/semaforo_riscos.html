@@ -15,15 +15,27 @@
         Exibindo o total da unidade — todos os GHEs somados.
         {% endif %}
     </p>
-    <details style="font-size: 12.5px; color: #777; margin-bottom: 10px;">
-        <summary style="cursor: pointer;">Como são calculadas as 3 faixas?</summary>
-        <p>
-            Favorável (escore &le; limite baixo), intermediário (entre os limites) e risco
-            para a saúde (escore &ge; limite elevado). Um GHE suprimido isoladamente entra
-            na soma do total da unidade, mas o resultado só aparece quando o total agregado
-            também atinge o N mínimo de confidencialidade.
-        </p>
-    </details>
+    <div style="border: 1px solid var(--slate-200); border-left: 4px solid var(--slate-400); background: var(--slate-50); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 12px; font-size: 12.5px; color: var(--slate-700);">
+        <strong style="display:block; margin-bottom: 4px; color: var(--slate-900);">Vermelho aqui não é automaticamente "Crítico"</strong>
+        Vermelho = a maioria dos respondentes relatou alta exposição a esse fator (ex.:
+        ritmo de trabalho, pressão por prazos) — já é sério e vira Banda
+        <span class="badge alto" style="display:inline;">Alto</span> no Diagnóstico do
+        GHE e no relatório (30 dias pra agir). A Banda
+        <span class="badge critico" style="display:inline;">Crítico</span> não vem da
+        cor do gráfico — só aparece quando existe um relato confirmado de evento grave
+        (violência, ameaça, assédio moral ou discriminação), com prazo de 15 dias e
+        aviso imediato à liderança/CIPA.
+        <details style="margin-top: 8px; font-size: 12px; color: #777;">
+            <summary style="cursor: pointer;">Como são calculadas as 3 faixas?</summary>
+            <p>
+                Favorável (escore &le; limite baixo), intermediário (entre os limites) e
+                risco para a saúde (escore &ge; limite elevado). Um GHE suprimido
+                isoladamente entra na soma do total da unidade, mas o resultado só
+                aparece quando o total agregado também atinge o N mínimo de
+                confidencialidade.
+            </p>
+        </details>
+    </div>
     <form method="get" style="margin-top: 10px;">
         <label for="ghe-select" style="display:inline; text-transform:none; font-weight:400; font-size:13px;">Filtrar por GHE:</label>
         <select id="ghe-select" name="ghe" onchange="this.form.submit()">
@@ -111,7 +123,7 @@
                 <td style="background: var(--teal-50);">{% widthratio linha.pct_favoravel 1 100 %}%</td>
                 <td>
                     {% if linha.prioridade == "P1" %}
-                    <span class="badge critico">P1</span>
+                    <span class="badge alto">P1</span>
                     {% elif linha.prioridade == "P2" %}
                     <span class="badge moderado">P2</span>
                     {% else %}

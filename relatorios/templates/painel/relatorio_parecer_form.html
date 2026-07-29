@@ -23,7 +23,7 @@
         <h2>Pareceres por domínio</h2>
         <div style="overflow-x: auto;">
         <table>
-            <thead><tr><th>GHE</th><th>Instrumento</th><th>Domínio</th><th>Classificação</th><th>Banda</th><th>Parecer</th><th>Remover</th></tr></thead>
+            <thead><tr><th>GHE</th><th>Instrumento</th><th>Domínio</th><th>Classificação</th><th>Banda</th><th>População exposta</th><th>Parecer</th><th>Remover</th></tr></thead>
             <tbody>
             {% for linha in linhas.dominio %}
                 <tr>
@@ -32,6 +32,7 @@
                     <td><input type="text" name="dominio_{{ linha.indice }}_dominio" value="{{ linha.dominio }}"></td>
                     <td><input type="text" name="dominio_{{ linha.indice }}_classificacao" value="{{ linha.classificacao }}"></td>
                     <td><input type="text" name="dominio_{{ linha.indice }}_banda" value="{{ linha.banda }}"></td>
+                    <td><input type="text" name="dominio_{{ linha.indice }}_populacao_exposta" value="{{ linha.populacao_exposta }}"></td>
                     <td><textarea name="dominio_{{ linha.indice }}_parecer" rows="2" style="width: 100%;">{{ linha.parecer }}</textarea></td>
                     <td><input type="checkbox" name="dominio_{{ linha.indice }}_remover"></td>
                 </tr>
@@ -65,13 +66,22 @@
         <h2>Recomendações</h2>
         <div style="overflow-x: auto;">
         <table>
-            <thead><tr><th>GHE</th><th>Domínio</th><th>Banda</th><th>Medida preventiva</th><th>Remover</th></tr></thead>
+            <thead><tr><th>GHE</th><th>Domínio</th><th>Banda</th><th>Hierarquia</th><th>Medida preventiva</th><th>Remover</th></tr></thead>
             <tbody>
             {% for linha in linhas.recom %}
                 <tr>
                     <td><input type="text" name="recom_{{ linha.indice }}_ghe" value="{{ linha.ghe }}"></td>
                     <td><input type="text" name="recom_{{ linha.indice }}_dominio" value="{{ linha.dominio }}"></td>
                     <td><input type="text" name="recom_{{ linha.indice }}_banda" value="{{ linha.banda }}"></td>
+                    <td>
+                        <select name="recom_{{ linha.indice }}_hierarquia_controle">
+                            <option value="" {% if not linha.hierarquia_controle %}selected{% endif %}>—</option>
+                            <option value="eliminacao" {% if linha.hierarquia_controle == "eliminacao" %}selected{% endif %}>Eliminação/redução na fonte</option>
+                            <option value="organizacao" {% if linha.hierarquia_controle == "organizacao" %}selected{% endif %}>Organização do trabalho</option>
+                            <option value="gestao" {% if linha.hierarquia_controle == "gestao" %}selected{% endif %}>Gestão/administrativo</option>
+                            <option value="resposta_imediata" {% if linha.hierarquia_controle == "resposta_imediata" %}selected{% endif %}>Resposta imediata</option>
+                        </select>
+                    </td>
                     <td><textarea name="recom_{{ linha.indice }}_medida_preventiva" rows="2" style="width: 100%;">{{ linha.medida_preventiva }}</textarea></td>
                     <td><input type="checkbox" name="recom_{{ linha.indice }}_remover"></td>
                 </tr>

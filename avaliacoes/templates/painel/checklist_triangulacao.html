@@ -68,11 +68,11 @@
 </div>
 
 <div class="cartao">
-    <h2>Respostas avaliadas ({{ respostas|length }})</h2>
+    <h2>Respostas ({{ respostas|length }})</h2>
     {% if respostas %}
     <div style="overflow-x: auto;">
     <table>
-        <thead><tr><th>Tipo</th><th>Item</th><th>Respondente</th><th>Conformidade</th><th>Evidência/observação</th></tr></thead>
+        <thead><tr><th>Tipo</th><th>Item</th><th>Respondente</th><th>Conformidade</th><th>Resposta/evidência</th></tr></thead>
         <tbody>
         {% for resposta in respostas %}
             <tr>
@@ -80,7 +80,9 @@
                 <td>{{ resposta.item.texto }}</td>
                 <td>{{ resposta.respondente.nome }}</td>
                 <td>
-                    {% if resposta.conformidade == "nao_conforme" %}
+                    {% if resposta.item.tipo == "entrevista" %}
+                    <span style="color: var(--slate-400);">— (pergunta aberta)</span>
+                    {% elif resposta.conformidade == "nao_conforme" %}
                     <span class="badge critico">Não conforme</span>
                     {% else %}
                     <span class="badge aceitavel">Conforme</span>

@@ -28,6 +28,41 @@ class PerfilProfissional(models.Model):
         return f"{self.user} ({self.conselho} {self.numero_registro})"
 
 
+class ChaveApiClaude(models.Model):
+    """Metadados de uma chave de API da Anthropic cadastrada pelo painel — o VALOR
+    COMPLETO da chave nunca é persistido aqui, só em `.env.local` (fora do controle de
+    versão — ver `.gitignore`), sob a variável `nome_variavel_ambiente`. O que fica
+    neste model é só o suficiente pra identificar a chave visualmente (nome, prefixo,
+    sufixo) e escolher qual está ativa. Ninguém com acesso ao banco, ao Admin ou a um
+    dump consegue reconstruir a chave completa a partir daqui — só o arquivo local
+    tem o valor, e nenhuma tela do painel o exibe de volta depois de salvo
+    (`relatorios/services/chaves_api.py`)."""
+
+    nome = models.CharField(max_length=100, help_text='Ex.: "Produção", "Testes".')
+    prefixo = models.CharField(max_length=16, editable=False)
+    sufixo = models.CharField(max_length=8, editable=False)
+    ativa = models.BooleanField(default=False)
+    valida = models.BooleanField(
+        null=True, blank=True, editable=False,
+        help_text="Resultado da última verificação contra a API da Anthropic. Null = ainda não verificada.",
+    )
+    verificada_em = models.DateTimeField(null=True, blank=True, editable=False)
+    criada_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+    criada_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-criada_em"]
+
+    def __str__(self) -> str:
+        return f"{self.nome} ({self.prefixo}…{self.sufixo})"
+
+    @property
+    def nome_variavel_ambiente(self) -> str:
+        return f"CLAUDE_API_KEY_{self.pk}"
+
+
 class StatusRelatorio(models.TextChoices):
     """Espelha a semântica minuta/aguardando_revisão/assinado da Seção 8.1 do
     CLAUDE.md. Valor inicial (default) deve ser exatamente "aguardando_revisão"."""

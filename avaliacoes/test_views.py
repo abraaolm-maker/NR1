@@ -1,4 +1,4 @@
-﻿import uuid
+import uuid
 
 import pytest
 from django.test import Client
@@ -7,6 +7,7 @@ from django.urls import reverse
 from avaliacoes.models import EscoreDominio, Respondente, StatusAplicacao, TipoAplicacao
 from avaliacoes.services.aplicacao_status import encerrar_coleta
 from avaliacoes.services.calculo_risco import dominios_da_aplicacao
+from avaliacoes.services.questionario import itens_em_ordem
 
 
 def _consentir(client, aplicacao):
@@ -24,12 +25,11 @@ def _preencher_perfil(client, aplicacao, nome=None):
     return client.post(reverse("avaliacoes:responder_perfil", args=[aplicacao.token]), data=dados, follow=True)
 
 
-def _responder_todos_os_dominios(client, aplicacao, valor="3"):
+def _responder_todos_os_itens(client, aplicacao, valor="3"):
     resp = None
-    for dominio in dominios_da_aplicacao(aplicacao):
-        url = reverse("avaliacoes:responder_dominio", args=[aplicacao.token, dominio.codigo])
-        data = {item.item_id: valor for item in dominio.itens.all()}
-        resp = client.post(url, data=data, follow=True)
+    for item in itens_em_ordem(aplicacao):
+        url = reverse("avaliacoes:responder_pergunta", args=[aplicacao.token, item.pk])
+        resp = client.post(url, data={"resposta": valor}, follow=True)
     return resp
 
 
@@ -66,23 +66,23 @@ def test_consentir_cria_respondente_e_vai_para_perfil(client, aplicacao_copsoq):
 
 
 @pytest.mark.django_db
-def test_dominio_direto_sem_perfil_redireciona_para_perfil(client, aplicacao_copsoq):
+def test_pergunta_direto_sem_perfil_redireciona_para_perfil(client, aplicacao_copsoq):
     _consentir(client, aplicacao_copsoq)
-    dominio = dominios_da_aplicacao(aplicacao_copsoq)[0]
+    item = itens_em_ordem(aplicacao_copsoq)[0]
     resp = client.get(
-        reverse("avaliacoes:responder_dominio", args=[aplicacao_copsoq.token, dominio.codigo]), follow=True
+        reverse("avaliacoes:responder_pergunta", args=[aplicacao_copsoq.token, item.pk]), follow=True
     )
     assert resp.redirect_chain[-1][0] == reverse("avaliacoes:responder_perfil", args=[aplicacao_copsoq.token])
 
 
 @pytest.mark.django_db
-def test_perfil_completo_segue_para_primeiro_dominio(client, aplicacao_copsoq):
+def test_perfil_completo_segue_para_primeira_pergunta(client, aplicacao_copsoq):
     _consentir(client, aplicacao_copsoq)
     resp = _preencher_perfil(client, aplicacao_copsoq)
 
-    primeiro = dominios_da_aplicacao(aplicacao_copsoq)[0]
+    primeiro_item = itens_em_ordem(aplicacao_copsoq)[0]
     assert resp.redirect_chain[-1][0] == reverse(
-        "avaliacoes:responder_dominio", args=[aplicacao_copsoq.token, primeiro.codigo]
+        "avaliacoes:responder_pergunta", args=[aplicacao_copsoq.token, primeiro_item.pk]
     )
     respondente = Respondente.objects.get(aplicacao=aplicacao_copsoq)
     assert respondente.tempo_na_organizacao == "3_a_5_anos"
@@ -90,24 +90,24 @@ def test_perfil_completo_segue_para_primeiro_dominio(client, aplicacao_copsoq):
 
 
 @pytest.mark.django_db
-def test_resume_pula_dominios_ja_respondidos(client, aplicacao_copsoq):
+def test_resume_pula_perguntas_ja_respondidas(client, aplicacao_copsoq):
     _consentir(client, aplicacao_copsoq)
     _preencher_perfil(client, aplicacao_copsoq)
-    todos_dominios = dominios_da_aplicacao(aplicacao_copsoq)
+    todos_itens = itens_em_ordem(aplicacao_copsoq)
 
-    primeiro = todos_dominios[0]
+    primeiro = todos_itens[0]
     client.post(
-        reverse("avaliacoes:responder_dominio", args=[aplicacao_copsoq.token, primeiro.codigo]),
-        data={item.item_id: "3" for item in primeiro.itens.all()},
+        reverse("avaliacoes:responder_pergunta", args=[aplicacao_copsoq.token, primeiro.pk]),
+        data={"resposta": "3"},
     )
 
-    # reabrir o link (consentimento) deve pular direto pro segundo domínio
+    # reabrir o link (consentimento) deve pular direto pra segunda pergunta
     resp = client.get(
         reverse("avaliacoes:responder_consentimento", args=[aplicacao_copsoq.token]), follow=True
     )
-    segundo = todos_dominios[1]
+    segundo = todos_itens[1]
     assert resp.redirect_chain[-1][0] == reverse(
-        "avaliacoes:responder_dominio", args=[aplicacao_copsoq.token, segundo.codigo]
+        "avaliacoes:responder_pergunta", args=[aplicacao_copsoq.token, segundo.pk]
     )
 
 
@@ -115,7 +115,7 @@ def test_resume_pula_dominios_ja_respondidos(client, aplicacao_copsoq):
 def test_fluxo_completo_ate_perguntas_abertas_e_concluido(client, aplicacao_copsoq):
     _consentir(client, aplicacao_copsoq)
     _preencher_perfil(client, aplicacao_copsoq)
-    resp = _responder_todos_os_dominios(client, aplicacao_copsoq)
+    resp = _responder_todos_os_itens(client, aplicacao_copsoq)
 
     assert resp.redirect_chain[-1][0] == reverse(
         "avaliacoes:responder_perguntas_abertas", args=[aplicacao_copsoq.token]
@@ -145,7 +145,7 @@ def test_fluxo_completo_ate_perguntas_abertas_e_concluido(client, aplicacao_cops
 def test_reabrir_link_apos_concluido_vai_direto_pra_tela_de_conclusao(client, aplicacao_copsoq):
     _consentir(client, aplicacao_copsoq)
     _preencher_perfil(client, aplicacao_copsoq)
-    _responder_todos_os_dominios(client, aplicacao_copsoq)
+    _responder_todos_os_itens(client, aplicacao_copsoq)
     _responder_perguntas_abertas(client, aplicacao_copsoq)
 
     resp = client.get(
@@ -194,3 +194,18 @@ def test_aplicacao_identificada_exige_nome_no_perfil(client, aplicacao_copsoq):
     _preencher_perfil(client, aplicacao_copsoq, nome="Maria")
     respondente.refresh_from_db()
     assert respondente.nome == "Maria"
+
+
+@pytest.mark.django_db
+def test_pergunta_mostra_progresso_e_titulo_do_dominio(client, aplicacao_copsoq):
+    _consentir(client, aplicacao_copsoq)
+    _preencher_perfil(client, aplicacao_copsoq)
+    todos_itens = itens_em_ordem(aplicacao_copsoq)
+    primeiro = todos_itens[0]
+
+    resp = client.get(reverse("avaliacoes:responder_pergunta", args=[aplicacao_copsoq.token, primeiro.pk]))
+
+    conteudo = resp.content.decode()
+    assert f"Pergunta 1 de {len(todos_itens)}" in conteudo
+    assert primeiro.dominio.nome in conteudo
+    assert primeiro.texto in conteudo

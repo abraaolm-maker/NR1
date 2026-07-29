@@ -14,9 +14,9 @@ urlpatterns = [
     ),
     path("responder/<uuid:aplicacao_token>/concluido/", views.responder_concluido, name="responder_concluido"),
     path(
-        "responder/<uuid:aplicacao_token>/dominio/<str:dominio_codigo>/",
-        views.responder_dominio,
-        name="responder_dominio",
+        "responder/<uuid:aplicacao_token>/pergunta/<int:item_pk>/",
+        views.responder_pergunta,
+        name="responder_pergunta",
     ),
     # Checklist de triangulação (entrevista + observação) — gestores/liderança da
     # empresa cliente, via link próprio (CLAUDE.md Seção 6.11).

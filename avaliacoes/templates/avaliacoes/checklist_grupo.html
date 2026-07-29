@@ -15,9 +15,13 @@
     {% for entrada in itens_com_campos %}
     <fieldset>
         <legend>{{ entrada.item.texto }}</legend>
+        {% if tipo == "entrevista" %}
+        {{ entrada.campo_resposta }}
+        {% else %}
         {{ entrada.campo_conformidade }}
         {% if entrada.campo_conformidade.errors %}<p class="erro-campo">{{ entrada.campo_conformidade.errors|join:" " }}</p>{% endif %}
         {{ entrada.campo_evidencia }}
+        {% endif %}
     </fieldset>
     {% endfor %}
     <div class="acoes-form">

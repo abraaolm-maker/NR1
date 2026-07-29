@@ -7,11 +7,11 @@
     "min": 1,
     "max": 5,
     "labels": {
-      "1": "Muito baixo / nunca / discordo totalmente",
-      "2": "Baixo / raramente",
-      "3": "Moderado / às vezes",
-      "4": "Alto / frequentemente",
-      "5": "Muito alto / sempre / concordo totalmente"
+      "1": "Discordo totalmente",
+      "2": "Discordo",
+      "3": "Neutro",
+      "4": "Concordo",
+      "5": "Concordo totalmente"
     }
   },
   "thresholds": { "baixo_max": 37.5, "moderado_max": 62.5 },
@@ -20,78 +20,78 @@
       "code": "D1",
       "name": "Exigências do trabalho",
       "items": [
-        { "id": "D1.1", "text": "Ritmo de trabalho elevado em relação ao tempo disponível para realizar as tarefas.", "polarity": "RISCO" },
-        { "id": "D1.2", "text": "Pressão por prazos para concluir as atividades do dia a dia.", "polarity": "RISCO" },
-        { "id": "D1.3", "text": "Volume de trabalho superior ao efetivo disponível em períodos de maior demanda.", "polarity": "RISCO" },
-        { "id": "D1.4", "text": "Interrupções frequentes que dificultam concluir as tarefas em andamento.", "polarity": "RISCO" },
-        { "id": "D1.5", "text": "Baixa previsibilidade da demanda, com solicitações urgentes, ajustes de última hora e retrabalho.", "polarity": "RISCO" }
+        { "id": "D1.1", "text": "Preciso manter um ritmo de trabalho muito acelerado em relação ao tempo que tenho disponível.", "polarity": "RISCO" },
+        { "id": "D1.2", "text": "Sinto pressão por prazos para concluir minhas atividades do dia a dia.", "polarity": "RISCO" },
+        { "id": "D1.3", "text": "O volume de trabalho é maior do que a equipe consegue dar conta, principalmente em períodos de maior demanda.", "polarity": "RISCO" },
+        { "id": "D1.4", "text": "Sou interrompido com frequência, o que dificulta concluir as tarefas que já comecei.", "polarity": "RISCO" },
+        { "id": "D1.5", "text": "Recebo solicitações urgentes ou ajustes de última hora que atrapalham meu planejamento.", "polarity": "RISCO" }
       ]
     },
     {
       "code": "D2",
       "name": "Exigências emocionais",
       "items": [
-        { "id": "D2.1", "text": "Necessidade de lidar com clientes, fornecedores ou colegas em situação de tensão, cobrança ou conflito.", "polarity": "RISCO" },
-        { "id": "D2.2", "text": "Necessidade de controlar emoções para manter o atendimento/relacionamento adequado mesmo sob pressão.", "polarity": "RISCO" },
-        { "id": "D2.3", "text": "Exposição a reclamações, cobranças ríspidas ou hostilidade verbal durante a rotina.", "polarity": "RISCO" },
-        { "id": "D2.4", "text": "Carga emocional decorrente da responsabilidade por evitar erros, perdas ou retrabalho na execução das tarefas.", "polarity": "RISCO" }
+        { "id": "D2.1", "text": "Preciso lidar com clientes, fornecedores ou colegas em situações de tensão, cobrança ou conflito.", "polarity": "RISCO" },
+        { "id": "D2.2", "text": "Preciso controlar minhas emoções para manter um bom atendimento mesmo quando estou sob pressão.", "polarity": "RISCO" },
+        { "id": "D2.3", "text": "Sou exposto a reclamações, cobranças ríspidas ou hostilidade verbal na minha rotina de trabalho.", "polarity": "RISCO" },
+        { "id": "D2.4", "text": "Sinto um desgaste emocional grande com a responsabilidade de evitar erros, perdas ou retrabalho.", "polarity": "RISCO" }
       ]
     },
     {
       "code": "D3",
       "name": "Autonomia e controle",
       "items": [
-        { "id": "D3.1", "text": "Possui autonomia para organizar a sequência das próprias atividades e priorizar demandas.", "polarity": "PROTETIVO" },
-        { "id": "D3.2", "text": "Consegue realizar pausas técnicas básicas sem prejuízo operacional ou constrangimento.", "polarity": "PROTETIVO" },
-        { "id": "D3.3", "text": "Tem influência sobre rotinas/procedimentos quando identifica falhas de segurança, qualidade ou organização.", "polarity": "PROTETIVO" },
-        { "id": "D3.4", "text": "A carga de trabalho permite executar as tarefas com atenção, sem necessidade de atalhos inseguros ou esforço excessivo.", "polarity": "PROTETIVO" }
+        { "id": "D3.1", "text": "Tenho autonomia para organizar a ordem das minhas atividades e definir prioridades.", "polarity": "PROTETIVO" },
+        { "id": "D3.2", "text": "Consigo fazer pausas básicas (banheiro, água, descanso curto) sem prejuízo pro meu trabalho.", "polarity": "PROTETIVO" },
+        { "id": "D3.3", "text": "Quando percebo uma falha de segurança, qualidade ou organização, tenho como influenciar a mudança.", "polarity": "PROTETIVO" },
+        { "id": "D3.4", "text": "Minha carga de trabalho permite que eu execute minhas tarefas com atenção, sem precisar de atalhos inseguros.", "polarity": "PROTETIVO" }
       ]
     },
     {
       "code": "D4",
       "name": "Sentido e significado do trabalho",
       "items": [
-        { "id": "D4.1", "text": "Percebe que o próprio trabalho contribui para o funcionamento seguro e organizado da empresa.", "polarity": "PROTETIVO" },
-        { "id": "D4.2", "text": "As atividades realizadas são coerentes com as responsabilidades da função.", "polarity": "PROTETIVO" },
-        { "id": "D4.3", "text": "Há clareza do papel, das responsabilidades e dos limites da função, evitando conflito e retrabalho.", "polarity": "PROTETIVO" }
+        { "id": "D4.1", "text": "Sinto que o meu trabalho contribui pro funcionamento seguro e organizado da empresa.", "polarity": "PROTETIVO" },
+        { "id": "D4.2", "text": "As atividades que realizo no dia a dia são coerentes com as responsabilidades da minha função.", "polarity": "PROTETIVO" },
+        { "id": "D4.3", "text": "Tenho clareza sobre meu papel, minhas responsabilidades e os limites da minha função.", "polarity": "PROTETIVO" }
       ]
     },
     {
       "code": "D5",
       "name": "Reconhecimento e recompensa",
       "items": [
-        { "id": "D5.1", "text": "Recebe reconhecimento proporcional às responsabilidades assumidas na rotina.", "polarity": "PROTETIVO" },
-        { "id": "D5.2", "text": "O feedback sobre desempenho é claro, respeitoso e voltado à melhoria do trabalho.", "polarity": "PROTETIVO" },
-        { "id": "D5.3", "text": "Critérios de metas, cobranças e prioridades são compatíveis com qualidade, segurança e capacidade operacional.", "polarity": "PROTETIVO" },
-        { "id": "D5.4", "text": "Percebe equilíbrio entre exigências e recursos disponíveis, incluindo estrutura, ferramentas, apoio e tempo.", "polarity": "PROTETIVO" }
+        { "id": "D5.1", "text": "Recebo reconhecimento proporcional às responsabilidades que assumo no dia a dia.", "polarity": "PROTETIVO" },
+        { "id": "D5.2", "text": "O feedback que recebo sobre meu desempenho é claro, respeitoso e ajuda a melhorar meu trabalho.", "polarity": "PROTETIVO" },
+        { "id": "D5.3", "text": "As metas e cobranças que recebo são compatíveis com o que é possível fazer com qualidade e segurança.", "polarity": "PROTETIVO" },
+        { "id": "D5.4", "text": "Tenho os recursos necessários (estrutura, ferramentas, apoio e tempo) pra dar conta do que é exigido de mim.", "polarity": "PROTETIVO" }
       ]
     },
     {
       "code": "D6",
       "name": "Relações sociais e liderança",
       "items": [
-        { "id": "D6.1", "text": "A liderança fornece suporte quando há sobrecarga, conflito de prioridade ou dificuldade operacional.", "polarity": "PROTETIVO" },
-        { "id": "D6.2", "text": "A comunicação com a liderança é acessível e resolve problemas de rotina.", "polarity": "PROTETIVO" },
-        { "id": "D6.3", "text": "As relações no trabalho são cooperativas, com ajuda mútua e respeito.", "polarity": "PROTETIVO" },
-        { "id": "D6.4", "text": "Conflitos são tratados de forma técnica, imparcial e sem exposição indevida.", "polarity": "PROTETIVO" }
+        { "id": "D6.1", "text": "Minha liderança me dá suporte quando estou sobrecarregado ou com dificuldades operacionais.", "polarity": "PROTETIVO" },
+        { "id": "D6.2", "text": "Consigo me comunicar facilmente com minha liderança para resolver problemas do dia a dia.", "polarity": "PROTETIVO" },
+        { "id": "D6.3", "text": "As relações no meu ambiente de trabalho são cooperativas, com ajuda mútua e respeito.", "polarity": "PROTETIVO" },
+        { "id": "D6.4", "text": "Quando surgem conflitos, eles são tratados de forma justa e sem me expor desnecessariamente.", "polarity": "PROTETIVO" }
       ]
     },
     {
       "code": "D7",
       "name": "Segurança psicológica",
       "items": [
-        { "id": "D7.1", "text": "Pode relatar erros, quase-erros, desvios ou dificuldades sem medo de punição injusta.", "polarity": "PROTETIVO" },
-        { "id": "D7.2", "text": "Pode discordar tecnicamente de uma orientação quando percebe risco de erro, perda, acidente ou não conformidade.", "polarity": "PROTETIVO" },
-        { "id": "D7.3", "text": "Sente que sua opinião prática é considerada nas decisões que afetam a rotina de trabalho.", "polarity": "PROTETIVO" }
+        { "id": "D7.1", "text": "Posso relatar erros, quase-erros ou dificuldades sem medo de ser punido injustamente.", "polarity": "PROTETIVO" },
+        { "id": "D7.2", "text": "Posso discordar de uma orientação quando percebo risco de erro, acidente ou problema, sem medo de represália.", "polarity": "PROTETIVO" },
+        { "id": "D7.3", "text": "Sinto que minha opinião é levada em conta nas decisões que afetam meu dia a dia de trabalho.", "polarity": "PROTETIVO" }
       ]
     },
     {
       "code": "D8",
       "name": "Justiça organizacional",
       "items": [
-        { "id": "D8.1", "text": "Escalas, folgas e distribuição de tarefas são feitas com critérios claros e equilibrados.", "polarity": "PROTETIVO" },
-        { "id": "D8.2", "text": "Regras e cobranças são aplicadas de forma consistente, sem favorecimento ou tratamento desigual.", "polarity": "PROTETIVO" },
-        { "id": "D8.3", "text": "Mudanças de rotina, metas, sistema ou procedimento são comunicadas com antecedência suficiente.", "polarity": "PROTETIVO" }
+        { "id": "D8.1", "text": "As escalas, folgas e a distribuição de tarefas seguem critérios claros e equilibrados.", "polarity": "PROTETIVO" },
+        { "id": "D8.2", "text": "As regras e cobranças são aplicadas igualmente pra todo mundo, sem favorecimento.", "polarity": "PROTETIVO" },
+        { "id": "D8.3", "text": "Quando há mudanças na rotina, nas metas ou nos procedimentos, sou avisado com antecedência.", "polarity": "PROTETIVO" }
       ]
     },
     {
@@ -99,10 +99,10 @@
       "name": "Violência, assédio e discriminação",
       "note": "Domínio de polaridade mista - D9.1/D9.2 são RISCO, D9.3/D9.4 são PROTETIVO. Inverter item a item, nunca no agregado.",
       "items": [
-        { "id": "D9.1", "text": "Já sofreu agressão verbal, ameaça ou intimidação de cliente, fornecedor, terceiro ou colega durante o trabalho.", "polarity": "RISCO", "evento_grave": true },
-        { "id": "D9.2", "text": "Já presenciou ou sofreu assédio moral, humilhação, exposição pública ou cobrança vexatória.", "polarity": "RISCO", "evento_grave": true },
-        { "id": "D9.3", "text": "Há canais confiáveis e resposta efetiva para relato de conflito, assédio ou violência, sem retaliação.", "polarity": "PROTETIVO" },
-        { "id": "D9.4", "text": "Há tratamento respeitoso e sem discriminação por gênero, raça, idade, deficiência, aparência, religião ou outra condição.", "polarity": "PROTETIVO" }
+        { "id": "D9.1", "text": "Já sofri agressão verbal, ameaça ou intimidação de cliente, fornecedor, terceiro ou colega durante o trabalho.", "polarity": "RISCO", "evento_grave": true },
+        { "id": "D9.2", "text": "Já presenciei ou sofri assédio moral, humilhação, exposição pública ou cobrança vexatória no trabalho.", "polarity": "RISCO", "evento_grave": true },
+        { "id": "D9.3", "text": "Sei que existe um canal confiável pra relatar conflito, assédio ou violência, sem medo de retaliação.", "polarity": "PROTETIVO" },
+        { "id": "D9.4", "text": "Sou tratado com respeito, sem discriminação por gênero, raça, idade, deficiência, aparência, religião ou outra condição.", "polarity": "PROTETIVO" }
       ]
     }
   ]

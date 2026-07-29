@@ -31,8 +31,11 @@ def test_calcula_dominio_risco_puro_elevado_gera_plano_de_acao(aplicacao_copsoq,
     assert escore_dominio.suprimido_por_confidencialidade is False
 
     classificacao_risco = escore_dominio.classificacao_risco
+    # 5 respondentes uniformes, todos elevados -> prevalência 100% -> Prioridade P1
+    # -> Banda Alto (achado de 2026-07-29: Banda vem da prevalência, não mais de
+    # Severidade × Probabilidade — evidencias_convergentes continua contado, mas só
+    # como contexto informativo, não muda mais a Banda).
     assert classificacao_risco.evidencias_convergentes == 1  # 1 IndicadorIndireto convergente
-    assert classificacao_risco.probabilidade == 2  # 1 evidência complementar
     assert classificacao_risco.banda == "Alto"
     assert classificacao_risco.prazo_dias_plano_de_acao == 30
 
@@ -409,10 +412,12 @@ def test_checklist_nao_conforme_conta_como_evidencia_convergente(aplicacao_copso
     valores = {"D1.1": 4, "D1.2": 4, "D1.3": 5, "D1.4": 3, "D1.5": 4}  # média 4.0 -> 75.0 -> Elevado
     dominio = responder_dominio(aplicacao_copsoq, "D1", valores, n_respondentes=5)
 
-    # sem nenhuma evidência: probabilidade 1 -> banda Moderado (severidade 3 x prob 1)
+    # 5 respondentes uniformes elevados -> prevalência 100% -> Banda Alto, independente
+    # de evidência complementar (achado de 2026-07-29: evidência não muda mais a Banda,
+    # só fica registrada como contexto — ver evidencias_convergentes abaixo).
     escore_dominio = calcular_dominio(aplicacao_copsoq, dominio)
-    assert escore_dominio.classificacao_risco.probabilidade == 1
-    assert escore_dominio.classificacao_risco.banda == "Moderado"
+    assert escore_dominio.classificacao_risco.evidencias_convergentes == 0
+    assert escore_dominio.classificacao_risco.banda == "Alto"
 
     coleta = ColetaChecklistTriangulacao.objects.create(aplicacao=aplicacao_copsoq)
     respondente = RespondenteChecklistTriangulacao.objects.create(coleta=coleta, nome="Gestor de Teste")
@@ -422,8 +427,8 @@ def test_checklist_nao_conforme_conta_como_evidencia_convergente(aplicacao_copso
     )
 
     escore_dominio = calcular_dominio(aplicacao_copsoq, dominio)
-    assert escore_dominio.classificacao_risco.probabilidade == 2  # 1 evidência agora
-    assert escore_dominio.classificacao_risco.banda == "Alto"
+    assert escore_dominio.classificacao_risco.evidencias_convergentes == 1  # contada, mas...
+    assert escore_dominio.classificacao_risco.banda == "Alto"  # ...não muda a Banda
 
 
 @pytest.mark.django_db
@@ -446,5 +451,65 @@ def test_checklist_conforme_nao_conta_como_evidencia(aplicacao_copsoq, responder
     )
 
     escore_dominio = calcular_dominio(aplicacao_copsoq, dominio)
-    assert escore_dominio.classificacao_risco.probabilidade == 1
-    assert escore_dominio.classificacao_risco.banda == "Moderado"
+    assert escore_dominio.classificacao_risco.evidencias_convergentes == 0
+    assert escore_dominio.classificacao_risco.banda == "Alto"
+
+
+@pytest.mark.django_db
+def test_checklist_entrevista_nao_conforme_nao_conta_como_evidencia(aplicacao_copsoq, responder_dominio):
+    """Achado em 2026-07-29: itens tipo=entrevista são perguntas abertas (ex. "Quais
+    são os períodos de maior demanda e por quê?"), sem conformidade válida — mesmo que
+    alguém force um valor "nao_conforme" via ORM/Admin, isso nunca deve contar como
+    evidência complementar (só itens tipo=observacao contam)."""
+    from avaliacoes.models import (
+        ColetaChecklistTriangulacao,
+        ItemChecklistTriangulacao,
+        RespondenteChecklistTriangulacao,
+        RespostaChecklistTriangulacao,
+    )
+
+    valores = {"D1.1": 4, "D1.2": 4, "D1.3": 5, "D1.4": 3, "D1.5": 4}
+    dominio = responder_dominio(aplicacao_copsoq, "D1", valores, n_respondentes=5)
+
+    coleta = ColetaChecklistTriangulacao.objects.create(aplicacao=aplicacao_copsoq)
+    respondente = RespondenteChecklistTriangulacao.objects.create(coleta=coleta, nome="Gestor de Teste")
+    item_entrevista = ItemChecklistTriangulacao.objects.filter(tipo="entrevista").first()
+    RespostaChecklistTriangulacao.objects.create(
+        respondente=respondente, item=item_entrevista, conformidade="nao_conforme", evidencia="Resposta da entrevista."
+    )
+
+    escore_dominio = calcular_dominio(aplicacao_copsoq, dominio)
+    assert escore_dominio.classificacao_risco.evidencias_convergentes == 0
+    assert escore_dominio.classificacao_risco.banda == "Alto"
+
+
+@pytest.mark.django_db
+def test_checklist_observacao_nao_conforme_so_afeta_dominio_mapeado(aplicacao_copsoq, responder_dominio):
+    """Achado em 2026-07-29: antes, "não conforme" em QUALQUER item de observação
+    empurrava a probabilidade de TODOS os domínios — sem relação com o que o item
+    realmente representa. Agora só afeta o domínio mapeado em
+    `dominio_codigo_relacionado` (mesma semântica do IndicadorIndireto)."""
+    from avaliacoes.models import (
+        ColetaChecklistTriangulacao,
+        ItemChecklistTriangulacao,
+        RespondenteChecklistTriangulacao,
+        RespostaChecklistTriangulacao,
+    )
+
+    valores_d1 = {"D1.1": 4, "D1.2": 4, "D1.3": 5, "D1.4": 3, "D1.5": 4}
+    valores_d9 = {"D9.1": 1, "D9.2": 1, "D9.3": 1, "D9.4": 1}
+    dominio_d1 = responder_dominio(aplicacao_copsoq, "D1", valores_d1, n_respondentes=5)
+    dominio_d9 = responder_dominio(aplicacao_copsoq, "D9", valores_d9, n_respondentes=5)
+
+    coleta = ColetaChecklistTriangulacao.objects.create(aplicacao=aplicacao_copsoq)
+    respondente = RespondenteChecklistTriangulacao.objects.create(coleta=coleta, nome="Gestor de Teste")
+    item_d9 = ItemChecklistTriangulacao.objects.filter(tipo="observacao", dominio_codigo_relacionado="D9").first()
+    RespostaChecklistTriangulacao.objects.create(
+        respondente=respondente, item=item_d9, conformidade="nao_conforme", evidencia="Observado in loco."
+    )
+
+    escore_d1 = calcular_dominio(aplicacao_copsoq, dominio_d1)
+    escore_d9 = calcular_dominio(aplicacao_copsoq, dominio_d9)
+
+    assert escore_d1.classificacao_risco.evidencias_convergentes == 0  # D1 não é o domínio mapeado — não conta
+    assert escore_d9.classificacao_risco.evidencias_convergentes == 1  # D9 é o domínio mapeado — conta

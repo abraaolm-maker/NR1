@@ -71,6 +71,10 @@ class IdentificacaoForm(forms.Form):
 
 
 def _construir_form_grupo(tipo: str, respondente: RespondenteChecklistTriangulacao, data=None) -> forms.Form:
+    """Itens `tipo=entrevista` são perguntas abertas (achado em 2026-07-29: não têm
+    resposta de conformidade válida) — só ganham um campo de texto livre. Itens
+    `tipo=observacao` são afirmações de checklist de verdade e mantêm
+    Conforme/Não conforme + evidência."""
     itens = ItemChecklistTriangulacao.objects.filter(tipo=tipo).order_by("ordem")
     respostas_existentes = {
         r.item_id: r for r in respondente.respostas.filter(item__tipo=tipo)
@@ -79,18 +83,26 @@ def _construir_form_grupo(tipo: str, respondente: RespondenteChecklistTriangulac
     campos = {}
     for item in itens:
         existente = respostas_existentes.get(item.id)
-        campos[f"conformidade_{item.id}"] = forms.ChoiceField(
-            label=item.texto,
-            choices=ConformidadeChecklist.choices,
-            widget=forms.RadioSelect,
-            initial=existente.conformidade if existente else ConformidadeChecklist.NAO_AVALIADO,
-        )
-        campos[f"evidencia_{item.id}"] = forms.CharField(
-            label="Evidência/observação",
-            widget=forms.Textarea(attrs={"rows": 2}),
-            required=False,
-            initial=existente.evidencia if existente else "",
-        )
+        if tipo == "entrevista":
+            campos[f"resposta_{item.id}"] = forms.CharField(
+                label=item.texto,
+                widget=forms.Textarea(attrs={"rows": 3}),
+                required=False,
+                initial=existente.evidencia if existente else "",
+            )
+        else:
+            campos[f"conformidade_{item.id}"] = forms.ChoiceField(
+                label=item.texto,
+                choices=ConformidadeChecklist.choices,
+                widget=forms.RadioSelect,
+                initial=existente.conformidade if existente else ConformidadeChecklist.NAO_AVALIADO,
+            )
+            campos[f"evidencia_{item.id}"] = forms.CharField(
+                label="Evidência/observação",
+                widget=forms.Textarea(attrs={"rows": 2}),
+                required=False,
+                initial=existente.evidencia if existente else "",
+            )
 
     FormularioGrupo = type("FormularioGrupo", (forms.Form,), campos)
     return FormularioGrupo(data)
@@ -140,26 +152,31 @@ def checklist_grupo(request, token, tipo):
         form = _construir_form_grupo(tipo, respondente, data=request.POST)
         if form.is_valid():
             for item in itens:
-                RespostaChecklistTriangulacao.objects.update_or_create(
-                    respondente=respondente,
-                    item=item,
-                    defaults={
+                if tipo == "entrevista":
+                    defaults = {"evidencia": form.cleaned_data[f"resposta_{item.id}"]}
+                else:
+                    defaults = {
                         "conformidade": form.cleaned_data[f"conformidade_{item.id}"],
                         "evidencia": form.cleaned_data[f"evidencia_{item.id}"],
-                    },
+                    }
+                RespostaChecklistTriangulacao.objects.update_or_create(
+                    respondente=respondente, item=item, defaults=defaults
                 )
             return _proximo_passo(respondente)
     else:
         form = _construir_form_grupo(tipo, respondente)
 
-    itens_com_campos = [
-        {
-            "item": item,
-            "campo_conformidade": form[f"conformidade_{item.id}"],
-            "campo_evidencia": form[f"evidencia_{item.id}"],
-        }
-        for item in itens
-    ]
+    if tipo == "entrevista":
+        itens_com_campos = [{"item": item, "campo_resposta": form[f"resposta_{item.id}"]} for item in itens]
+    else:
+        itens_com_campos = [
+            {
+                "item": item,
+                "campo_conformidade": form[f"conformidade_{item.id}"],
+                "campo_evidencia": form[f"evidencia_{item.id}"],
+            }
+            for item in itens
+        ]
 
     indice = GRUPOS.index(tipo)
     url_anterior = (

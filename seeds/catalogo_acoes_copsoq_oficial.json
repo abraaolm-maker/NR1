@@ -1,0 +1,496 @@
+{
+  "instrument_code": "COPSOQ_OFICIAL",
+  "source_note": "Catálogo elaborado especificamente para as 35 subescalas do COPSOQ Oficial (CLAUDE.md Seção 5.1.1) — o catálogo original (seeds/catalogo_acoes.json) só cobria os 9 domínios do COPSOQ adaptado (D1-D9) e não existia ainda quando este instrumento foi criado, então toda aplicação de COPSOQ Oficial caía no texto genérico de fallback. Ações fundamentadas em: (1) hierarquia de controle de riscos psicossociais recomendada pelo NIOSH e adotada pelo Guia MTE de Fatores de Riscos Psicossociais (eliminação > organização do trabalho > gestão/administrativo > resposta imediata para eventos graves — nunca EPI/individual como primeira linha); (2) modelos clássicos de risco psicossocial que fundamentam o próprio COPSOQ — demanda-controle (Karasek), esforço-recompensa (Siegrist) e Job Demands-Resources; (3) o próprio manual COPSOQ Portugal 2013 (definição de cada subescala). Domínios que são desfechos de saúde (SG, PSONO, BURN, STR, SDEP, SSOM, SCOG) têm ação voltada a encaminhamento ao serviço de saúde ocupacional/SESMT e correção da causa organizacional identificada — nunca tratamento clínico individual como substituto da ação preventiva.",
+  "acoes": [
+    {
+      "dominio_codigo": "EQ",
+      "nivel": "Moderado",
+      "acao_sugerida": "Revisar a distribuição de tarefas e o dimensionamento da equipe para reduzir acúmulo de trabalho e horas extras habituais.",
+      "hierarquia": "organizacao",
+      "indicador": "Horas extras registradas, backlog de tarefas pendentes e pausas efetivamente cumpridas."
+    },
+    {
+      "dominio_codigo": "EQ",
+      "nivel": "Elevado",
+      "acao_sugerida": "Redimensionar a equipe ou redistribuir a carga entre turnos/áreas, eliminando picos de demanda evitáveis e metas incompatíveis com o tempo disponível.",
+      "hierarquia": "eliminacao",
+      "indicador": "Carga planejada versus capacidade real da equipe, horas extras e índice de retrabalho."
+    },
+    {
+      "dominio_codigo": "RT",
+      "nivel": "Moderado",
+      "acao_sugerida": "Ajustar metas de produtividade e cadência de tarefas para um ritmo sustentável, com pausas programadas ao longo do turno.",
+      "hierarquia": "organizacao",
+      "indicador": "Tempo médio por tarefa e cumprimento das pausas programadas."
+    },
+    {
+      "dominio_codigo": "RT",
+      "nivel": "Elevado",
+      "acao_sugerida": "Redesenhar o processo ou investir em automação/apoio técnico para eliminar exigência de ritmo acelerado incompatível com segurança e qualidade.",
+      "hierarquia": "eliminacao",
+      "indicador": "Incidentes associados à pressa e afastamentos por exaustão relacionada ao ritmo."
+    },
+    {
+      "dominio_codigo": "EC",
+      "nivel": "Moderado",
+      "acao_sugerida": "Revisar a distribuição de decisões complexas entre a equipe e reduzir interrupções durante tarefas que exigem concentração.",
+      "hierarquia": "organizacao",
+      "indicador": "Erros associados à sobrecarga cognitiva e queixas de fadiga mental."
+    },
+    {
+      "dominio_codigo": "EC",
+      "nivel": "Elevado",
+      "acao_sugerida": "Redistribuir a responsabilidade por decisões críticas entre mais pessoas e prover apoio técnico ou tecnológico que reduza a exigência cognitiva individual.",
+      "hierarquia": "eliminacao",
+      "indicador": "Decisões críticas com apoio formal definido e erros associados à sobrecarga cognitiva."
+    },
+    {
+      "dominio_codigo": "EE",
+      "nivel": "Moderado",
+      "acao_sugerida": "Definir protocolo para lidar com situações emocionalmente difíceis e garantir espaço de apoio da liderança logo após o evento.",
+      "hierarquia": "gestao",
+      "indicador": "Eventos emocionalmente difíceis registrados e uso do apoio disponibilizado após ocorrência."
+    },
+    {
+      "dominio_codigo": "EE",
+      "nivel": "Elevado",
+      "acao_sugerida": "Reduzir a exposição direta a situações de alta carga emocional (rodízio, retaguarda especializada, cobertura) e garantir suporte psicológico formal.",
+      "hierarquia": "eliminacao",
+      "indicador": "Frequência de exposição a situações emocionalmente extremas e adesão ao suporte psicológico oferecido."
+    },
+    {
+      "dominio_codigo": "EEE",
+      "nivel": "Moderado",
+      "acao_sugerida": "Treinar lideranças e equipes em comunicação assertiva, garantindo espaço seguro para expressar divergências e desconforto.",
+      "hierarquia": "gestao",
+      "indicador": "Relatos de desconforto emocional tratados e clima de abertura percebido pela equipe."
+    },
+    {
+      "dominio_codigo": "EEE",
+      "nivel": "Elevado",
+      "acao_sugerida": "Revisar políticas de atendimento que exigem supressão emocional constante (ex.: obrigação de sempre parecer satisfeito) e criar canal para reportar situações abusivas de clientes ou terceiros sem punição ao trabalhador.",
+      "hierarquia": "organizacao",
+      "indicador": "Política revisada e número de relatos de abuso tratados sem retaliação ao trabalhador."
+    },
+    {
+      "dominio_codigo": "IT",
+      "nivel": "Moderado",
+      "acao_sugerida": "Ampliar os espaços de participação da equipe na organização das tarefas e nas decisões do dia a dia.",
+      "hierarquia": "organizacao",
+      "indicador": "Decisões operacionais tomadas com participação direta da equipe."
+    },
+    {
+      "dominio_codigo": "IT",
+      "nivel": "Elevado",
+      "acao_sugerida": "Redesenhar processos e alçadas de decisão para devolver autonomia real sobre método, ritmo e prioridades do próprio trabalho.",
+      "hierarquia": "eliminacao",
+      "indicador": "Nível de autonomia percebido e decisões operacionais delegadas ao nível de execução."
+    },
+    {
+      "dominio_codigo": "PD",
+      "nivel": "Moderado",
+      "acao_sugerida": "Criar plano de capacitação e rodízio de tarefas para ampliar o aprendizado e o uso de habilidades da equipe.",
+      "hierarquia": "gestao",
+      "indicador": "Horas de capacitação oferecidas e diversidade de tarefas exercidas por colaborador."
+    },
+    {
+      "dominio_codigo": "PD",
+      "nivel": "Elevado",
+      "acao_sugerida": "Redesenhar a função para incluir tarefas desafiadoras e uma trilha de desenvolvimento formal, evitando trabalho repetitivo sem nenhuma perspectiva de aprendizado.",
+      "hierarquia": "organizacao",
+      "indicador": "Trilha de desenvolvimento implantada e progressão de competências registrada."
+    },
+    {
+      "dominio_codigo": "VT",
+      "nivel": "Moderado",
+      "acao_sugerida": "Introduzir rodízio de tarefas para reduzir a monotonia e a repetição excessiva no posto de trabalho.",
+      "hierarquia": "organizacao",
+      "indicador": "Frequência do rodízio aplicado e diversidade de tarefas por colaborador."
+    },
+    {
+      "dominio_codigo": "VT",
+      "nivel": "Elevado",
+      "acao_sugerida": "Redesenhar o posto ou processo para eliminar tarefas puramente repetitivas, combinando atividades de natureza diferente.",
+      "hierarquia": "eliminacao",
+      "indicador": "Proporção de tarefas únicas versus variadas no posto e satisfação com a variedade percebida."
+    },
+    {
+      "dominio_codigo": "PREV",
+      "nivel": "Moderado",
+      "acao_sugerida": "Padronizar a comunicação antecipada de mudanças, metas e decisões relevantes que afetem a rotina da equipe.",
+      "hierarquia": "gestao",
+      "indicador": "Antecedência média da comunicação e número de mudanças feitas sem aviso prévio."
+    },
+    {
+      "dominio_codigo": "PREV",
+      "nivel": "Elevado",
+      "acao_sugerida": "Implantar rotina formal de comunicação prévia (reuniões, murais, canais oficiais) antes de qualquer mudança relevante na rotina de trabalho.",
+      "hierarquia": "organizacao",
+      "indicador": "Percentual de mudanças comunicadas com antecedência mínima definida em política."
+    },
+    {
+      "dominio_codigo": "TPL",
+      "nivel": "Moderado",
+      "acao_sugerida": "Atualizar descrições de função, objetivos das tarefas e critérios de prioridade da equipe.",
+      "hierarquia": "organizacao",
+      "indicador": "Descrições de função atualizadas e dúvidas sobre responsabilidades reportadas."
+    },
+    {
+      "dominio_codigo": "TPL",
+      "nivel": "Elevado",
+      "acao_sugerida": "Redesenhar papéis e responsabilidades entre áreas/cargos para eliminar ambiguidade sistêmica sobre quem faz o quê.",
+      "hierarquia": "eliminacao",
+      "indicador": "Conflitos de papel registrados e retrabalho causado por ambiguidade de função."
+    },
+    {
+      "dominio_codigo": "REC",
+      "nivel": "Moderado",
+      "acao_sugerida": "Tornar os critérios de reconhecimento, o feedback de desempenho e as perspectivas de carreira claros e regulares.",
+      "hierarquia": "gestao",
+      "indicador": "Frequência de feedback formal recebido e clareza percebida sobre os critérios de reconhecimento."
+    },
+    {
+      "dominio_codigo": "REC",
+      "nivel": "Elevado",
+      "acao_sugerida": "Revisar a política de reconhecimento, remuneração e plano de carreira para corrigir desequilíbrio grave e persistente entre esforço exigido e recompensa oferecida.",
+      "hierarquia": "organizacao",
+      "indicador": "Plano de carreira revisado e percepção de reconhecimento justo em nova aplicação."
+    },
+    {
+      "dominio_codigo": "CONFL",
+      "nivel": "Moderado",
+      "acao_sugerida": "Alinhar expectativas entre lideranças sobre prioridades e critérios de qualidade, evitando ordens contraditórias para a mesma equipe.",
+      "hierarquia": "gestao",
+      "indicador": "Ordens contraditórias reportadas e retrabalho causado por conflito de instrução."
+    },
+    {
+      "dominio_codigo": "CONFL",
+      "nivel": "Elevado",
+      "acao_sugerida": "Redesenhar o fluxo de decisão e a hierarquia de aprovação para eliminar exigências sistematicamente incompatíveis entre si.",
+      "hierarquia": "eliminacao",
+      "indicador": "Situações de conflito de papel eliminadas e existência de uma única linha de prioridade clara."
+    },
+    {
+      "dominio_codigo": "ASC",
+      "nivel": "Moderado",
+      "acao_sugerida": "Fomentar rotinas de cooperação e comunicação entre colegas, como mentoria entre pares e reuniões regulares de equipe.",
+      "hierarquia": "gestao",
+      "indicador": "Frequência de interações de apoio entre colegas percebida pela equipe."
+    },
+    {
+      "dominio_codigo": "ASC",
+      "nivel": "Elevado",
+      "acao_sugerida": "Redesenhar a organização do trabalho para reduzir isolamento (trabalho solitário, turnos sem equipe) e garantir retaguarda entre pares.",
+      "hierarquia": "organizacao",
+      "indicador": "Tempo de trabalho isolado e disponibilidade real de apoio entre colegas."
+    },
+    {
+      "dominio_codigo": "ASS",
+      "nivel": "Moderado",
+      "acao_sugerida": "Estabelecer rotina de conversas periódicas (check-ins) e feedback do chefe direto sobre o andamento do trabalho.",
+      "hierarquia": "gestao",
+      "indicador": "Frequência de check-ins realizados e feedback efetivamente recebido pela equipe."
+    },
+    {
+      "dominio_codigo": "ASS",
+      "nivel": "Elevado",
+      "acao_sugerida": "Capacitar lideranças em suporte ativo à equipe e ajustar o número de subordinados por gestor quando o volume atual impede apoio adequado.",
+      "hierarquia": "organizacao",
+      "indicador": "Número de subordinados por gestor e satisfação da equipe com o suporte recebido."
+    },
+    {
+      "dominio_codigo": "CST",
+      "nivel": "Moderado",
+      "acao_sugerida": "Promover atividades de integração que fortaleçam o senso de equipe e pertencimento.",
+      "hierarquia": "gestao",
+      "indicador": "Participação em atividades de integração e clima de equipe percebido."
+    },
+    {
+      "dominio_codigo": "CST",
+      "nivel": "Elevado",
+      "acao_sugerida": "Investigar e corrigir dinâmicas estruturais de exclusão ou fragmentação da equipe (isolamento de subgrupos, ausência de cooperação entre turnos/áreas).",
+      "hierarquia": "organizacao",
+      "indicador": "Ocorrências de exclusão reportadas e coesão de equipe percebida em nova aplicação."
+    },
+    {
+      "dominio_codigo": "QL",
+      "nivel": "Moderado",
+      "acao_sugerida": "Capacitar lideranças em planejamento do trabalho, resolução de conflitos e desenvolvimento de equipe.",
+      "hierarquia": "gestao",
+      "indicador": "Horas de capacitação de líderes realizadas e avaliação da liderança pela equipe."
+    },
+    {
+      "dominio_codigo": "QL",
+      "nivel": "Elevado",
+      "acao_sugerida": "Reavaliar formalmente lideranças com padrão sistemático de baixa qualidade percebida, com plano de desenvolvimento estruturado ou realocação quando necessário.",
+      "hierarquia": "gestao",
+      "indicador": "Planos de desenvolvimento de liderança abertos e reincidência de queixas sobre a chefia."
+    },
+    {
+      "dominio_codigo": "CH",
+      "nivel": "Moderado",
+      "acao_sugerida": "Estimular transparência e compartilhamento de informação entre colegas, com rotinas formais de alinhamento de equipe.",
+      "hierarquia": "gestao",
+      "indicador": "Ocorrências de informação retida reportadas e frequência de alinhamento entre pares."
+    },
+    {
+      "dominio_codigo": "CH",
+      "nivel": "Elevado",
+      "acao_sugerida": "Investigar e corrigir causas estruturais de desconfiança entre colegas (competição excessiva, falta de reconhecimento coletivo, informação usada como forma de poder).",
+      "hierarquia": "organizacao",
+      "indicador": "Nível de confiança horizontal percebido e ocorrências de retenção de informação entre colegas."
+    },
+    {
+      "dominio_codigo": "CV",
+      "nivel": "Moderado",
+      "acao_sugerida": "Aumentar a transparência da gerência nas decisões e na comunicação de informações relevantes aos funcionários.",
+      "hierarquia": "gestao",
+      "indicador": "Informações compartilhadas proativamente e percepção de transparência da gerência."
+    },
+    {
+      "dominio_codigo": "CV",
+      "nivel": "Elevado",
+      "acao_sugerida": "Revisar práticas de gestão que geram desconfiança sistemática (informação sonegada, decisões não explicadas) e implantar rotina formal de prestação de contas à equipe.",
+      "hierarquia": "organizacao",
+      "indicador": "Confiança vertical percebida e decisões comunicadas com justificativa explícita."
+    },
+    {
+      "dominio_codigo": "JR",
+      "nivel": "Moderado",
+      "acao_sugerida": "Padronizar critérios de distribuição de trabalho, reconhecimento e resolução de conflitos entre funcionários.",
+      "hierarquia": "gestao",
+      "indicador": "Critérios documentados e disponíveis e percepção de justiça no tratamento recebido."
+    },
+    {
+      "dominio_codigo": "JR",
+      "nivel": "Elevado",
+      "acao_sugerida": "Auditar decisões recentes de gestão (distribuição de tarefas, promoções, tratamento de conflitos) e corrigir padrões identificados de tratamento desigual.",
+      "hierarquia": "organizacao",
+      "indicador": "Desvios corrigidos e percepção de justiça organizacional em nova aplicação."
+    },
+    {
+      "dominio_codigo": "RS",
+      "nivel": "Moderado",
+      "acao_sugerida": "Reforçar a política de diversidade e inclusão da empresa, com comunicação clara sobre não discriminação.",
+      "hierarquia": "gestao",
+      "indicador": "Denúncias de discriminação recebidas e participação em treinamentos de diversidade."
+    },
+    {
+      "dominio_codigo": "RS",
+      "nivel": "Elevado",
+      "acao_sugerida": "Investigar e corrigir práticas discriminatórias identificadas (gênero, raça, idade, deficiência) com plano de ação formal e acompanhamento.",
+      "hierarquia": "organizacao",
+      "indicador": "Casos investigados, medidas corretivas aplicadas e taxa de reincidência."
+    },
+    {
+      "dominio_codigo": "AE",
+      "nivel": "Moderado",
+      "acao_sugerida": "Oferecer suporte, treinamento e feedback construtivo que fortaleçam a confiança dos colaboradores na própria capacidade de resolver problemas do trabalho.",
+      "hierarquia": "gestao",
+      "indicador": "Participação em capacitações e feedback estruturado efetivamente recebido."
+    },
+    {
+      "dominio_codigo": "AE",
+      "nivel": "Elevado",
+      "acao_sugerida": "Investigar se a baixa autoconfiança está associada a condições de trabalho que impedem o sucesso (falta de recursos, metas inatingíveis, punição por erro) e corrigir essas condições antes de qualquer intervenção individual.",
+      "hierarquia": "organizacao",
+      "indicador": "Recursos e metas revisados e recorrência de relatos de incapacidade de resolver problemas."
+    },
+    {
+      "dominio_codigo": "ST",
+      "nivel": "Moderado",
+      "acao_sugerida": "Reforçar a comunicação sobre o propósito e o impacto real do trabalho de cada função na organização.",
+      "hierarquia": "gestao",
+      "indicador": "Percepção de propósito reportada e nível de engajamento da equipe."
+    },
+    {
+      "dominio_codigo": "ST",
+      "nivel": "Elevado",
+      "acao_sugerida": "Redesenhar tarefas fragmentadas ou esvaziadas de sentido, reconectando o trabalho ao resultado final e ao impacto para a equipe ou os clientes.",
+      "hierarquia": "organizacao",
+      "indicador": "Tarefas redesenhadas e percepção de significado do trabalho em nova aplicação."
+    },
+    {
+      "dominio_codigo": "CLT",
+      "nivel": "Moderado",
+      "acao_sugerida": "Fortalecer a identificação com a organização por meio de comunicação interna consistente e reconhecimento do vínculo dos funcionários.",
+      "hierarquia": "gestao",
+      "indicador": "Engajamento com a comunicação interna e permanência voluntária na empresa."
+    },
+    {
+      "dominio_codigo": "CLT",
+      "nivel": "Elevado",
+      "acao_sugerida": "Investigar as causas reais do baixo comprometimento (desalinhamento de valores, falta de reconhecimento, insegurança) e agir na causa raiz, não só na comunicação.",
+      "hierarquia": "organizacao",
+      "indicador": "Turnover voluntário e resultado de pesquisa de clima organizacional."
+    },
+    {
+      "dominio_codigo": "SAT",
+      "nivel": "Moderado",
+      "acao_sugerida": "Levantar as causas específicas de insatisfação (condições físicas, perspectivas de carreira, uso das capacidades) e agir diretamente nos pontos identificados.",
+      "hierarquia": "gestao",
+      "indicador": "Ações corretivas implementadas por causa de insatisfação e satisfação reavaliada."
+    },
+    {
+      "dominio_codigo": "SAT",
+      "nivel": "Elevado",
+      "acao_sugerida": "Revisar estruturalmente condições de trabalho, perspectivas de carreira e aproveitamento de capacidades quando a insatisfação é ampla e persistente na equipe.",
+      "hierarquia": "organizacao",
+      "indicador": "Turnover, absenteísmo e satisfação medida em nova aplicação do questionário."
+    },
+    {
+      "dominio_codigo": "IL",
+      "nivel": "Moderado",
+      "acao_sugerida": "Comunicar de forma transparente e antecipada mudanças organizacionais, reestruturações ou automações que possam afetar os postos de trabalho.",
+      "hierarquia": "gestao",
+      "indicador": "Comunicações formais realizadas antes de qualquer mudança estrutural relevante."
+    },
+    {
+      "dominio_codigo": "IL",
+      "nivel": "Elevado",
+      "acao_sugerida": "Formalizar política de estabilidade e recolocação (requalificação, transferência interna, prazo de aviso) diante de reestruturação, automação ou risco real de desemprego.",
+      "hierarquia": "organizacao",
+      "indicador": "Planos de requalificação ou recolocação executados e nível de insegurança reavaliado."
+    },
+    {
+      "dominio_codigo": "SG",
+      "nivel": "Moderado",
+      "acao_sugerida": "Investigar quais fatores de trabalho (carga, ritmo, suporte) estão associados à percepção de saúde reduzida e encaminhar avaliação com o SESMT/serviço de saúde ocupacional.",
+      "hierarquia": "gestao",
+      "indicador": "Encaminhamentos ao serviço de saúde ocupacional e reavaliação da percepção de saúde geral."
+    },
+    {
+      "dominio_codigo": "SG",
+      "nivel": "Elevado",
+      "acao_sugerida": "Aprofundar a investigação cruzando com absenteísmo, afastamentos e CAT/CID relacionados, e agir nas causas organizacionais identificadas com acompanhamento médico ocupacional ativo.",
+      "hierarquia": "organizacao",
+      "indicador": "Afastamentos por saúde, CAT/CID relacionados registrados e reavaliação periódica da saúde geral."
+    },
+    {
+      "dominio_codigo": "CTF",
+      "nivel": "Moderado",
+      "acao_sugerida": "Rever política de horários, banco de horas e comunicação fora do expediente para reduzir a invasão da vida pessoal pelo trabalho.",
+      "hierarquia": "organizacao",
+      "indicador": "Horas extras habituais registradas e contatos de trabalho fora do expediente."
+    },
+    {
+      "dominio_codigo": "CTF",
+      "nivel": "Elevado",
+      "acao_sugerida": "Implantar política formal de desconexão e limitar jornada/sobreaviso quando invade sistematicamente a vida pessoal dos colaboradores.",
+      "hierarquia": "eliminacao",
+      "indicador": "Cumprimento da política de desconexão e nível de conflito trabalho-família reavaliado."
+    },
+    {
+      "dominio_codigo": "CFT",
+      "nivel": "Moderado",
+      "acao_sugerida": "Oferecer flexibilidade de horário ou modalidade de trabalho, quando compatível com a função, para acomodar demandas pessoais e familiares.",
+      "hierarquia": "organizacao",
+      "indicador": "Solicitações de flexibilidade atendidas e impacto observado no desempenho."
+    },
+    {
+      "dominio_codigo": "CFT",
+      "nivel": "Elevado",
+      "acao_sugerida": "Formalizar políticas de apoio (horário flexível, licenças, banco de horas) para funções onde o conflito família-trabalho é recorrente e afeta o desempenho.",
+      "hierarquia": "gestao",
+      "indicador": "Políticas de apoio implantadas e nível de conflito família-trabalho reavaliado."
+    },
+    {
+      "dominio_codigo": "PSONO",
+      "nivel": "Moderado",
+      "acao_sugerida": "Investigar a relação com carga de trabalho, turnos e contato fora do expediente; orientar sobre higiene do sono e encaminhar ao serviço de saúde ocupacional.",
+      "hierarquia": "gestao",
+      "indicador": "Encaminhamentos realizados e problemas de sono reavaliados em novo ciclo."
+    },
+    {
+      "dominio_codigo": "PSONO",
+      "nivel": "Elevado",
+      "acao_sugerida": "Revisar escala de turnos, sobrecarga de trabalho e política de desconexão como causa provável, com acompanhamento médico ocupacional ativo para casos persistentes.",
+      "hierarquia": "organizacao",
+      "indicador": "Ajustes de escala/turno realizados e prevalência de distúrbios do sono na equipe."
+    },
+    {
+      "dominio_codigo": "BURN",
+      "nivel": "Moderado",
+      "acao_sugerida": "Reduzir a sobrecarga de trabalho na origem (revisar exigências quantitativas, ritmo e cognitivas relacionadas), garantir pausas reais e oferecer apoio psicológico voluntário.",
+      "hierarquia": "gestao",
+      "indicador": "Pausas efetivamente cumpridas, uso do apoio psicológico oferecido e reavaliação do burnout."
+    },
+    {
+      "dominio_codigo": "BURN",
+      "nivel": "Elevado",
+      "acao_sugerida": "Ativar protocolo de afastamento preventivo quando indicado, redesenhar a carga e o processo na origem, e garantir retorno acompanhado pelo SESMT/serviço de saúde ocupacional.",
+      "hierarquia": "eliminacao",
+      "indicador": "Afastamentos preventivos realizados, retorno acompanhado e recorrência de exaustão."
+    },
+    {
+      "dominio_codigo": "STR",
+      "nivel": "Moderado",
+      "acao_sugerida": "Mapear as fontes organizacionais de estresse (carga, conflito de papéis, insegurança) e atuar nelas antes de qualquer medida individual, oferecendo também apoio psicológico.",
+      "hierarquia": "gestao",
+      "indicador": "Fontes de estresse mapeadas e nível de estresse reavaliado em novo ciclo."
+    },
+    {
+      "dominio_codigo": "STR",
+      "nivel": "Elevado",
+      "acao_sugerida": "Redesenhar a organização do trabalho na causa raiz identificada e acompanhar clinicamente os casos de estresse elevado e persistente.",
+      "hierarquia": "organizacao",
+      "indicador": "Medidas na causa raiz implantadas e nível de estresse reavaliado em nova aplicação."
+    },
+    {
+      "dominio_codigo": "SDEP",
+      "nivel": "Moderado",
+      "acao_sugerida": "Sinalizar ao SESMT/serviço de saúde ocupacional para avaliação e apoio, preservando sigilo e sem qualquer viés de causa individual.",
+      "hierarquia": "gestao",
+      "indicador": "Encaminhamentos realizados e acompanhamento sigiloso mantido ativo."
+    },
+    {
+      "dominio_codigo": "SDEP",
+      "nivel": "Elevado",
+      "acao_sugerida": "Acionar imediatamente o fluxo de apoio à saúde mental (encaminhamento clínico, rede de apoio, avaliação de afastamento) e revisar sem demora os fatores organizacionais associados (carga, assédio, insegurança).",
+      "hierarquia": "resposta_imediata",
+      "indicador": "Encaminhamento clínico realizado e fatores organizacionais associados corrigidos."
+    },
+    {
+      "dominio_codigo": "SSOM",
+      "nivel": "Moderado",
+      "acao_sugerida": "Encaminhar avaliação médica ocupacional e investigar fatores de carga física ou mental associados aos sintomas somáticos relatados.",
+      "hierarquia": "gestao",
+      "indicador": "Avaliações médicas realizadas e sintomas somáticos reavaliados em novo ciclo."
+    },
+    {
+      "dominio_codigo": "SSOM",
+      "nivel": "Elevado",
+      "acao_sugerida": "Revisar imediatamente a carga de trabalho e as condições associadas, com acompanhamento médico ativo para sintomas físicos persistentes de origem psicossocial.",
+      "hierarquia": "organizacao",
+      "indicador": "Ajustes de carga realizados e prevalência de sintomas somáticos na equipe."
+    },
+    {
+      "dominio_codigo": "SCOG",
+      "nivel": "Moderado",
+      "acao_sugerida": "Investigar a relação com exigências cognitivas e interrupções constantes; ajustar a organização do trabalho para reduzir a sobrecarga mental.",
+      "hierarquia": "gestao",
+      "indicador": "Ajustes realizados na organização do trabalho e dificuldades cognitivas reavaliadas."
+    },
+    {
+      "dominio_codigo": "SCOG",
+      "nivel": "Elevado",
+      "acao_sugerida": "Redesenhar o processo para eliminar sobrecarga cognitiva crônica (múltiplas prioridades simultâneas, interrupções constantes) e acompanhar clinicamente os casos persistentes.",
+      "hierarquia": "organizacao",
+      "indicador": "Processo redesenhado e sintomas de estresse cognitivo reavaliados em nova aplicação."
+    },
+    {
+      "dominio_codigo": "CO",
+      "nivel": "Moderado",
+      "acao_sugerida": "Reforçar a política de tolerância zero a conflitos, rumores e insultos no ambiente de trabalho, com canal confidencial de denúncia e apuração ágil.",
+      "hierarquia": "gestao",
+      "indicador": "Denúncias apuradas dentro do prazo definido e recorrência de comportamentos ofensivos."
+    },
+    {
+      "dominio_codigo": "CO",
+      "nivel": "Elevado",
+      "acao_sugerida": "Ativar fluxo protegido imediato: cessar a exposição, preservar evidências, apurar com isenção e proteger a vítima contra retaliação — mesmo padrão de resposta do domínio D9 do COPSOQ adaptado.",
+      "hierarquia": "resposta_imediata",
+      "indicador": "Proteção efetivada, prazo de resposta cumprido e ausência de recorrência do comportamento ofensivo."
+    }
+  ]
+}

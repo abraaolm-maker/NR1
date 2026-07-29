@@ -9,6 +9,25 @@
     </p>
 </div>
 
+{% if not aplicacao %}
+<div class="cartao" style="border-color: var(--amber-100, #fef3c7); background: var(--amber-50, #fffbeb);">
+    <details>
+        <summary style="cursor: pointer; font-weight: 600; color: var(--amber-700, #b45309);">
+            ⚠ Antes de aplicar: você está pronto pra agir sobre o resultado?
+        </summary>
+        <p style="font-size: 13px; color: #555; margin-top: 8px;">
+            O manual do COPSOQ (Copenhagen Psychosocial Questionnaire) é categórico: "o
+            instrumento não deve ser usado se não se pretende agir face aos resultados
+            encontrados". Aplicar o questionário cria uma expectativa nos respondentes e uma
+            obrigação técnica (NR-01/GRO-PGR) de que os riscos identificados virem Plano de
+            Ação com responsável e prazo — o sistema já gera isso automaticamente pra
+            domínios acima de "Aceitável", mas a execução real das medidas depende da sua
+            empresa.
+        </p>
+    </details>
+</div>
+{% endif %}
+
 <div class="cartao">
     <form method="post">
         {% csrf_token %}
@@ -19,6 +38,14 @@
             {{ form.instrumento }}
             {% if form.instrumento.errors %}<span class="helptext" style="color:#c0392b;">{{ form.instrumento.errors|join:" " }}</span>{% endif %}
             <span class="helptext" id="instrumento-ajuda-dinamica" style="display:block; margin-top:4px; color:#555;"></span>
+        </p>
+
+        {# ---- Profundidade: só aparece pra instrumentos que a usam (COPSOQ Oficial) ---- #}
+        <p id="profundidade-campo" style="display:none;">
+            <label for="{{ form.profundidade.id_for_label }}">{{ form.profundidade.label }}:</label>
+            {{ form.profundidade }}
+            {% if form.profundidade.errors %}<span class="helptext" style="color:#c0392b;">{{ form.profundidade.errors|join:" " }}</span>{% endif %}
+            <span class="helptext" style="display:block; margin-top:4px; color:#777;">{{ form.profundidade.help_text }}</span>
         </p>
 
         {# ---- Tipo: decisão real #2, já vem pré-marcado em "Anônima" ---- #}
@@ -84,15 +111,20 @@
 </div>
 
 <script type="application/json" id="instrumentos-ajuda-data">{{ form.instrumentos_ajuda_json|safe }}</script>
+<script type="application/json" id="instrumentos-profundidade-data">{{ form.instrumentos_com_profundidade_json|safe }}</script>
 <script>
 (function () {
     var ajudaData = JSON.parse(document.getElementById('instrumentos-ajuda-data').textContent);
+    var instrumentosComProfundidade = JSON.parse(document.getElementById('instrumentos-profundidade-data').textContent);
 
     var selectInstrumento = document.getElementById('{{ form.instrumento.id_for_label }}');
     var ajudaInstrumento = document.getElementById('instrumento-ajuda-dinamica');
+    var campoProfundidade = document.getElementById('profundidade-campo');
+
     function atualizarAjudaInstrumento() {
         var texto = ajudaData[selectInstrumento.value];
         ajudaInstrumento.textContent = texto || 'Selecione um instrumento para ver o que ele é e quando usá-lo.';
+        campoProfundidade.style.display = instrumentosComProfundidade.indexOf(selectInstrumento.value) !== -1 ? 'block' : 'none';
     }
     selectInstrumento.addEventListener('change', atualizarAjudaInstrumento);
     atualizarAjudaInstrumento();

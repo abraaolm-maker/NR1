@@ -38,6 +38,36 @@ from avaliacoes.services.criterio_versao import verificar_criterio_versao_atuali
 from instrumentos.models import Dominio, Item
 
 
+BANDA_ORDEM = {
+    "Crítico": 4,
+    "Alto": 3,
+    "Moderado": 2,
+    "Aceitável": 1,
+}
+
+
+def media_nacional_comparavel(dominio: Dominio) -> float | None:
+    """Normaliza a média nacional publicada (bruta, 1-5, manual COPSOQ Portugal 2013)
+    pra escala 0-100 já invertida por polaridade — mesma direção do EscoreDominio.escore
+    (maior = mais risco), pra comparar direto "sua empresa X | média nacional Y". Usada
+    tanto no PDF (`relatorios/services/pdf.py`) quanto na tela do painel
+    (`avaliacoes/painel_views.py::aplicacao_detail`) — CLAUDE.md Seção 6.13.
+
+    Retorna None quando não há valor publicado ou quando o domínio tem polaridade mista
+    (Confiança horizontal/vertical) — inverter a média agregada do manual exigiria o
+    dado item a item que o manual não publica, então não arriscamos uma conta enganosa."""
+    if dominio.referencia_media_nacional is None:
+        return None
+    polaridades = set(dominio.itens.values_list("polaridade", flat=True))
+    if len(polaridades) != 1:
+        return None
+    valor = float(dominio.referencia_media_nacional)
+    if polaridades.pop() == "PROTETIVO":
+        valor = (dominio.escala_max + dominio.escala_min) - valor
+    amplitude = dominio.escala_max - dominio.escala_min
+    return round((valor - dominio.escala_min) / amplitude * 100, 1)
+
+
 def _thresholds_do_criterio(aplicacao: Aplicacao, dominio: Dominio) -> "risk_engine.Thresholds":
     criterio = aplicacao.criterio_versao
     try:
@@ -55,17 +85,24 @@ def contar_evidencias_convergentes(aplicacao: Aplicacao, dominio: Dominio) -> in
     domínio. Duas fontes:
     1. IndicadorIndireto do GHE (absenteísmo, turnover, CAT/CID-F, relato de
        entrevista, ou "checklist não conforme" cadastrado manualmente).
-    2. RespostaChecklistTriangulacao "Não conforme" desta Aplicacao (Prompt 09) —
-       antes não alimentava o cálculo (achado no diagnóstico de UX de 2026-07-28: o
-       checklist de entrevista/observação existia mas não tinha efeito nenhum na
-       probabilidade). Conta no máximo 1, como um único tipo de evidência — o mesmo
-       peso que os outros 4 tipos têm na regra 0/1/2+ do risk_engine."""
+    2. RespostaChecklistTriangulacao "Não conforme" desta Aplicacao (Prompt 09), só de
+       itens `tipo=observacao` (achado em 2026-07-29: itens `tipo=entrevista` são
+       perguntas abertas, sem conformidade válida — nunca devem contar aqui) e só
+       quando o item não tem `dominio_codigo_relacionado` (evidência geral) ou tem o
+       mesmo código do domínio calculado (mesma semântica do `dominio_relacionado`
+       nulo/preenchido do IndicadorIndireto, ver Seção 4.2). Conta no máximo 1, como um
+       único tipo de evidência — o mesmo peso que os outros 4 tipos têm na regra
+       0/1/2+ do risk_engine."""
     indicadores = IndicadorIndireto.objects.filter(ghe=aplicacao.ghe, convergente=True).filter(
         django_models.Q(dominio_relacionado__isnull=True) | django_models.Q(dominio_relacionado=dominio)
     ).count()
 
     tem_checklist_nao_conforme = RespostaChecklistTriangulacao.objects.filter(
-        respondente__coleta__aplicacao=aplicacao, conformidade=ConformidadeChecklist.NAO_CONFORME
+        respondente__coleta__aplicacao=aplicacao,
+        conformidade=ConformidadeChecklist.NAO_CONFORME,
+        item__tipo="observacao",
+    ).filter(
+        django_models.Q(item__dominio_codigo_relacionado="") | django_models.Q(item__dominio_codigo_relacionado=dominio.codigo)
     ).exists()
 
     return indicadores + (1 if tem_checklist_nao_conforme else 0)
@@ -85,10 +122,36 @@ def _recalcular_indice_geral(respondente_id: int) -> None:
     Respondente.objects.filter(pk=respondente_id).update(indice_geral=Decimal(str(round(float(media), 2))))
 
 
+_ORDEM_PROFUNDIDADE = {"curta": 1, "media": 2, "longa": 3}
+
+
+def itens_da_aplicacao(aplicacao: Aplicacao, dominio: Dominio):
+    """Itens de um domínio que valem pra esta Aplicacao — normalmente todos, mas no
+    COPSOQ Oficial (CLAUDE.md — 3 profundidades curta/média/longa) só entram os itens
+    com `profundidade` em branco (sempre incluído) ou cujo nível é <= o nível escolhido
+    na Aplicacao (curta ⊆ média ⊆ longa, por conteúdo do item — Seção sobre o COPSOQ
+    Oficial)."""
+    qs = dominio.itens.all()
+    if not aplicacao.profundidade:
+        return qs
+    nivel_aplicacao = _ORDEM_PROFUNDIDADE[aplicacao.profundidade]
+    ids_validos = [
+        item.id
+        for item in qs
+        if not item.profundidade or _ORDEM_PROFUNDIDADE[item.profundidade] <= nivel_aplicacao
+    ]
+    return qs.filter(id__in=ids_validos)
+
+
 def dominios_da_aplicacao(aplicacao: Aplicacao) -> list[Dominio]:
-    """Todos os Dominio do instrumento da Aplicacao — sempre genéricos, o mesmo
-    conjunto vale para qualquer GHE (CLAUDE.md Seção 6.5)."""
-    return list(Dominio.objects.filter(instrumento=aplicacao.instrumento).select_related("instrumento"))
+    """Todos os Dominio do instrumento da Aplicacao que têm pelo menos um item válido
+    pra esta profundidade — sempre genéricos, o mesmo conjunto vale para qualquer GHE
+    (CLAUDE.md Seção 6.5). No COPSOQ Oficial, um domínio exclusivo da versão longa (ex.
+    "Variação no trabalho") não aparece numa Aplicacao com profundidade=curta/média."""
+    dominios = Dominio.objects.filter(instrumento=aplicacao.instrumento).select_related("instrumento")
+    if not aplicacao.profundidade:
+        return list(dominios)
+    return [d for d in dominios if itens_da_aplicacao(aplicacao, d).exists()]
 
 
 @transaction.atomic
@@ -118,7 +181,12 @@ def calcular_dominio(aplicacao: Aplicacao, dominio: Dominio) -> EscoreDominio:
         for item in dominio.itens.all()
     }
 
-    resultado_dominio, resultado_risco, suprimir = risk_engine.avaliar_dominio(
+    # `avaliar_dominio` ainda calcula a Banda antiga (Severidade × Probabilidade por
+    # evidências convergentes) internamente, mas esse resultado NÃO é mais usado pra
+    # decidir a Banda persistida (achado de 2026-07-29, ver risk_engine.py::
+    # calcular_risco_por_prevalencia) — só aproveitamos `resultado_dominio` (escore/
+    # classificação/severidade), `suprimir` e `evento_grave_confirmado` daqui.
+    resultado_dominio, resultado_risco_legado, suprimir = risk_engine.avaliar_dominio(
         codigo_dominio=dominio.codigo,
         respostas=respostas,
         itens_por_id=itens_por_id,
@@ -181,6 +249,18 @@ def calcular_dominio(aplicacao: Aplicacao, dominio: Dominio) -> EscoreDominio:
             "percentual_elevados": Decimal(str(prevalencia.percentual_elevados)),
             "prioridade": prioridade.value,
         },
+    )
+
+    # Banda/prazo vêm da Prioridade por prevalência (mesma lógica do semáforo COPSOQ),
+    # não mais da matriz Severidade × Probabilidade (achado de 2026-07-29). Usa
+    # `prevalencia.prioridade` (nunca a variável `prioridade` acima, que vira AGRUPAR
+    # quando suprimido) — a supressão continua protegida da mesma forma que sempre
+    # foi: os templates checam `suprimido_por_confidencialidade` antes de mostrar
+    # Banda/escore, não porque o dado deixa de existir internamente.
+    resultado_risco = risk_engine.calcular_risco_por_prevalencia(
+        prioridade=prevalencia.prioridade,
+        severidade=resultado_dominio.severidade,
+        evento_grave_confirmado=resultado_risco_legado.evento_grave_confirmado,
     )
 
     classificacao_risco, _ = ClassificacaoRisco.objects.update_or_create(
@@ -296,6 +376,44 @@ def diagnostico_ghe(aplicacao: Aplicacao) -> list[dict]:
             }
         )
     return linhas
+
+
+def criterio_classificacao_linhas(criterio_versao) -> list[dict]:
+    """Critério que efetivamente decide a Banda hoje (achado de 2026-07-29): a
+    Prioridade por prevalência, mesma lógica "semáforo" do manual COPSOQ Portugal 2013
+    (p. 15) e da planilha de referência do projeto — substitui a antiga matriz
+    Severidade × Probabilidade (`CriterioVersao.matriz_risco`, mantida no banco só
+    como registro histórico de como as Aplicacoes antigas foram calculadas, nunca mais
+    usada pra decidir Banda de cálculos novos). Usada tanto no PDF do relatório
+    (`relatorios/services/pdf.py`) quanto na tela de Configurações de risco do painel."""
+    p1 = criterio_versao.prevalencia_p1
+    p2 = criterio_versao.prevalencia_p2
+    return [
+        {
+            "prioridade": "P1",
+            "condicao": f"≥ {int(float(p1) * 100)}% dos respondentes na faixa elevada",
+            "banda": "Alto",
+            "prazo_dias": 30,
+        },
+        {
+            "prioridade": "P2",
+            "condicao": f"≥ {int(float(p2) * 100)}% e < {int(float(p1) * 100)}% dos respondentes na faixa elevada",
+            "banda": "Moderado",
+            "prazo_dias": 90,
+        },
+        {
+            "prioridade": "P3",
+            "condicao": f"< {int(float(p2) * 100)}% dos respondentes na faixa elevada",
+            "banda": "Aceitável",
+            "prazo_dias": None,
+        },
+        {
+            "prioridade": "—",
+            "condicao": "Evento grave confirmado (violência, ameaça, assédio moral ou discriminação relatados)",
+            "banda": "Crítico",
+            "prazo_dias": 15,
+        },
+    ]
 
 
 def _gerar_plano_de_acao_se_necessario(

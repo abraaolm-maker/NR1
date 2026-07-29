@@ -8,12 +8,13 @@ o que já foi respondido. Um navegador diferente que abra o mesmo link é tratad
 um respondente novo.
 
 Fluxo: consentimento (duas declarações obrigatórias) -> perfil (tempo na organização,
-modalidade de trabalho, nome se identificada) -> um domínio/subescala por página ->
-perguntas abertas (opcionais) -> conclusão. `_proximo_passo` decide sempre a próxima
-etapa a partir do estado do Respondente, num único lugar."""
+modalidade de trabalho, nome se identificada) -> uma pergunta por página, cruzando
+todos os domínios em sequência única (revisão de UX de 2026-07-29 — reduz distração
+em relação a mostrar um domínio inteiro por página) -> perguntas abertas (opcionais)
+-> conclusão. `_proximo_passo` decide sempre a próxima etapa a partir do estado do
+Respondente, num único lugar."""
 
 from django import forms
-from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -28,9 +29,9 @@ from avaliacoes.models import (
     TipoAplicacao,
 )
 from avaliacoes.services.aplicacao_status import atualizar_status_aplicacao
-from avaliacoes.services.calculo_risco import calcular_dominio, dominios_da_aplicacao
-from avaliacoes.services.questionario import dominios_pendentes
-from instrumentos.models import Dominio
+from avaliacoes.services.calculo_risco import calcular_dominio
+from avaliacoes.services.questionario import itens_em_ordem, posicao_item, proximo_item_pendente
+from instrumentos.models import Item
 
 
 def _get_aplicacao_ou_404(aplicacao_token) -> Aplicacao:
@@ -71,11 +72,9 @@ def _proximo_passo(respondente: Respondente):
     if not _perfil_preenchido(respondente):
         return redirect("avaliacoes:responder_perfil", aplicacao_token=aplicacao.token)
 
-    pendentes = dominios_pendentes(respondente)
-    if pendentes:
-        return redirect(
-            "avaliacoes:responder_dominio", aplicacao_token=aplicacao.token, dominio_codigo=pendentes[0].codigo
-        )
+    proximo_item = proximo_item_pendente(respondente)
+    if proximo_item:
+        return redirect("avaliacoes:responder_pergunta", aplicacao_token=aplicacao.token, item_pk=proximo_item.pk)
     if not respondente.perguntas_abertas_respondidas_em:
         return redirect("avaliacoes:responder_perguntas_abertas", aplicacao_token=aplicacao.token)
 
@@ -128,27 +127,21 @@ class PerguntasAbertasForm(forms.Form):
     )
 
 
-def _construir_form_dominio(dominio: Dominio, respondente: Respondente, data=None) -> forms.Form:
-    respostas_existentes = dict(
-        Resposta.objects.filter(respondente=respondente, item__dominio=dominio).values_list(
-            "item__item_id", "valor_bruto"
-        )
+def _construir_form_item(item: Item, respondente: Respondente, data=None) -> forms.Form:
+    valor_existente = (
+        Resposta.objects.filter(respondente=respondente, item=item).values_list("valor_bruto", flat=True).first()
     )
-    choices = sorted(dominio.escala_labels.items(), key=lambda kv: int(kv[0]))
-    opcoes = [(valor, f"{valor} — {rotulo}") for valor, rotulo in choices]
+    choices = sorted(item.dominio.escala_labels.items(), key=lambda kv: int(kv[0]))
+    opcoes = [(valor, rotulo) for valor, rotulo in choices]
 
-    campos = {}
-    for item in dominio.itens.all():
-        valor_existente = respostas_existentes.get(item.item_id)
-        campos[item.item_id] = forms.ChoiceField(
-            label=item.texto,
-            choices=opcoes,
-            widget=forms.RadioSelect,
-            initial=str(valor_existente) if valor_existente is not None else None,
-        )
-
-    formulario_dominio = type("FormularioDominio", (forms.Form,), campos)
-    return formulario_dominio(data)
+    campo = forms.ChoiceField(
+        label=item.texto,
+        choices=opcoes,
+        widget=forms.RadioSelect,
+        initial=str(valor_existente) if valor_existente is not None else None,
+    )
+    formulario_item = type("FormularioItem", (forms.Form,), {"resposta": campo})
+    return formulario_item(data)
 
 
 def responder_consentimento(request, aplicacao_token):
@@ -211,7 +204,20 @@ def responder_perfil(request, aplicacao_token):
     return render(request, "avaliacoes/questionario_perfil.html", {"respondente": respondente, "form": form})
 
 
-def responder_dominio(request, aplicacao_token, dominio_codigo):
+def _cor_barra_progresso(percentual: float) -> str:
+    """Interpola de âmbar (início) pra verde (perto do fim) conforme o progresso —
+    pedido explícito do usuário pra dar uma pista visual contínua de avanço, além do
+    número "Pergunta N de T"."""
+    inicio = (245, 158, 11)  # âmbar
+    fim = (34, 197, 94)  # verde
+    fracao = max(0.0, min(1.0, percentual / 100))
+    r = round(inicio[0] + (fim[0] - inicio[0]) * fracao)
+    g = round(inicio[1] + (fim[1] - inicio[1]) * fracao)
+    b = round(inicio[2] + (fim[2] - inicio[2]) * fracao)
+    return f"rgb({r}, {g}, {b})"
+
+
+def responder_pergunta(request, aplicacao_token, item_pk):
     aplicacao = _get_aplicacao_ou_404(aplicacao_token)
     respondente = _get_respondente_da_sessao(request, aplicacao)
     if not respondente:
@@ -223,51 +229,52 @@ def responder_dominio(request, aplicacao_token, dominio_codigo):
     if respondente.concluido_em:
         return redirect("avaliacoes:responder_concluido", aplicacao_token=aplicacao_token)
 
-    todos_dominios = dominios_da_aplicacao(aplicacao)
-    dominios_por_codigo = {d.codigo: d for d in todos_dominios}
-    dominio = dominios_por_codigo.get(dominio_codigo)
-    if dominio is None:
-        raise Http404("Este domínio não pertence à aplicação.")
+    todos_itens = itens_em_ordem(aplicacao)
+    item = get_object_or_404(Item, pk=item_pk)
+    if item not in todos_itens:
+        return redirect("avaliacoes:responder_consentimento", aplicacao_token=aplicacao_token)
 
     if request.method == "POST":
-        form = _construir_form_dominio(dominio, respondente, data=request.POST)
+        form = _construir_form_item(item, respondente, data=request.POST)
         if form.is_valid():
-            for item in dominio.itens.all():
-                Resposta.objects.update_or_create(
-                    respondente=respondente,
-                    item=item,
-                    defaults={"valor_bruto": int(form.cleaned_data[item.item_id])},
-                )
+            Resposta.objects.update_or_create(
+                respondente=respondente,
+                item=item,
+                defaults={"valor_bruto": int(form.cleaned_data["resposta"])},
+            )
 
             # Recalcula o agregado do domínio (todas as Respostas de todos os
-            # Respondentes da Aplicacao até agora) assim que alguém termina de
-            # respondê-lo — sem isso, EscoreDominio/ClassificacaoRisco/PlanoDeAcao
-            # nunca nasceriam a partir do fluxo real de resposta.
-            calcular_dominio(aplicacao, dominio)
+            # Respondentes da Aplicacao até agora) a cada resposta — idempotente,
+            # sem isso EscoreDominio/ClassificacaoRisco/PlanoDeAcao nunca nasceriam
+            # a partir do fluxo real de resposta.
+            calcular_dominio(aplicacao, item.dominio)
 
             return _proximo_passo(respondente)
     else:
-        form = _construir_form_dominio(dominio, respondente)
+        form = _construir_form_item(item, respondente)
 
-    indice = todos_dominios.index(dominio)
-    progresso = {"atual": indice + 1, "total": len(todos_dominios)}
+    indice = todos_itens.index(item)
+    progresso = posicao_item(aplicacao, item)
+    percentual = progresso["atual"] / progresso["total"] * 100
 
     if indice == 0:
         url_anterior = reverse("avaliacoes:responder_perfil", args=[aplicacao_token])
     else:
         url_anterior = reverse(
-            "avaliacoes:responder_dominio",
-            args=[aplicacao_token, todos_dominios[indice - 1].codigo],
+            "avaliacoes:responder_pergunta", args=[aplicacao_token, todos_itens[indice - 1].pk]
         )
 
     return render(
         request,
-        "avaliacoes/questionario_dominio.html",
+        "avaliacoes/questionario_pergunta.html",
         {
             "respondente": respondente,
-            "dominio": dominio,
+            "dominio": item.dominio,
+            "item": item,
             "form": form,
             "progresso": progresso,
+            "percentual_progresso": percentual,
+            "cor_barra_progresso": _cor_barra_progresso(percentual),
             "url_anterior": url_anterior,
         },
     )
@@ -299,10 +306,10 @@ def responder_perguntas_abertas(request, aplicacao_token):
             }
         )
 
-    todos_dominios = dominios_da_aplicacao(aplicacao)
+    todos_itens = itens_em_ordem(aplicacao)
     url_anterior = (
-        reverse("avaliacoes:responder_dominio", args=[aplicacao_token, todos_dominios[-1].codigo])
-        if todos_dominios
+        reverse("avaliacoes:responder_pergunta", args=[aplicacao_token, todos_itens[-1].pk])
+        if todos_itens
         else reverse("avaliacoes:responder_perfil", args=[aplicacao_token])
     )
 

@@ -1,7 +1,21 @@
 from django.contrib import admin, messages
 
-from .models import PerfilProfissional, Relatorio
+from .models import ChaveApiClaude, PerfilProfissional, Relatorio
 from .services.pdf import assinar_relatorio, gerar_pdf_relatorio
+
+
+@admin.register(ChaveApiClaude)
+class ChaveApiClaudeAdmin(admin.ModelAdmin):
+    """Só leitura/toggle de `ativa` — o cadastro (que grava o valor bruto no
+    `.env.local`) só acontece pelo painel (`painel_relatorios:chaves_api_create`),
+    nunca por aqui, pra não abrir um segundo caminho que exponha o valor completo."""
+
+    list_display = ("nome", "prefixo", "sufixo", "ativa", "criada_por", "criada_em")
+    list_filter = ("ativa",)
+    readonly_fields = ("nome", "prefixo", "sufixo", "criada_por", "criada_em")
+
+    def has_add_permission(self, request):
+        return False
 
 
 @admin.register(PerfilProfissional)

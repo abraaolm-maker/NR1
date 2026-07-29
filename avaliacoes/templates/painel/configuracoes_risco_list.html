@@ -1,0 +1,61 @@
+{% extends "painel/_base.html" %}
+{% block titulo %}Configurações de Classificação de Risco{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+    <h1>Configurações de Classificação de Risco</h1>
+    <p class="subtitulo">
+        Cada versão abaixo é um retrato fixo dos parâmetros que o motor de cálculo usa
+        (limites de faixa, N mínimo de confidencialidade, matriz de risco). Uma versão
+        nunca é editada depois de criada — se um número precisa mudar, cria-se uma
+        versão nova, pra que os relatórios já gerados continuem citando exatamente o
+        critério com que foram calculados.
+    </p>
+</div>
+
+<div class="cartao">
+    <div style="display:flex; justify-content:flex-end; margin-bottom: 14px;">
+        <a href="{% url 'painel_avaliacoes:configuracoes_risco_create' %}" class="botao">+ Nova versão</a>
+    </div>
+
+    {% if criterios %}
+    <table>
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Status</th>
+                <th>N mínimo</th>
+                <th>Limite Baixo / Elevado</th>
+                <th>Prevalência P1 / P2</th>
+                <th>Aplicações usando</th>
+                <th>Criado em</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for criterio in criterios %}
+            <tr>
+                <td><strong>{{ criterio.codigo }}</strong></td>
+                <td>
+                    {% if criterio.status == "ratificado" %}
+                    <span class="badge aceitavel">Ratificado</span>
+                    {% else %}
+                    <span class="badge moderado">Aguardando ratificação</span>
+                    {% endif %}
+                </td>
+                <td>{{ criterio.n_minimo_respondentes }}</td>
+                <td>{{ criterio.limite_baixo }} / {{ criterio.limite_elevado }}</td>
+                <td>{{ criterio.prevalencia_p1 }} / {{ criterio.prevalencia_p2 }}</td>
+                <td>{{ criterio.n_aplicacoes }}</td>
+                <td>{{ criterio.criado_em|date:"d/m/Y H:i" }}</td>
+                <td>
+                    <a href="{% url 'painel_avaliacoes:configuracoes_risco_detail' criterio.pk %}" class="botao secundario pequeno">Ver</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Nenhuma versão de critério cadastrada ainda.</p>
+    {% endif %}
+</div>
+{% endblock %}

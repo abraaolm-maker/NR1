@@ -59,6 +59,15 @@ class Dominio(models.Model):
     )
     thresholds_referencia_baixo_max = models.DecimalField(max_digits=6, decimal_places=2)
     thresholds_referencia_moderado_max = models.DecimalField(max_digits=6, decimal_places=2)
+    referencia_media_nacional = models.DecimalField(
+        max_digits=6, decimal_places=2, null=True, blank=True,
+        help_text="Média nacional publicada (valor bruto, sem inversão de polaridade — "
+        "ex.: COPSOQ Manual Portugal 2013, N=4162). Só informativo/contexto.",
+    )
+    referencia_desvio_padrao = models.DecimalField(
+        max_digits=6, decimal_places=2, null=True, blank=True,
+        help_text="Desvio-padrão da média nacional publicada, mesma fonte/ressalva.",
+    )
     ordem = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
@@ -74,6 +83,19 @@ class Dominio(models.Model):
         return f"{self.instrumento.codigo} / {self.codigo}"
 
 
+class Profundidade(models.TextChoices):
+    """Nível de profundidade do COPSOQ Oficial (CLAUDE.md — instrumento transcrito do
+    manual COPSOQ Portugal 2013): cada item pertence ao nível mais raso em que aparece
+    no documento oficial (curta ⊆ média ⊆ longa, por conteúdo do item, não por posição
+    numérica — alguns itens da versão longa correspondem à média com texto reformulado,
+    tratados como itens próprios daquele nível). Em branco = instrumento não usa níveis
+    (COPSOQ adaptado, ITRA) — o item aparece sempre, independente de profundidade."""
+
+    CURTA = "curta", "Curta"
+    MEDIA = "media", "Média"
+    LONGA = "longa", "Longa"
+
+
 class Item(models.Model):
     item_id = models.CharField(
         max_length=20, help_text='Identificador exato do seed, ex. "D1.1", "EACT.01" — usado como '
@@ -86,6 +108,14 @@ class Item(models.Model):
         default=False,
         help_text="Se True, valor_bruto >= limiar (CriterioVersao) força Probabilidade=3 "
         "(CLAUDE.md Seção 7.5).",
+    )
+    profundidade = models.CharField(
+        max_length=10,
+        choices=Profundidade.choices,
+        blank=True,
+        default="",
+        help_text="Só usado pelo COPSOQ Oficial — nível mínimo em que o item aparece "
+        "(curta/média/longa). Em branco = item sempre incluído (demais instrumentos).",
     )
     ordem = models.PositiveSmallIntegerField(default=0)
 
