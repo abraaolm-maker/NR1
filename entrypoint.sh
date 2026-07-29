@@ -9,8 +9,10 @@ set -e
 python manage.py migrate --noinput
 
 python manage.py load_instrumentos seeds/copsoq_rr_revestir.json
+python manage.py load_instrumentos seeds/copsoq_oficial.json
 python manage.py load_instrumentos seeds/itra.json
 python manage.py load_catalogo_acoes seeds/catalogo_acoes.json
+python manage.py load_catalogo_acoes seeds/catalogo_acoes_copsoq_oficial.json
 python manage.py load_checklist_triangulacao seeds/checklist_triangulacao.json
 python manage.py criar_criterio_versao || true
 
