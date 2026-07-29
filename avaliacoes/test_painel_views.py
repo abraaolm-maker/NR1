@@ -104,7 +104,7 @@ def test_catalogo_acoes_list_mostra_acoes_e_permite_editar(client, gestor, aplic
 
     resp = client.get(reverse("painel_avaliacoes:catalogo_acoes_list"))
     assert resp.status_code == 200
-    assert b"Redimensionar capacidade" in resp.content
+    assert b"Redimensionar a equipe" in resp.content
 
     acao = CatalogoAcao.objects.get(dominio__codigo="D1", nivel="Elevado")
     resp = client.post(

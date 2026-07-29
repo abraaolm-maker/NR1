@@ -3,10 +3,12 @@ from datetime import date
 import pytest
 from django.contrib.auth import get_user_model
 
+from avaliacoes.models import PlanoDeAcao
 from avaliacoes.services.calculo_risco import calcular_dominio
 from relatorios.models import PerfilProfissional, Relatorio, StatusRelatorio
 from relatorios.services.analise_ia import MODEL, gerar_e_salvar_parecer, gerar_parecer, montar_payload_relatorio
 from relatorios.services.pdf import _contexto_relatorio, assinar_relatorio, gerar_pdf_relatorio
+from relatorios.services.plano_acao_ia import gerar_e_salvar_planos_refinados, montar_payload_planos
 
 
 class _FakeToolUseBlock:
@@ -255,3 +257,51 @@ def test_assinar_relatorio_sem_parecer_levanta_erro(relatorio_com_dominio_calcul
 
     with pytest.raises(ValueError, match="parecer"):
         assinar_relatorio(relatorio_com_dominio_calculado.pk, user.pk)
+
+
+@pytest.mark.django_db
+def test_montar_payload_planos_so_inclui_dominios_com_plano_gerado(relatorio_com_dominio_calculado):
+    """D1 é Alto (tem PlanoDeAcao); D2 está suprimido por confidencialidade (nunca
+    gera PlanoDeAcao, Seção 3 princípio 3) — não deve aparecer no payload."""
+    payload = montar_payload_planos(relatorio_com_dominio_calculado.pk)
+
+    dominios = {p["dominio"] for p in payload["planos"]}
+    assert dominios == {"D1"}
+    assert payload["planos"][0]["banda"] == "Alto"
+    assert payload["planos"][0]["medida_catalogo"]
+
+
+@pytest.mark.django_db
+def test_gerar_e_salvar_planos_refinados_atualiza_plano_existente(relatorio_com_dominio_calculado):
+    resultado_ia = {
+        "planos_refinados": [
+            {
+                "ghe": "Equipe Teste",
+                "dominio": "D1",
+                "medida": "Medida refinada de teste para D1.",
+                "hierarquia_controle": "organizacao",
+                "indicador": "Indicador refinado de teste.",
+            }
+        ]
+    }
+    fake_response = _FakeResponse([_FakeToolUseBlock("refinar_plano_de_acao", resultado_ia)])
+    client = _FakeAnthropicClient(fake_response)
+
+    atualizados = gerar_e_salvar_planos_refinados(relatorio_com_dominio_calculado.pk, client=client)
+
+    assert atualizados == 1
+    plano = PlanoDeAcao.objects.get(classificacao_risco__escore_dominio__dominio__codigo="D1")
+    assert plano.medida == "Medida refinada de teste para D1."
+    assert plano.hierarquia == "organizacao"
+    assert plano.indicador == "Indicador refinado de teste."
+
+
+@pytest.mark.django_db
+def test_gerar_e_salvar_planos_refinados_incompleto_levanta_erro(relatorio_com_dominio_calculado):
+    """Mesmo achado do parecer técnico: uma lista incompleta não pode ser aceita
+    silenciosamente — precisa cobrir todo domínio com PlanoDeAcao já existente."""
+    fake_response = _FakeResponse([_FakeToolUseBlock("refinar_plano_de_acao", {"planos_refinados": []})])
+    client = _FakeAnthropicClient(fake_response)
+
+    with pytest.raises(RuntimeError, match="incompleto"):
+        gerar_e_salvar_planos_refinados(relatorio_com_dominio_calculado.pk, client=client)

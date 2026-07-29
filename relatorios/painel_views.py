@@ -13,12 +13,14 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 
 from avaliacoes.decorators import admin_required, gestor_required
-from avaliacoes.models import Aplicacao, StatusAplicacao, Unidade
+from avaliacoes.models import Aplicacao, PlanoDeAcao, StatusAplicacao, Unidade
+from avaliacoes.services.calculo_risco import BANDA_ORDEM
 from avaliacoes.services.tenancy import empresas_visiveis
 
 from .forms import ChaveApiClaudeForm, ParecerJSONForm, PerfilProfissionalForm, RelatorioForm
 from .models import ChaveApiClaude, PerfilProfissional, Relatorio, StatusRelatorio
 from .services.analise_ia import gerar_e_salvar_parecer
+from .services.plano_acao_ia import gerar_e_salvar_planos_refinados
 from .services.chaves_api import (
     chave_precisa_reverificacao,
     definir_chave_ativa,
@@ -149,6 +151,17 @@ def relatorio_detail(request, pk):
         },
     ]
 
+    # Planos de ação de todas as Aplicações deste relatório, do mais urgente pro
+    # menos urgente — mesma ordenação usada no PDF (relatorios/services/pdf.py::
+    # _planos_ordenados) e na tela da Aplicação (achado de 2026-07-29).
+    planos_de_acao = sorted(
+        PlanoDeAcao.objects.filter(
+            classificacao_risco__escore_dominio__aplicacao__in=aplicacoes
+        ).select_related("classificacao_risco__escore_dominio__dominio", "classificacao_risco__escore_dominio__aplicacao__ghe"),
+        key=lambda p: BANDA_ORDEM.get(p.classificacao_risco.banda, 0),
+        reverse=True,
+    )
+
     return render(
         request,
         "painel/relatorio_detail.html",
@@ -160,6 +173,7 @@ def relatorio_detail(request, pk):
             "etapa_parecer": etapa_parecer,
             "etapa_pdf": etapa_pdf,
             "pdf_desatualizado": pdf_desatualizado,
+            "planos_de_acao": planos_de_acao,
         },
     )
 
@@ -216,6 +230,18 @@ def relatorio_gerar_parecer_ia(request, pk):
         messages.success(request, "Parecer gerado via IA.")
     except Exception as exc:  # SDK da Anthropic, chave ausente, rede, etc.
         messages.error(request, f"Não foi possível gerar o parecer via IA: {exc}")
+    return redirect("painel_relatorios:relatorio_detail", pk=pk)
+
+
+@admin_required
+def relatorio_refinar_planos_ia(request, pk):
+    if request.method != "POST":
+        return redirect("painel_relatorios:relatorio_detail", pk=pk)
+    try:
+        atualizados = gerar_e_salvar_planos_refinados(pk)
+        messages.success(request, f"{atualizados} plano(s) de ação refinado(s) via IA.")
+    except Exception as exc:  # SDK da Anthropic, chave ausente, rede, etc.
+        messages.error(request, f"Não foi possível refinar os planos de ação via IA: {exc}")
     return redirect("painel_relatorios:relatorio_detail", pk=pk)
 
 

@@ -152,6 +152,41 @@
 </div>
 
 <div class="cartao">
+    <h2>Planos de ação ({{ planos_de_acao|length }})</h2>
+    {% if planos_de_acao %}
+    <table>
+        <thead><tr><th>Código</th><th>GHE</th><th>Domínio</th><th>Banda</th><th>Medida</th></tr></thead>
+        <tbody>
+        {% for plano in planos_de_acao %}
+            <tr>
+                <td>{{ plano.codigo|default:"—" }}</td>
+                <td>{{ plano.classificacao_risco.escore_dominio.aplicacao.ghe.nome }}</td>
+                <td>{{ plano.classificacao_risco.escore_dominio.dominio.codigo }}</td>
+                <td><span class="badge {{ plano.classificacao_risco.banda|slugify }}">{{ plano.classificacao_risco.banda }}</span></td>
+                <td>{{ plano.medida|truncatechars:100 }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <p style="font-size: 12.5px; color: #777; margin-top: 8px;">
+        As medidas acima nascem automaticamente de um catálogo pré-definido por domínio
+        e nível de risco. O botão abaixo pede à IA uma versão mais específica pra cada
+        GHE, usando o texto do catálogo como ponto de partida — nunca cria nem remove
+        um plano, só reescreve medida, hierarquia de controle e indicador dos planos já
+        existentes.
+    </p>
+    <form method="post" action="{% url 'painel_relatorios:relatorio_refinar_planos_ia' relatorio.pk %}" class="form-com-carregamento">
+        {% csrf_token %}
+        <button type="submit" class="botao secundario" data-texto-carregando="Refinando planos…">
+            Refinar planos de ação com IA
+        </button>
+    </form>
+    {% else %}
+    <p>Nenhum plano de ação gerado ainda para as aplicações deste relatório.</p>
+    {% endif %}
+</div>
+
+<div class="cartao">
     <h2>PDF</h2>
     {% if relatorio.pdf_path %}
     <p><a href="{{ relatorio.pdf_path.url }}" target="_blank" class="botao secundario">Baixar PDF atual</a>

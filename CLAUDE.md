@@ -2043,6 +2043,59 @@ a mudança.
 
 ---
 
+## 6.15 Catálogo de ações do COPSOQ adaptado reformulado + Plano de Ação refinado por IA sob demanda (2026-07-29)
+
+> O usuário achou o catálogo de ações do COPSOQ adaptado (`seeds/catalogo_acoes.json`,
+> Seção 6.9 Prompt 07) genérico demais, principalmente comparado ao catálogo elaborado
+> depois para o COPSOQ Oficial (Seção 6.13). Pediu reformulação do catálogo adaptado
+> e, indo além, pediu que o Plano de Ação passasse a usar IA para gerar medidas com
+> mais sentido, a partir do catálogo como base — como já acontece com as
+> recomendações do parecer técnico, que o usuário achou mais específicas que o texto
+> padrão do catálogo.
+
+**Decisão sobre quando chamar a IA** (perguntada ao usuário via AskUserQuestion):
+**sob demanda**, nunca automática. O Plano de Ação continua nascendo automaticamente,
+de forma síncrona e sem IA, dentro de `calcular_dominio()` — o questionário público
+não pode depender de uma chamada de rede à Anthropic no meio do fluxo do respondente.
+O refinamento por IA é uma etapa opcional posterior, disparada por um botão na tela do
+Relatório, mesmo padrão do parecer técnico.
+
+**O que mudou:**
+
+1. **`seeds/catalogo_acoes.json` reformulado por completo** — as 18 entradas (9
+   domínios × Moderado/Elevado) foram reescritas com o mesmo padrão de qualidade do
+   catálogo do COPSOQ Oficial: medidas concretas e específicas ao conteúdo real de
+   cada domínio (Seção 5.1), fundamentadas na hierarquia de controle NIOSH e nos
+   modelos demanda-controle (Karasek) e esforço-recompensa (Siegrist). Recarregado
+   via `manage.py load_catalogo_acoes seeds/catalogo_acoes.json` — `PlanoDeAcao` já
+   existentes não são reescritos automaticamente (a função que os gera nunca
+   sobrescreve um plano já criado), só afeta domínios calculados depois da
+   reformulação ou refinados manualmente pela nova função de IA.
+2. **Novo módulo `relatorios/services/plano_acao_ia.py`**: `montar_payload_planos`
+   monta um item por `PlanoDeAcao` já existente e ligado ao relatório (nunca inclui
+   domínio suprimido por confidencialidade, que nunca gera plano); `gerar_planos_refinados`
+   chama a Anthropic com `tool_choice` forçado (mesmo padrão de `analise_ia.py`),
+   pedindo que a IA use a medida do catálogo como ponto de partida, nunca invente
+   dado fora do JSON de entrada, nunca rebaixe a hierarquia de controle informada, e
+   trate evento grave confirmado como prioridade máxima de resposta imediata; a
+   mesma regra de proibição de hífen/travessão e de nunca revelar autoria por IA
+   (Seção 6.13) se aplica aqui. `_validar_cobertura_planos` rejeita uma resposta que
+   não cubra todos os planos enviados (mesmo achado do parecer técnico, Seção 6.17).
+   `gerar_e_salvar_planos_refinados` sobrescreve só `medida`/`hierarquia`/`indicador`
+   dos `PlanoDeAcao` já existentes — nunca cria nem remove um plano.
+3. **Botão "Refinar planos de ação com IA"** na tela do Relatório
+   (`relatorios/templates/painel/relatorio_detail.html`), novo card "Planos de ação"
+   listando todos os planos das Aplicações do relatório (ordenados do mais urgente
+   pro menos urgente, Seção 6.14), com o botão logo abaixo — mesmo padrão visual do
+   botão "Gerar parecer via IA".
+
+**Cobertura de teste** (`relatorios/tests.py`):
+`test_montar_payload_planos_so_inclui_dominios_com_plano_gerado`,
+`test_gerar_e_salvar_planos_refinados_atualiza_plano_existente`,
+`test_gerar_e_salvar_planos_refinados_incompleto_levanta_erro`.
+
+---
+
 ## 7. Backend — cálculo da matriz de risco (valores definitivos, sem exemplos ilustrativos)
 
 A implementação de referência completa está no arquivo **`risk_engine.py`** entregue junto com

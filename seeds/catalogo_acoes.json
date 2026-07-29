@@ -1,132 +1,132 @@
 {
   "instrument_code": "COPSOQ_RR_REVESTIR",
-  "source_note": "Extraído da planilha 'Catalogo_Acoes' de Relatorio_Semaforo_Dados_Simulados.xlsx — 9 domínios x 2 níveis (Moderado/Elevado). D9 'Elevado' corresponde ao rótulo 'Elevado/alerta' da planilha original (nível de alerta protegido).",
+  "source_note": "Reformulado em 2026-07-29 (pedido do usuário: o catálogo original, extraído literalmente da planilha Catalogo_Acoes de Relatorio_Semaforo_Dados_Simulados.xlsx, tinha medidas genéricas demais quando comparado ao catálogo elaborado depois para o COPSOQ Oficial). Ações fundamentadas nos mesmos três pilares usados no catálogo do COPSOQ Oficial (seeds/catalogo_acoes_copsoq_oficial.json): (1) hierarquia de controle de riscos psicossociais do NIOSH, adotada pelo Guia MTE de Fatores de Riscos Psicossociais — eliminação/redução na fonte > organização do trabalho > gestão/administrativo > resposta imediata para eventos graves, nunca medida individual como primeira linha; (2) modelos demanda-controle (Karasek) e esforço-recompensa (Siegrist), que fundamentam a própria estrutura dos 9 domínios deste instrumento; (3) o conteúdo específico de cada domínio (Seção 5.1 do CLAUDE.md), incluindo a natureza mista do D9 (itens de risco e itens protetivos).",
   "acoes": [
     {
       "dominio_codigo": "D1",
       "nivel": "Moderado",
-      "acao_sugerida": "Revisar prioridades, prazos, interrupções e distribuição diária de tarefas.",
+      "acao_sugerida": "Revisar junto à equipe as prioridades do dia, os prazos assumidos e a frequência de interrupções, ajustando o volume de tarefas simultâneas por pessoa.",
       "hierarquia": "organizacao",
-      "indicador": "Fila de demandas, horas extras, retrabalho e cumprimento de pausas."
+      "indicador": "Número de tarefas simultâneas por pessoa, solicitações urgentes fora do planejamento e pausas efetivamente cumpridas."
     },
     {
       "dominio_codigo": "D1",
       "nivel": "Elevado",
-      "acao_sugerida": "Redimensionar capacidade/efetivo, reduzir picos evitáveis e redesenhar fluxo e metas.",
+      "acao_sugerida": "Redimensionar a equipe ou redistribuir a carga entre turnos e áreas, eliminando picos de demanda evitáveis e metas incompatíveis com o tempo disponível para a tarefa.",
       "hierarquia": "eliminacao",
-      "indicador": "Carga planejada x capacidade, horas extras, atrasos e retrabalho."
+      "indicador": "Carga planejada versus capacidade real da equipe, horas extras habituais e índice de retrabalho por pressa."
     },
     {
       "dominio_codigo": "D2",
       "nivel": "Moderado",
-      "acao_sugerida": "Definir protocolo para situações tensas, apoio da liderança e recuperação após eventos difíceis.",
+      "acao_sugerida": "Definir um protocolo formal para atendimento em situações de tensão ou conflito com clientes e fornecedores, com escalonamento rápido para a liderança quando necessário.",
       "hierarquia": "organizacao",
-      "indicador": "Eventos registrados e tempo de resposta da liderança."
+      "indicador": "Situações de tensão registradas, tempo de resposta da liderança e uso do escalonamento formal."
     },
     {
       "dominio_codigo": "D2",
       "nivel": "Elevado",
-      "acao_sugerida": "Reduzir exposição, garantir cobertura/rodízio e autoridade para interromper interação abusiva.",
+      "acao_sugerida": "Reduzir a exposição direta e continuada a clientes ou situações hostis por meio de rodízio, retaguarda especializada e autoridade explícita para interromper um atendimento abusivo.",
       "hierarquia": "eliminacao",
-      "indicador": "Recorrência de eventos e afastamento da fonte de exposição."
+      "indicador": "Recorrência de atendimentos hostis pela mesma pessoa e uso da autoridade de interrupção concedida."
     },
     {
       "dominio_codigo": "D3",
       "nivel": "Moderado",
-      "acao_sugerida": "Aumentar participação no planejamento e garantir pausas e margem de decisão.",
+      "acao_sugerida": "Ampliar a participação da equipe na organização da própria rotina e garantir de fato o direito a pausas básicas, sem prejuízo de avaliação de desempenho.",
       "hierarquia": "organizacao",
-      "indicador": "Pausas realizadas e melhorias propostas/implantadas."
+      "indicador": "Pausas básicas efetivamente realizadas e melhorias de processo propostas pela equipe e implantadas."
     },
     {
       "dominio_codigo": "D3",
       "nivel": "Elevado",
-      "acao_sugerida": "Redesenhar papéis, alçadas e cobertura operacional para remover impedimentos à autonomia segura.",
+      "acao_sugerida": "Redesenhar papéis e alçadas de decisão para que falhas de segurança, qualidade ou organização identificadas pela equipe possam ser corrigidas sem depender de aprovação hierárquica lenta.",
       "hierarquia": "eliminacao",
-      "indicador": "Decisões resolvidas no nível adequado e redução de atalhos."
+      "indicador": "Decisões resolvidas no nível adequado e redução de atalhos inseguros adotados por falta de autonomia."
     },
     {
       "dominio_codigo": "D4",
       "nivel": "Moderado",
-      "acao_sugerida": "Atualizar descrição de função, interfaces e critérios de prioridade.",
+      "acao_sugerida": "Atualizar a descrição de cada função, deixando claro o papel de cada pessoa dentro do funcionamento seguro e organizado da empresa.",
       "hierarquia": "organizacao",
-      "indicador": "Conflitos de papel e retrabalho por ambiguidade."
+      "indicador": "Conflitos de papel relatados e retrabalho causado por ambiguidade de responsabilidade."
     },
     {
       "dominio_codigo": "D4",
       "nivel": "Elevado",
-      "acao_sugerida": "Redesenhar responsabilidades e eliminar acúmulos incompatíveis ou ordens contraditórias.",
+      "acao_sugerida": "Redesenhar responsabilidades e eliminar acúmulo de funções incompatíveis ou ordens contraditórias vindas de mais de uma liderança.",
       "hierarquia": "eliminacao",
-      "indicador": "Desvios de função e ordens conflitantes."
+      "indicador": "Ocorrências de ordens conflitantes e desvios de função identificados."
     },
     {
       "dominio_codigo": "D5",
       "nivel": "Moderado",
-      "acao_sugerida": "Tornar metas, feedback e reconhecimento previsíveis, claros e respeitosos.",
+      "acao_sugerida": "Estruturar um ciclo regular de feedback sobre desempenho, com critério claro e respeitoso, e garantir que metas e cobranças estejam alinhadas ao que a equipe consegue entregar com qualidade.",
       "hierarquia": "gestao",
-      "indicador": "Regularidade de feedback e percepção de clareza."
+      "indicador": "Regularidade dos ciclos de feedback realizados e percepção de clareza reportada pela equipe."
     },
     {
       "dominio_codigo": "D5",
       "nivel": "Elevado",
-      "acao_sugerida": "Revisar metas e recursos para compatibilizar exigência, qualidade e segurança.",
+      "acao_sugerida": "Revisar metas, recursos disponíveis e critérios de reconhecimento para eliminar a incompatibilidade entre o que é exigido e o que é possível entregar com qualidade e segurança.",
       "hierarquia": "eliminacao",
-      "indicador": "Metas revisadas, recursos disponíveis e incidentes por pressão."
+      "indicador": "Metas revisadas com participação da equipe, recursos efetivamente disponibilizados e incidentes associados a pressão por resultado."
     },
     {
       "dominio_codigo": "D6",
       "nivel": "Moderado",
-      "acao_sugerida": "Estabelecer rotinas de suporte, alinhamento e tratamento imparcial de conflitos.",
+      "acao_sugerida": "Estabelecer canais de comunicação direta entre equipe e liderança e uma rotina de mediação imparcial para conflitos entre colegas.",
       "hierarquia": "gestao",
-      "indicador": "Tempo de resolução e recorrência de conflitos."
+      "indicador": "Tempo médio de resolução de conflitos e recorrência de conflitos entre as mesmas pessoas."
     },
     {
       "dominio_codigo": "D6",
       "nivel": "Elevado",
-      "acao_sugerida": "Intervir em práticas de liderança e fluxos de escalonamento, com responsabilização e monitoramento.",
+      "acao_sugerida": "Intervir formalmente em práticas de liderança que gerem falta de suporte ou cooperação, com acompanhamento e responsabilização explícita da chefia envolvida.",
       "hierarquia": "gestao",
-      "indicador": "Reincidência, queixas e cumprimento dos acordos."
+      "indicador": "Reincidência de queixas sobre a mesma liderança e cumprimento dos acordos de melhoria estabelecidos."
     },
     {
       "dominio_codigo": "D7",
       "nivel": "Moderado",
-      "acao_sugerida": "Criar rotina sem culpa para relatar erros, riscos e sugestões, com retorno documentado.",
+      "acao_sugerida": "Criar um canal e uma rotina explicitamente sem punição para relatar erros, quase-erros e discordâncias técnicas, com retorno documentado a quem relatou.",
       "hierarquia": "gestao",
-      "indicador": "Relatos recebidos, retorno no prazo e melhorias implantadas."
+      "indicador": "Relatos recebidos, retorno dado dentro do prazo combinado e melhorias implantadas a partir dos relatos."
     },
     {
       "dominio_codigo": "D7",
       "nivel": "Elevado",
-      "acao_sugerida": "Garantir proteção contra retaliação e autoridade de parada diante de risco grave.",
+      "acao_sugerida": "Garantir por escrito a proteção contra retaliação e a autoridade de qualquer trabalhador para interromper uma atividade diante de risco grave percebido.",
       "hierarquia": "eliminacao",
-      "indicador": "Relatos sem retaliação e ações corretivas concluídas."
+      "indicador": "Relatos feitos sem retaliação registrada e ações corretivas concluídas a partir de paradas de segurança."
     },
     {
       "dominio_codigo": "D8",
       "nivel": "Moderado",
-      "acao_sugerida": "Publicar critérios de escalas, tarefas e mudanças e abrir canal de contestação.",
+      "acao_sugerida": "Publicar e comunicar com antecedência os critérios usados para escalas, distribuição de tarefas e mudanças de rotina, abrindo um canal formal de contestação.",
       "hierarquia": "gestao",
-      "indicador": "Contestações, ajustes e antecedência da comunicação."
+      "indicador": "Contestações registradas, ajustes realizados e antecedência média da comunicação de mudanças."
     },
     {
       "dominio_codigo": "D8",
       "nivel": "Elevado",
-      "acao_sugerida": "Revisar decisões e práticas com tratamento desigual e corrigir critérios e governança.",
+      "acao_sugerida": "Revisar decisões recentes de escala, tarefas ou cobrança que tenham gerado percepção de tratamento desigual, corrigindo os critérios e a governança que permitiram essa desigualdade.",
       "hierarquia": "eliminacao",
-      "indicador": "Desvios corrigidos e percepção de justiça na reaplicação."
+      "indicador": "Desvios de critério corrigidos e percepção de justiça organizacional na reaplicação do questionário."
     },
     {
       "dominio_codigo": "D9",
       "nivel": "Moderado",
-      "acao_sugerida": "Reforçar política, canal confidencial, não retaliação e fluxo de apuração.",
+      "acao_sugerida": "Reforçar a divulgação da política de tolerância zero a assédio e discriminação, garantindo que todos conheçam o canal de denúncia confidencial e o compromisso de não retaliação.",
       "hierarquia": "gestao",
-      "indicador": "Tempo de resposta, proteção aplicada e recorrência."
+      "indicador": "Conhecimento do canal de denúncia pela equipe e tempo médio de resposta a relatos recebidos."
     },
     {
       "dominio_codigo": "D9",
       "nivel": "Elevado",
-      "acao_sugerida": "Ativar fluxo protegido imediato, cessar a exposição, preservar evidências e realizar apuração competente.",
+      "acao_sugerida": "Ativar imediatamente o fluxo protegido de resposta a evento grave: cessar a exposição da pessoa envolvida, preservar evidências, afastar cautelarmente quem for apontado e conduzir apuração por pessoa isenta.",
       "hierarquia": "resposta_imediata",
-      "indicador": "Proteção efetivada, prazo de resposta e não recorrência."
+      "indicador": "Tempo entre o relato e a cessação da exposição, proteção efetivamente aplicada à vítima e recorrência do mesmo tipo de evento."
     }
   ]
 }

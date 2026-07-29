@@ -23,6 +23,11 @@ urlpatterns = [
         painel_views.relatorio_gerar_parecer_ia,
         name="relatorio_gerar_parecer_ia",
     ),
+    path(
+        "relatorios/<int:pk>/refinar-planos-ia/",
+        painel_views.relatorio_refinar_planos_ia,
+        name="relatorio_refinar_planos_ia",
+    ),
     path("relatorios/<int:pk>/gerar-pdf/", painel_views.relatorio_gerar_pdf, name="relatorio_gerar_pdf"),
     path("relatorios/<int:pk>/assinar/", painel_views.relatorio_assinar, name="relatorio_assinar"),
     path("chaves-api/", painel_views.chaves_api_list, name="chaves_api_list"),
