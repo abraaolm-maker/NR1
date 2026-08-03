@@ -3,14 +3,21 @@ parecer técnico dos relatórios.
 
 Regra inegociável: o valor completo de uma chave NUNCA é persistido no banco de dados
 nem reexibido em nenhuma tela depois de salvo. Ele só existe em memória durante a
-requisição de cadastro e no arquivo `.env.local` (fora do controle de versão — ver
-`.gitignore`), sob uma variável nomeada por `ChaveApiClaude.nome_variavel_ambiente`.
+requisição de cadastro e num arquivo local (`settings.CHAVES_API_ENV_PATH`, fora do
+controle de versão), sob uma variável nomeada por `ChaveApiClaude.nome_variavel_ambiente`.
 O que fica no banco (`ChaveApiClaude`) é só metadado de identificação: nome, prefixo,
 sufixo e qual está ativa.
 
-`.env.local` é lido DIRETO DO DISCO a cada chamada (nunca de `os.environ`, que só
+Esse arquivo é lido DIRETO DO DISCO a cada chamada (nunca de `os.environ`, que só
 reflete o que foi carregado quando o processo do servidor subiu) — assim uma chave
-nova ou trocada fica disponível na hora, sem precisar reiniciar o servidor."""
+nova ou trocada fica disponível na hora, sem precisar reiniciar o servidor.
+
+Em produção com Docker, `CHAVES_API_ENV_PATH` PRECISA apontar pro mesmo disco
+persistente do banco (ex.: `/var/data/.env.local`) — se ficar no filesystem efêmero
+do container (o default `BASE_DIR/.env.local`, usado em desenvolvimento local),
+recriar o container apaga esse arquivo enquanto o metadado no banco continua
+existindo, e o sistema passa a achar que tem uma chave ativa que na verdade sumiu
+(achado em produção, 2026-08-03)."""
 
 from __future__ import annotations
 
@@ -22,7 +29,7 @@ from django.utils import timezone
 
 from relatorios.models import ChaveApiClaude
 
-ENV_PATH = settings.BASE_DIR / ".env.local"
+ENV_PATH = settings.CHAVES_API_ENV_PATH
 
 INTERVALO_REVERIFICACAO = timezone.timedelta(days=1)
 

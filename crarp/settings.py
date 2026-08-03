@@ -114,6 +114,14 @@ DATABASES = {
     }
 }
 
+# relatorios/services/chaves_api.py grava o VALOR completo de cada chave de API do
+# Claude só neste arquivo (nunca no banco, CLAUDE.md Seção 6.15) — em produção ele
+# precisa ficar no mesmo disco persistente do banco (ex.: /var/data/.env.local via
+# CHAVES_API_ENV_PATH), senão recriar o container apaga a chave enquanto o metadado
+# no banco (nome/prefixo/"ativa") continua existindo, e o sistema passa a achar que
+# tem uma chave ativa que na verdade sumiu (achado em produção, 2026-08-03).
+CHAVES_API_ENV_PATH = Path(os.environ.get('CHAVES_API_ENV_PATH', BASE_DIR / '.env.local'))
+
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
