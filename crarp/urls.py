@@ -15,10 +15,10 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.conf import settings
-from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
-from django.urls import include, path
+from django.urls import include, path, re_path
+from django.views.static import serve as serve_static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -37,7 +37,17 @@ urlpatterns = [
 
 # Servir /media/ direto pelo Django mesmo com DEBUG=False: os PDFs de relatório são
 # gerados em runtime (WeasyPrint), então o WhiteNoise (que só serve STATIC_URL,
-# coletado no build) não os enxerga. Para o volume baixo deste ambiente de teste isso
-# é aceitável; se o tráfego crescer, mover para um storage externo (S3 etc.) em vez de
-# servir arquivos direto do processo Django.
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# coletado no build) não os enxerga. `django.conf.urls.static.static()` NÃO serve pra
+# isso — ele só registra a rota quando DEBUG=True, então em produção (DEBUG=False,
+# nosso caso real) ela nunca existia e todo PDF dava 404 (achado em 2026-08-03,
+# testado no deploy do VPS). `re_path` com `django.views.static.serve` direto ignora
+# esse comportamento e funciona independente de DEBUG. Para o volume baixo deste
+# ambiente de teste isso é aceitável; se o tráfego crescer, mover para um storage
+# externo (S3 etc.) em vez de servir arquivos direto do processo Django.
+urlpatterns += [
+    re_path(
+        r'^%s(?P<path>.*)$' % settings.MEDIA_URL.lstrip('/'),
+        serve_static,
+        {'document_root': settings.MEDIA_ROOT},
+    ),
+]

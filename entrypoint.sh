@@ -18,4 +18,9 @@ python manage.py criar_criterio_versao || true
 
 python manage.py criar_admin_do_env
 
-exec gunicorn crarp.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 3
+# --timeout 300: o padrão do Gunicorn é 30s, e a geração de parecer/plano de ação
+# via IA (relatorios/services/analise_ia.py e plano_acao_ia.py) chama a Anthropic
+# com max_tokens=8192 — pode legitimamente passar de 30s em relatórios com muitos
+# domínios, o que fazia o Gunicorn matar o worker no meio da requisição (achado em
+# produção, 2026-08-03: "Internal Server Error" ao gerar parecer via IA).
+exec gunicorn crarp.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 3 --timeout 300
