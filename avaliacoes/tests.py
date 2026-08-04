@@ -49,6 +49,28 @@ def test_calcula_dominio_risco_puro_elevado_gera_plano_de_acao(aplicacao_copsoq,
 
 
 @pytest.mark.django_db
+def test_evidencia_diagnostico_do_plano_acompanha_recalculo(aplicacao_copsoq, responder_dominio):
+    """Achado em produção, 2026-08-03 (relatório real revisado pelo usuário): o plano
+    de ação foi criado com N=5 e nunca mais atualizado, então continuava mostrando
+    "N=5" no PDF mesmo depois de o domínio ser recalculado com mais respondentes —
+    uma inconsistência de dado que derrubava a credibilidade do documento."""
+    valores = {"D1.1": 4, "D1.2": 4, "D1.3": 5, "D1.4": 3, "D1.5": 4}
+    dominio = responder_dominio(aplicacao_copsoq, "D1", valores, n_respondentes=5)
+    escore_dominio = calcular_dominio(aplicacao_copsoq, dominio)
+    plano = escore_dominio.classificacao_risco.planos_de_acao.get()
+    assert "N=5" in plano.evidencia_diagnostico
+
+    # mais 3 pessoas respondem depois — recalcular deve atualizar N e escore no texto
+    responder_dominio(aplicacao_copsoq, "D1", valores, n_respondentes=3)
+    escore_dominio = calcular_dominio(aplicacao_copsoq, dominio)
+    plano.refresh_from_db()
+
+    assert escore_dominio.n_respondentes == 8
+    assert "N=8" in plano.evidencia_diagnostico
+    assert "N=5" not in plano.evidencia_diagnostico
+
+
+@pytest.mark.django_db
 def test_calcula_dominio_d9_evento_grave_forca_critico(aplicacao_copsoq, responder_dominio):
     valores = {"D9.1": 5, "D9.2": 5, "D9.3": 1, "D9.4": 1}
     dominio = responder_dominio(aplicacao_copsoq, "D9", valores, n_respondentes=5)

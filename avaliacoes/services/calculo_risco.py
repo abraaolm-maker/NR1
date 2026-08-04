@@ -426,12 +426,30 @@ def _gerar_plano_de_acao_se_necessario(
         return
     if classificacao_risco.banda == risk_engine.BandaRisco.ACEITAVEL.value:
         return
-    if classificacao_risco.planos_de_acao.exists():
-        return  # recalcular não deve duplicar plano já existente
 
     escore_dominio = classificacao_risco.escore_dominio
     dominio = escore_dominio.dominio
     ghe = escore_dominio.aplicacao.ghe
+
+    # Achado em 2026-08-03: "evidencia_diagnostico" citava o escore/N do momento da
+    # criação do plano e nunca era atualizada — um domínio calculado pela primeira vez
+    # com 5 respondentes e depois recalculado com 8 continuava exibindo "N=5" pra
+    # sempre no PDF, divergindo do escore atual mostrado em todo o resto do relatório
+    # (achado direto num relatório real gerado em produção). Agora esse texto é
+    # recalculado sempre que o domínio é recalculado, mesmo quando o plano já existe.
+    evidencia_atual = (
+        f"{dominio.nome} classificado como {escore_dominio.classificacao} no GHE "
+        f'"{ghe.nome}"; índice de risco {escore_dominio.escore} (escala 0-100), '
+        f"N={escore_dominio.n_respondentes}."
+    )
+
+    if classificacao_risco.planos_de_acao.exists():
+        # Recalcular nunca duplica o plano nem reescreve a medida já escolhida
+        # (manual ou via IA) — só a evidência do diagnóstico precisa acompanhar o
+        # escore/N atuais, senão o documento contradiz a própria Seção 4/Parecer.
+        classificacao_risco.planos_de_acao.update(evidencia_diagnostico=evidencia_atual)
+        return
+
     prazo = None
     if classificacao_risco.prazo_dias_plano_de_acao is not None:
         prazo = timezone.now().date() + timedelta(days=classificacao_risco.prazo_dias_plano_de_acao)
@@ -453,11 +471,7 @@ def _gerar_plano_de_acao_se_necessario(
             )
         ),
         hierarquia=catalogo.hierarquia if catalogo else "",
-        evidencia_diagnostico=(
-            f"{dominio.nome} classificado como {escore_dominio.classificacao} no GHE "
-            f'"{ghe.nome}"; índice de risco {escore_dominio.escore} (escala 0-100), '
-            f"N={escore_dominio.n_respondentes}."
-        ),
+        evidencia_diagnostico=evidencia_atual,
         indicador=catalogo.indicador if catalogo else "",
         prazo=prazo,
         status=StatusPlanoDeAcao.PLANEJADA,

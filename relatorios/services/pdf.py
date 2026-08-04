@@ -47,12 +47,73 @@ def _planos_ordenados(ghes: list[dict]) -> list[dict]:
                         "plano": plano,
                         "ghe_nome": item["ghe"].nome,
                         "dominio_codigo": d["escore_dominio"].dominio.codigo,
+                        "dominio_nome": d["escore_dominio"].dominio.nome,
                         "banda": d["classificacao_risco"].banda,
                         "banda_css": d["banda_css"],
                     }
                 )
     planos.sort(key=lambda p: BANDA_ORDEM.get(p["banda"], 0), reverse=True)
     return planos
+
+
+def _mapa_nomes_dominio(ghes: list[dict]) -> dict[str, str]:
+    return {d["escore_dominio"].dominio.codigo: d["escore_dominio"].dominio.nome for item in ghes for d in item["dominios"]}
+
+
+def _parecer_para_exibicao(parecer_ia: dict | None, ghes: list[dict]) -> dict | None:
+    """Seção 3 (Parecer técnico): acha de 2026-08-03 (relatório real revisado pelo
+    usuário) — mostrar só o código do domínio ("EE") obriga quem lê a decorar 29
+    códigos diferentes; e as tabelas "Riscos prioritários" e "Recomendações" listavam
+    os mesmos domínios em duas tabelas separadas, restatando a mesma banda duas
+    vezes. Esta função prepara uma versão só pra exibição (nunca sobrescreve o JSON
+    original salvo em `Relatorio.parecer_ia`): troca o código pelo nome completo e
+    funde as duas tabelas numa só (Domínio, Banda, Justificativa, Medida preventiva).
+    A coluna "GHE" e a coluna "Instrumento" só aparecem quando há mais de 1 GHE ou
+    mais de 1 instrumento neste relatório — repetir "Escritório"/"COPSOQ_OFICIAL" em
+    toda linha quando só existe um GHE/instrumento no ciclo não ajuda a leitura."""
+    if not parecer_ia:
+        return None
+
+    nomes = _mapa_nomes_dominio(ghes)
+
+    def _rotulo(codigo: str) -> str:
+        nome = nomes.get(codigo)
+        return f"{nome} ({codigo})" if nome else codigo
+
+    ghes_distintos = {p.get("ghe") for p in parecer_ia.get("pareceres_por_dominio", [])}
+    mostrar_ghe = len(ghes_distintos) > 1
+
+    pareceres = []
+    for p in parecer_ia.get("pareceres_por_dominio", []):
+        pareceres.append({**p, "dominio_rotulo": _rotulo(p.get("dominio", ""))})
+
+    riscos_por_chave = {(r.get("ghe"), r.get("dominio")): r for r in parecer_ia.get("riscos_prioritarios", [])}
+    recomendacoes_por_chave = {
+        (r.get("ghe"), r.get("dominio")): r for r in parecer_ia.get("recomendacoes", [])
+    }
+    chaves = list(dict.fromkeys([*riscos_por_chave, *recomendacoes_por_chave]))  # preserva ordem, sem duplicar
+
+    riscos_e_recomendacoes = []
+    for chave in chaves:
+        risco = riscos_por_chave.get(chave, {})
+        recomendacao = recomendacoes_por_chave.get(chave, {})
+        riscos_e_recomendacoes.append(
+            {
+                "ghe": chave[0],
+                "dominio_rotulo": _rotulo(chave[1] or ""),
+                "banda": risco.get("banda") or recomendacao.get("banda", ""),
+                "justificativa": risco.get("justificativa", ""),
+                "medida_preventiva": recomendacao.get("medida_preventiva", ""),
+            }
+        )
+
+    return {
+        "sintese_executiva": parecer_ia.get("sintese_executiva", ""),
+        "pareceres_por_dominio": pareceres,
+        "riscos_e_recomendacoes": riscos_e_recomendacoes,
+        "aviso_minuta": parecer_ia.get("aviso_minuta", ""),
+        "mostrar_ghe": mostrar_ghe,
+    }
 
 VARIANTE_POR_PROFUNDIDADE = {
     "curta": "COPSOQ oficial, versão curta",
@@ -158,6 +219,7 @@ def _contexto_relatorio(relatorio: Relatorio, minuta: bool) -> dict:
         "criterio_classificacao_linhas": _criterio_classificacao_linhas(relatorio.criterio_versao),
         "planos_ordenados": _planos_ordenados(ghes),
         "dominios_criticos_evento_grave": _dominios_criticos_por_evento_grave(ghes),
+        "parecer_exibicao": _parecer_para_exibicao(relatorio.parecer_ia, ghes),
         "linhas_semaforo": linhas_semaforo,
         "resumo_semaforo": resumo_semaforo,
         "n_total_semaforo": n_total_semaforo,

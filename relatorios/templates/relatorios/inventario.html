@@ -276,44 +276,39 @@
 <!-- 3. PARECER TÉCNICO -->
 <div class="secao">
     <h2>3. Parecer técnico</h2>
-    {% if relatorio.parecer_ia %}
+    {% if parecer_exibicao %}
         <h3>Síntese executiva</h3>
-        <p>{{ relatorio.parecer_ia.sintese_executiva }}</p>
+        <p>{{ parecer_exibicao.sintese_executiva }}</p>
 
         <h3>Pareceres por domínio</h3>
         <table>
-            <thead><tr><th>GHE</th><th>Instrumento</th><th>Domínio</th><th>Classificação</th><th>Banda</th><th>Parecer</th></tr></thead>
+            <thead><tr>{% if parecer_exibicao.mostrar_ghe %}<th>GHE</th>{% endif %}<th>Domínio</th><th>Classificação</th><th>Banda</th><th>Parecer</th></tr></thead>
             <tbody>
-            {% for p in relatorio.parecer_ia.pareceres_por_dominio %}
+            {% for p in parecer_exibicao.pareceres_por_dominio %}
                 <tr>
-                    <td>{{ p.ghe }}</td><td>{{ p.instrumento }}</td><td>{{ p.dominio }}</td>
+                    {% if parecer_exibicao.mostrar_ghe %}<td>{{ p.ghe }}</td>{% endif %}
+                    <td>{{ p.dominio_rotulo }}</td>
                     <td>{{ p.classificacao }}</td><td>{{ p.banda }}</td><td>{{ p.parecer }}</td>
                 </tr>
             {% endfor %}
             </tbody>
         </table>
 
-        <h3>Riscos prioritários</h3>
+        <h3>Riscos prioritários e recomendações</h3>
         <table>
-            <thead><tr><th>GHE</th><th>Domínio</th><th>Banda</th><th>Justificativa</th></tr></thead>
+            <thead><tr>{% if parecer_exibicao.mostrar_ghe %}<th>GHE</th>{% endif %}<th>Domínio</th><th>Banda</th><th>Por que é prioritário</th><th>Medida preventiva</th></tr></thead>
             <tbody>
-            {% for r in relatorio.parecer_ia.riscos_prioritarios %}
-                <tr><td>{{ r.ghe }}</td><td>{{ r.dominio }}</td><td>{{ r.banda }}</td><td>{{ r.justificativa }}</td></tr>
+            {% for r in parecer_exibicao.riscos_e_recomendacoes %}
+                <tr>
+                    {% if parecer_exibicao.mostrar_ghe %}<td>{{ r.ghe }}</td>{% endif %}
+                    <td>{{ r.dominio_rotulo }}</td><td>{{ r.banda }}</td>
+                    <td>{{ r.justificativa }}</td><td>{{ r.medida_preventiva }}</td>
+                </tr>
             {% endfor %}
             </tbody>
         </table>
 
-        <h3>Recomendações</h3>
-        <table>
-            <thead><tr><th>GHE</th><th>Domínio</th><th>Banda</th><th>Medida preventiva</th></tr></thead>
-            <tbody>
-            {% for r in relatorio.parecer_ia.recomendacoes %}
-                <tr><td>{{ r.ghe }}</td><td>{{ r.dominio }}</td><td>{{ r.banda }}</td><td>{{ r.medida_preventiva }}</td></tr>
-            {% endfor %}
-            </tbody>
-        </table>
-
-        <p class="rodape-nota">{{ relatorio.parecer_ia.aviso_minuta }}</p>
+        <p class="rodape-nota">{{ parecer_exibicao.aviso_minuta }}</p>
     {% else %}
         <p>Parecer técnico ainda não gerado para este relatório.</p>
     {% endif %}
@@ -486,32 +481,6 @@
         <span class="quadrado" style="color: #27ae60;">■</span> situação favorável.
         Referência visual: COPSOQ Manual Portugal 2013, Gráfico 1.
     </p>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Domínio</th><th>N</th><th>Risco</th><th>Intermediário</th><th>Favorável</th>
-                <th>Prioridade</th><th>Média de risco</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for linha in linhas_semaforo %}
-            <tr>
-                <td>{{ linha.dominio_codigo }} — {{ linha.dominio_nome }}</td>
-                <td>{{ linha.n_respondentes }}</td>
-                {% if linha.suprimido %}
-                <td colspan="5">Suprimido por confidencialidade (N &lt; {{ linha.n_minimo }})</td>
-                {% else %}
-                <td>{% widthratio linha.pct_risco 1 100 %}%</td>
-                <td>{% widthratio linha.pct_intermediario 1 100 %}%</td>
-                <td>{% widthratio linha.pct_favoravel 1 100 %}%</td>
-                <td><span class="badge {% if linha.prioridade == "P1" %}alto{% elif linha.prioridade == "P2" %}moderado{% else %}aceitavel{% endif %}">{{ linha.prioridade }}</span></td>
-                <td>{{ linha.media_risco }}</td>
-                {% endif %}
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
     {% if resumo_semaforo.maior_risco %}
     <p>
         Maior proporção em vermelho: <strong>{{ resumo_semaforo.maior_risco.dominio_codigo }} —
@@ -590,7 +559,8 @@
         <div class="ficha-acao">
             <div class="ficha-titulo">
                 {{ plano.codigo|default:"—" }} — {{ entrada.ghe_nome }} —
-                {{ entrada.dominio_codigo }} / <span class="badge {{ entrada.banda_css }}">{{ entrada.banda }}</span>
+                {{ entrada.dominio_nome }} ({{ entrada.dominio_codigo }}) /
+                <span class="badge {{ entrada.banda_css }}">{{ entrada.banda }}</span>
             </div>
             <table>
                 <tr><td class="rotulo">Medida escolhida</td><td>{{ plano.medida }}</td></tr>

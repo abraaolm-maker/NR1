@@ -2096,6 +2096,54 @@ Relatório, mesmo padrão do parecer técnico.
 
 ---
 
+## 6.16 Engenharia reversa do relatório real + correção de credibilidade (2026-08-03)
+
+> O usuário pediu uma revisão crítica de um relatório real gerado em produção (COPSOQ
+> Oficial, 25 domínios): o que está bom, o que é bug, o que é redundante, o que falta.
+> Achado mais grave: o Plano de Ação de um domínio citava "N=5" enquanto todo o resto
+> do documento (Parecer, Seção 4, Semáforo) já mostrava "N=8" para o mesmo domínio —
+> uma contradição de dado dentro do mesmo PDF que derruba a credibilidade técnica.
+
+**Bug corrigido — `avaliacoes/services/calculo_risco.py::_gerar_plano_de_acao_se_necessario`**:
+`evidencia_diagnostico` (escore/N citados no texto) era escrita só na criação do
+`PlanoDeAcao` e nunca mais atualizada — se o domínio fosse recalculado depois com mais
+respondentes (fluxo normal: coleta continua depois do primeiro cálculo), o texto do
+plano ficava congelado no valor antigo pra sempre. Agora esse texto é recalculado
+sempre que o domínio é recalculado, mesmo quando o plano já existe (só a evidência é
+atualizada — a medida escolhida manualmente ou pela IA nunca é sobrescrita).
+
+**Redundância reduzida no PDF** (`relatorios/services/pdf.py`, `inventario.html`):
+1. **Nunca mais código de domínio sozinho** ("EE", "RT") — sempre "Nome completo
+   (CÓDIGO)". Afetava as 3 tabelas do Parecer técnico (geradas pela IA, que só recebe
+   o código no payload) e o título de cada ficha do Plano de Ação. Nova função
+   `pdf.py::_parecer_para_exibicao` traduz o código pro nome só na exibição, sem
+   alterar o JSON original salvo em `Relatorio.parecer_ia`.
+2. **"Riscos prioritários" e "Recomendações" fundidas numa tabela só** (Domínio,
+   Banda, Por que é prioritário, Medida preventiva) — antes eram duas tabelas
+   separadas repetindo os mesmos domínios com textos parecidos.
+3. **Coluna "GHE" só aparece quando há mais de 1 GHE** no relatório — repetir o mesmo
+   nome em toda linha de toda tabela quando só existe 1 GHE no ciclo não ajudava a
+   leitura (`parecer_exibicao.mostrar_ghe`).
+4. **Tabela numérica duplicada da Seção 5 (Análise semáforo) removida** — o gráfico de
+   barras já mostra a mesma informação de forma mais fácil de entender (decisão do
+   usuário: preferir a leitura visual do semáforo a uma segunda tabela repetindo os
+   mesmos 25 domínios já detalhados na Seção 4).
+5. Coluna "Instrumento" removida da tabela de Pareceres por domínio — já é dita uma
+   vez por GHE na Seção 2/3, repetir o código técnico (`COPSOQ_OFICIAL`) em cada linha
+   não agregava nada.
+
+**Achado sem correção de código (é dado de cadastro, não bug)**: a assinatura do
+relatório mostrava "admin" em vez do nome da profissional — o template já busca
+`get_full_name()` corretamente, mas a conta usada não tinha nome preenchido. Correção:
+preencher `first_name`/`last_name` do usuário que assina (Django Admin ou
+`changepassword`-equivalente), não uma mudança de código.
+
+**Cobertura de teste**: `avaliacoes/tests.py::test_evidencia_diagnostico_do_plano_acompanha_recalculo`
+cobre o bug do N desatualizado (cria com N=5, recalcula com N=8, confirma que o texto
+acompanha). Suíte completa reexecutada após a mudança.
+
+---
+
 ## 7. Backend — cálculo da matriz de risco (valores definitivos, sem exemplos ilustrativos)
 
 A implementação de referência completa está no arquivo **`risk_engine.py`** entregue junto com
