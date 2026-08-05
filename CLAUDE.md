@@ -2250,6 +2250,55 @@ não foi executada nesta rodada a pedido explícito do usuário ("não precisa r
 suba pro vps que eu vou conferir olhando"); só os testes das áreas tocadas (`relatorios/tests.py`,
 `relatorios/test_painel_views.py`, `manage.py check`) foram rodados antes do push.
 
+## 6.20 Redesenho visual completo do PDF, 4 fases (2026-08-05)
+
+> O usuário comparou o PDF real com o relatório de referência Solute lado a lado e apontou
+> corretamente que a rodada anterior (Seção 6.19) só trocou os cabeçalhos das seções — o
+> elemento que mais define o visual da Solute (nenhuma tabela com grade em nenhuma página)
+> nunca tinha sido tocado fora do Panorama. Pediu as 4 fases do plano (`PLANO_ACAO_RELATORIO.md`
+> Seção 3.5) implementadas de uma vez.
+
+**Fase A (fundação CSS)**: tabelas perderam a grade completa (`border: 1px solid #ccc` em toda
+célula) — agora só têm linha divisória horizontal fina (`border-bottom: 1px solid #e8e8e8`) e
+cabeçalho com borda inferior mais forte na cor primária, sem fundo. Classe `.zebra` (listras
+sutis) reservada só pras 2 tabelas genuinamente tabulares que continuam como tabela (Resultados
+por GHE/domínio, N respondentes por domínio) — o resto virou lista ou card. Rodapé ganhou selo
+"CONFIDENCIAL · Inventário de Risco Psicossocial" (`@bottom-left` do `@page`), ao lado do número
+de página que já existia (`@bottom-right`).
+
+**Fase B (capa)**: marca quadrada com iniciais "IRP" (navy, cantos arredondados) e barra de
+acento horizontal (laranja) abaixo do título — equivalente simplificado ao "S" da Solute, sem
+precisar de um logo desenhado.
+
+**Fase C (tabelas densas → cards/listas)**:
+- "Instrumentos utilizados por GHE" e "Variante do questionário aplicada" (1-2 linhas cada):
+  viraram lista de texto corrido — tabela pra 1 linha de dado era desperdício de espaço.
+- "Pareceres por domínio" (Seção 4): deixou de listar todos os ~26 domínios em tabela — agora só
+  mostra card por domínio **fora da faixa Aceitável** (os Aceitáveis já aparecem na coluna
+  "O que está protegendo" do Panorama, sem repetir parecer individual). Reduz de ~26 linhas de
+  tabela pra só as ~9 que realmente pedem leitura atenta.
+- "Riscos prioritários e recomendações": virou card por domínio (mesmo componente `.ficha-acao`
+  do Plano de Ação), com borda esquerda colorida pela banda (vermelho Alto/Crítico, âmbar
+  Moderado, verde Aceitável).
+- Plano de ação: as fichas já existiam como card, só ganharam a borda esquerda colorida por banda
+  (antes eram todas cinzas, sem diferenciação visual de urgência).
+- "Resultados por GHE e por domínio" e "N respondentes por domínio": mantidas como tabela (dado
+  genuinamente tabular, 26 linhas — a Solute não tem equivalente porque o exemplo deles só tem 8
+  dimensões), mas com a grade destylizada (Fase A) em vez de continuar com a grade pesada.
+
+**Fase D (bug de contagem da IA)**: achado nesta auditoria — a síntese executiva gerada por IA
+errou a própria contagem ("Dos 25 domínios avaliados, 4 apresentaram banda Alto" quando a
+Aplicação real tinha 26 domínios e só 3 em Alto). A IA tentava somar sozinha em texto livre e
+errava. Corrigido em `relatorios/services/analise_ia.py`:
+`montar_payload_relatorio` agora anexa `resumo_contagens` (total de domínios avaliados +
+contagem por banda, somados deterministicamente pelo backend via `_montar_resumo_contagens`);
+nova regra 11 do `SYSTEM_PROMPT` proíbe a IA de recalcular essas contagens — ela deve citar
+literalmente os valores de `resumo_contagens` na síntese executiva.
+
+**Cobertura de teste**: `relatorios/tests.py` e `relatorios/test_painel_views.py` (32 testes)
+passando após a mudança — nenhum teste dependia da estrutura exata das tabelas removidas, só do
+conteúdo (que continua presente, só reformatado). `manage.py check` sem erros de template.
+
 ---
 
 ## 7. Backend — cálculo da matriz de risco (valores definitivos, sem exemplos ilustrativos)

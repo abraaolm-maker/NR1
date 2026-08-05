@@ -105,7 +105,14 @@ em qualquer circunstância, mesmo dentro de uma palavra composta ou de uma lista
 a frase usando vírgula, a conjunção "e", parênteses ou dois pontos no lugar do hífen. Além \
 disso, nunca use qualquer expressão que sugira que este parecer foi redigido por \
 inteligência artificial, modelo de linguagem ou automação — o texto deve se ler como \
-redação técnica humana."""
+redação técnica humana.
+
+11. O JSON de entrada traz um campo "resumo_contagens" (total_dominios_avaliados e \
+por_banda, já somados pelo backend). PROIBIDO recalcular ou estimar essas contagens de \
+cabeça na síntese executiva — cite exatamente os números de "resumo_contagens", inclusive \
+o total de domínios avaliados e quantos estão em cada banda. Nunca escreva uma contagem no \
+texto que não bata com esses valores; se precisar mencionar quais domínios estão em cada \
+banda, liste os nomes, mas o NÚMERO sempre vem literal de "resumo_contagens"."""
 
 PARECER_TOOL = {
     "name": "gerar_parecer_tecnico",
@@ -270,7 +277,29 @@ def montar_payload_relatorio(relatorio_id: int) -> dict:
 
         payload["ghes"].append(ghe_payload)
 
+    payload["resumo_contagens"] = _montar_resumo_contagens(payload["ghes"])
     return payload
+
+
+def _montar_resumo_contagens(ghes_payload: list[dict]) -> dict:
+    """Achado de 2026-08-05 (relatório real revisado pelo usuário): a síntese
+    executiva gerada por IA errou a própria contagem de domínios ("Dos 25 domínios
+    avaliados, 4 apresentaram banda Alto" quando na verdade eram 26 domínios e 3 em
+    Alto) — a IA tentou somar/contar sozinha em texto livre e errou. Essas contagens
+    são determinísticas e já estão disponíveis no payload; calculá-las aqui e exigir
+    (regra 11 do SYSTEM_PROMPT) que a IA só as repita, nunca as recalcule, elimina
+    essa classe de erro por completo."""
+    total = 0
+    por_banda = {"Aceitável": 0, "Moderado": 0, "Alto": 0, "Crítico": 0}
+    for ghe_payload in ghes_payload:
+        for dominio in ghe_payload["dominios"]:
+            if dominio.get("suprimido_por_confidencialidade"):
+                continue
+            total += 1
+            banda = dominio.get("banda")
+            if banda in por_banda:
+                por_banda[banda] += 1
+    return {"total_dominios_avaliados": total, "por_banda": por_banda}
 
 
 def _dominios_fora_de_aceitavel(payload: dict) -> set[tuple[str, str]]:

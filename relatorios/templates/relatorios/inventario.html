@@ -6,8 +6,14 @@
 <style>
     @page {
         size: A4;
-        margin: 2cm 1.8cm;
-        @bottom-center {
+        margin: 2.2cm 1.8cm 1.8cm;
+        @bottom-left {
+            content: "CONFIDENCIAL · Inventário de Risco Psicossocial";
+            font-size: 8px;
+            letter-spacing: .04em;
+            color: #999;
+        }
+        @bottom-right {
             content: "Página " counter(page) " de " counter(pages);
             font-size: 9px;
             color: #666;
@@ -40,7 +46,29 @@
 
     .capa {
         text-align: center;
-        margin-top: 8cm;
+        margin-top: 6.5cm;
+        page-break-after: always;
+    }
+    .capa .marca {
+        width: 40px;
+        height: 40px;
+        margin: 0 auto 18px;
+        background: #2b3a55;
+        color: #fff;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+        font-weight: bold;
+        letter-spacing: .02em;
+    }
+    .capa .barra-acento {
+        width: 64px;
+        height: 4px;
+        margin: 18px auto 0;
+        background: #c76b1f;
+        border-radius: 2px;
     }
     .capa .selo {
         font-size: 12px;
@@ -52,21 +80,35 @@
     .capa .meta { margin-top: 24px; font-size: 12px; color: #444; }
     .capa .meta div { margin-bottom: 4px; }
 
-    .capa { page-break-after: always; }
-
+    /* Fase A da reformulação visual (2026-08-05, PLANO_ACAO_RELATORIO.md Seção 3.5):
+       a Solute nunca usa grade de tabela em nenhuma página — o peso visual vem de
+       whitespace, cards e linhas finas, não de bordas cruzadas. Tabelas continuam
+       existindo aqui só onde o dado é genuinamente tabular (Resultados por domínio),
+       mas sem grade completa: sem borda lateral, só linha divisória horizontal fina
+       e cabeçalho com borda inferior mais forte na cor primária. */
     table {
         width: 100%;
         border-collapse: collapse;
-        margin-bottom: 10px;
+        margin-bottom: 14px;
         font-size: 10px;
     }
     th, td {
-        border: 1px solid #ccc;
-        padding: 4px 6px;
+        border: none;
+        border-bottom: 1px solid #e8e8e8;
+        padding: 6px 8px;
         text-align: left;
         vertical-align: top;
     }
-    th { background: #eef1f6; color: #2b3a55; }
+    th {
+        background: none;
+        color: #2b3a55;
+        border-bottom: 2px solid #2b3a55;
+        font-size: 9.5px;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+    }
+    .zebra tbody tr:nth-child(even) td { background: #fafbfc; }
+    .ficha-acao table td { border-bottom: 1px solid #eee; }
 
     .badge {
         display: inline-block;
@@ -113,16 +155,21 @@
     }
 
     .ficha-acao {
-        border: 1px solid #ccc;
-        border-radius: 3px;
-        padding: 8px 10px;
-        margin-bottom: 10px;
+        border: 1px solid #e5e5e5;
+        border-left: 4px solid #2b3a55;
+        border-radius: 6px;
+        padding: 10px 12px;
+        margin-bottom: 12px;
+        background: #fdfdfd;
         page-break-inside: avoid;
     }
+    .ficha-acao.borda-alto, .ficha-acao.borda-critico { border-left-color: #c0392b; }
+    .ficha-acao.borda-moderado { border-left-color: #d1a316; }
+    .ficha-acao.borda-aceitavel { border-left-color: #3a9d5d; }
     .ficha-acao .ficha-titulo {
         font-weight: bold;
         color: #2b3a55;
-        margin-bottom: 4px;
+        margin-bottom: 6px;
     }
     .ficha-acao table { margin-bottom: 0; }
     .ficha-acao table td.rotulo {
@@ -233,8 +280,10 @@
 
 <!-- 1. CAPA -->
 <div class="capa">
+    <div class="marca">IRP</div>
     <div class="selo">Inventário de Risco Psicossocial</div>
     <h1>{{ empresa.nome }}</h1>
+    <div class="barra-acento"></div>
     <div class="meta">
         <div>CNPJ: {{ empresa.cnpj }}</div>
         <div>Unidade: {{ unidade.nome }}{% if unidade.cnpj %} — CNPJ {{ unidade.cnpj }}{% endif %}</div>
@@ -345,18 +394,11 @@
         preventiva sugerida{% if relatorio.tipo == "diagnostico_plano_acao" %} (Seção 9, Plano de ação){% else %} no parecer técnico deste documento{% endif %}.
     </p>
     <h3>Instrumentos utilizados por GHE</h3>
-    <table>
-        <thead><tr><th>GHE</th><th>Instrumento</th><th>Tipo de aplicação</th></tr></thead>
-        <tbody>
-        {% for item in ghes %}
-            <tr>
-                <td>{{ item.ghe.nome }}</td>
-                <td>{{ item.aplicacao.instrumento.nome }}</td>
-                <td>{{ item.aplicacao.get_tipo_display }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    <ul style="margin: 0; padding-left: 18px;">
+    {% for item in ghes %}
+        <li>{{ item.ghe.nome }}: instrumento {{ item.aplicacao.instrumento.nome }}, aplicação {{ item.aplicacao.get_tipo_display|lower }}.</li>
+    {% endfor %}
+    </ul>
 </div>
 
 <!-- 3. METODOLOGIA -->
@@ -368,18 +410,12 @@
         identificada conforme registrado, e cálculo determinístico de escore, classificação
         e matriz de risco por domínio/subescala, atualizado a cada novo ciclo de coleta.
     </p>
-    <table>
-        <thead><tr><th>GHE</th><th>Variante do questionário aplicada</th></tr></thead>
-        <tbody>
-        {% for item in ghes %}
-            <tr>
-                <td>{{ item.ghe.nome }}</td>
-                <td>{{ item.variante_instrumento }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    <table>
+    <ul style="margin: 0 0 14px; padding-left: 18px;">
+    {% for item in ghes %}
+        <li>{{ item.ghe.nome }}: {{ item.variante_instrumento }}.</li>
+    {% endfor %}
+    </ul>
+    <table class="zebra">
         <thead><tr><th>GHE</th><th>Domínio/subescala</th><th>N respondentes</th><th>Observação</th></tr></thead>
         <tbody>
         {% for item in ghes %}
@@ -408,33 +444,39 @@
         <h3>Síntese executiva</h3>
         <p>{{ parecer_exibicao.sintese_executiva }}</p>
 
-        <h3>Pareceres por domínio</h3>
-        <table>
-            <thead><tr>{% if parecer_exibicao.mostrar_ghe %}<th>GHE</th>{% endif %}<th>Domínio</th><th>Classificação</th><th>Banda</th><th>Parecer</th></tr></thead>
-            <tbody>
-            {% for p in parecer_exibicao.pareceres_por_dominio %}
-                <tr>
-                    {% if parecer_exibicao.mostrar_ghe %}<td>{{ p.ghe }}</td>{% endif %}
-                    <td>{{ p.dominio_rotulo }}</td>
-                    <td>{{ p.classificacao }}</td><td>{{ p.banda }}</td><td>{{ p.parecer }}</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+        <h3>Pareceres por domínio (fora da faixa Aceitável)</h3>
+        <p style="font-size: 10px; color: #777; margin-top: -4px;">
+            Domínios em faixa Aceitável já aparecem na coluna "O que está protegendo" do
+            Panorama (Seção 1) — não repetidos aqui pra manter o foco no que precisa de
+            leitura mais atenta.
+        </p>
+        {% with pareceres_relevantes=parecer_exibicao.pareceres_por_dominio|dictsortreversed:"banda" %}
+        {% for p in pareceres_relevantes %}
+            {% if p.banda != "Aceitável" %}
+            <div class="ficha-acao borda-{{ p.banda|slugify }}">
+                <div class="ficha-titulo">
+                    {% if parecer_exibicao.mostrar_ghe %}{{ p.ghe }} — {% endif %}{{ p.dominio_rotulo }} /
+                    <span class="badge {{ p.banda|slugify }}">{{ p.banda }}</span>
+                </div>
+                <p style="margin: 0; font-size: 10.5px;">{{ p.parecer }}</p>
+            </div>
+            {% endif %}
+        {% endfor %}
+        {% endwith %}
 
         <h3>Riscos prioritários e recomendações</h3>
-        <table>
-            <thead><tr>{% if parecer_exibicao.mostrar_ghe %}<th>GHE</th>{% endif %}<th>Domínio</th><th>Banda</th><th>Por que é prioritário</th><th>Medida preventiva</th></tr></thead>
-            <tbody>
-            {% for r in parecer_exibicao.riscos_e_recomendacoes %}
-                <tr>
-                    {% if parecer_exibicao.mostrar_ghe %}<td>{{ r.ghe }}</td>{% endif %}
-                    <td>{{ r.dominio_rotulo }}</td><td>{{ r.banda }}</td>
-                    <td>{{ r.justificativa }}</td><td>{{ r.medida_preventiva }}</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+        {% for r in parecer_exibicao.riscos_e_recomendacoes %}
+            <div class="ficha-acao borda-{{ r.banda|slugify }}">
+                <div class="ficha-titulo">
+                    {% if parecer_exibicao.mostrar_ghe %}{{ r.ghe }} — {% endif %}{{ r.dominio_rotulo }} /
+                    <span class="badge {{ r.banda|slugify }}">{{ r.banda }}</span>
+                </div>
+                <table style="margin-bottom: 0;">
+                    <tr><td class="rotulo">Por que é prioritário</td><td>{{ r.justificativa }}</td></tr>
+                    <tr><td class="rotulo">Medida preventiva</td><td>{{ r.medida_preventiva }}</td></tr>
+                </table>
+            </div>
+        {% endfor %}
 
         <p class="rodape-nota">{{ parecer_exibicao.aviso_minuta }}</p>
     {% else %}
@@ -493,7 +535,7 @@
     {% for item in ghes %}
     <div class="ghe-bloco">
         <h3>GHE: {{ item.ghe.nome }}{% if item.ghe.setor %} ({{ item.ghe.setor }}){% endif %}</h3>
-        <table>
+        <table class="zebra">
             <thead>
                 <tr>
                     <th>Domínio</th><th>Escore</th><th>Média nacional*</th><th>Classificação</th><th>% em risco</th>
@@ -690,7 +732,7 @@
     </div>
     {% for entrada in planos_ordenados %}
         {% with plano=entrada.plano %}
-        <div class="ficha-acao">
+        <div class="ficha-acao borda-{{ entrada.banda_css }}">
             <div class="ficha-titulo">
                 {{ plano.codigo|default:"—" }} — {{ entrada.ghe_nome }} —
                 {{ entrada.dominio_nome }} ({{ entrada.dominio_codigo }}) /

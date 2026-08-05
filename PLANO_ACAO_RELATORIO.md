@@ -134,21 +134,113 @@ leitura" no estilo deles.
 | 06 · Considerações finais — "Próximo ciclo." | **Considerações finais** — reaplicação, conformidade NR-01, sigilo | Diagnóstico e Diagnóstico+Plano |
 
 ### 3.4 Elementos visuais específicos a incorporar
+
+> **Atualização de 2026-08-05 (auditoria pós-implementação)**: a primeira rodada
+> (CLAUDE.md Seção 6.19) implementou só os 2 primeiros itens abaixo (eyebrow +
+> manchete, e os cards/colunas — mas só dentro da Seção 1 Panorama). O usuário
+> comparou o PDF real gerado com o PDF da Solute lado a lado e apontou,
+> corretamente: **da Seção 2 em diante o documento continua com a cara antiga**
+> — tabelas com grade cinza cheia de bordas, sem o respiro/whitespace da
+> Solute, sem cor de destaque em lugar nenhum fora do Panorama, capa sem
+> nenhum elemento visual (barra lateral, marca), rodapé sem selo de
+> confidencialidade. Isso é uma lacuna real de execução, não uma limitação
+> técnica — fica detalhado no plano faseado abaixo (Seção 3.5), que é o que
+> falta pra realmente fechar o que este documento pede desde o início.
+
 - Rótulo pequeno maiúsculo com letter-spacing antes da manchete de cada seção
   (ex.: "01 · PANORAMA"), seguido de manchete grande em negrito com 1-2 palavras
-  destacadas na cor de acento.
+  destacadas na cor de acento. **[Feito em todas as seções, 2026-08-05]**
 - Cards de indicador: número grande + rótulo pequeno abaixo + selo/legenda de
-  leitura (ex.: "Faixa favorável", "Alta confiabilidade").
+  leitura (ex.: "Faixa favorável", "Alta confiabilidade"). **[Feito só na Seção 1]**
 - Cartão de destaque (fundo escuro no exemplo da Solute) para o número de
-  "frentes de atenção" (quantos domínios estão fora do Aceitável), com texto
-  explicando quais são ao lado.
-- Duas colunas lado a lado: **"O que está protegendo"** (domínios em banda
-  Aceitável, lidos como fator positivo) e **"O que pede ação"** (domínios fora de
-  Aceitável) — hoje o sistema só lista o que está ruim; isso é conteúdo novo.
-- Badges coloridos de faixa (já existem no sistema — Aceitável/Moderado/Alto/
-  Crítico — só ajustar o estilo visual pro padrão do card).
+  "frentes de atenção". **[Feito só na Seção 1]**
+- Duas colunas "O que está protegendo" / "O que pede ação". **[Feito só na
+  Seção 1 — o resto do documento nunca teve essa leitura]**
+- Badges coloridos de faixa. **[Já existiam antes deste ciclo, sem mudança]**
 - Cabeçalho/rodapé com nome do sistema, empresa, número de página e selo de
-  confidencialidade.
+  confidencialidade. **[NÃO feito — rodapé continua só "Página N de M"]**
+- Capa com barra de acento lateral e marca quadrada tipo "S" da Solute. **[NÃO
+  feito — capa continua só texto centralizado, sem nenhum elemento gráfico]**
+- Tabelas densas convertidas em listas/cards sem grade completa (a Solute não
+  usa NENHUMA tabela com borda visível em lugar nenhum do documento — tudo é
+  card, lista com marcador, ou texto corrido). **[NÃO feito — todas as tabelas
+  do sistema (Metodologia, Parecer por domínio, Resultados por GHE, Riscos
+  prioritários) continuam com grade cinza completa, exatamente como antes]**
+
+### 3.5 Plano faseado para fechar a lacuna (não implementado — aguardando aprovação)
+
+> Only a genuine redesign closes this gap — trocar só os cabeçalhos (o que já
+> foi feito) não é suficiente porque a Solute nunca usa tabela com grade em
+> nenhuma página; o "peso visual" do documento inteiro vem de whitespace,
+> cards e listas, não de texto+régua. Um clone pixel a pixel não é viável (o
+> exemplo da Solute tem 8 dimensões; nosso COPSOQ Oficial tem até 26) — mas o
+> *sistema visual* (cor, espaçamento, tipografia, componentes) dá pra replicar
+> em qualquer densidade de dado, inclusive nas tabelas de 26 linhas.
+
+**Fase A — Fundação do sistema visual (CSS, sem mudar conteúdo/estrutura)**
+- Paleta definitiva: `#2b3a55` (azul-marinho, cor primária — títulos, bordas,
+  ícones) + `#c76b1f` (laranja, SÓ para destaque pontual — palavra-chave em
+  manchete, barra lateral de card, nunca fundo nem texto corrido).
+- Escala tipográfica única (eyebrow 9.5px caps letter-spaced / manchete 19-22px
+  bold / corpo 10.5-11px / rótulo de card 9px) aplicada em todo o documento,
+  não só no Panorama.
+- Componente "card" reutilizável (fundo levemente cinza, borda 1px suave,
+  cantos arredondados, sem sombra pesada — WeasyPrint suporta `border-radius`)
+  para substituir tabela onde fizer sentido.
+- Selo "CONFIDENCIAL" + nome do documento no rodapé de toda página (hoje só
+  tem número de página).
+
+**Fase B — Capa**
+- Barra de acento lateral (navy, largura ~8px, borda esquerda da página) e uma
+  marca quadrada simples com iniciais do sistema (equivalente ao "S" da
+  Solute) — não precisa ser um logo desenhado, só um quadrado com iniciais em
+  fonte bold, mesmo espírito.
+
+**Fase C — Conversão de tabelas densas em cards/listas onde o dado permite**
+- "Parecer por domínio" (Seção 4): de tabela de 5 colunas × 26 linhas para uma
+  lista de mini-cards (1 por domínio fora de Aceitável — os Aceitáveis ficam
+  só na lista "protegendo" do Panorama, sem repetir parecer individual deles,
+  reduzindo de 26 blocos pra só os ~9 que importam).
+- "Riscos prioritários e recomendações": já é conceitualmente um card por
+  domínio (Domínio/Banda/Por quê/Medida) — só precisa perder a borda de
+  tabela e virar cards empilhados, como o Plano de Ação já faz.
+- "Instrumentos por GHE" e "Variante do questionário" (Metodologia): tabelas
+  de 1-2 linhas viram texto corrido ("Este ciclo usou o COPSOQ oficial, versão
+  curta, aplicado de forma anônima ao GHE Escritório") — tabela é desperdício
+  de espaço pra 1 linha de dado.
+- "Resultados por GHE e por domínio" (Seção 5) e a tabela "N respondentes por
+  domínio" (Metodologia): são genuinamente tabulares (26 linhas × várias
+  colunas numéricas) — aqui a Solute não tem equivalente direto (só 8
+  dimensões). Decisão proposta: manter como tabela, mas remover a grade cinza
+  completa (`border: 1px solid #ccc` em toda célula) e usar só linha divisória
+  horizontal fina + fundo alternado sutil (zebra), no mesmo espírito "sem
+  grade pesada" da Solute.
+
+**Fase D — Correção de um bug real encontrado nesta auditoria**
+- A síntese executiva gerada por IA (Seção 4, Parecer técnico) **erra a
+  contagem dos próprios dados**: no relatório revisado, ela diz "Dos 25
+  domínios avaliados, 4 apresentaram banda Alto" — mas a Aplicação tem **26**
+  domínios (confirmado na tabela da Metodologia) e só **3** estão em banda
+  Alto (EC, CLT, IL — confirmado na Seção 5 e no Panorama, que mostra 9
+  frentes de atenção = 3 Alto + 6 Moderado, batendo com a tabela real). A IA
+  não tem acesso a "achar" esses números — ela SÓ deveria repetir o que já
+  veio pronto no payload (`montar_payload_relatorio`), mas erra a soma/
+  contagem em texto livre. Isso é uma falha de confiabilidade factual num
+  documento que promete "a IA nunca decide, só interpreta números já prontos"
+  (CLAUDE.md Seção 8.1) — se ela erra a contagem na síntese, quebra essa
+  promessa na prática, mesmo sem alterar a Banda/classificação em si (que
+  continuam corretas, calculadas pelo backend). Correção proposta: computar as
+  contagens (nº de domínios avaliados, nº por banda) no backend e **injetar
+  esses números prontos no payload enviado à IA**, com instrução explícita de
+  reusar os valores literalmente na síntese em vez de tentar somar sozinha.
+
+**Fase E — O que continua fora de escopo** (inalterado desde a Seção 5 abaixo):
+Recortes por setor/cargo, tendência entre ciclos, fórmula alternativa de
+índice consolidado.
+
+> **Atualização de 2026-08-05 (mesmo dia)**: Fases A, B, C e D **implementadas**
+> — ver CLAUDE.md Seção 6.20 para o detalhamento final. Fase E permanece
+> pendente (inalterada).
 
 ---
 
