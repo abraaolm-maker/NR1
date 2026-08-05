@@ -149,8 +149,13 @@ def relatorio_detail(request, pk):
     pode_gerar_pdf = etapa_parecer and (etapa_planos_refinados or not exige_planos_refinados)
 
     etapas = [
-        {"nome": "Diagnósticos", "concluida": True, "atual": False},
-        {"nome": "Parecer técnico", "concluida": etapa_parecer, "atual": not etapa_parecer},
+        {"nome": "Diagnósticos", "concluida": True, "atual": False, "ancora": "#secao-tipo"},
+        {
+            "nome": "Parecer técnico",
+            "concluida": etapa_parecer,
+            "atual": not etapa_parecer,
+            "ancora": "#secao-parecer",
+        },
     ]
     if exige_planos_refinados:
         etapas.append(
@@ -158,14 +163,18 @@ def relatorio_detail(request, pk):
                 "nome": "Refinar planos de ação",
                 "concluida": etapa_planos_refinados,
                 "atual": etapa_parecer and not etapa_planos_refinados,
+                "ancora": "#secao-planos",
             }
         )
-    etapas.append({"nome": "PDF", "concluida": etapa_pdf, "atual": pode_gerar_pdf and not etapa_pdf})
+    etapas.append(
+        {"nome": "PDF", "concluida": etapa_pdf, "atual": pode_gerar_pdf and not etapa_pdf, "ancora": "#secao-pdf"}
+    )
     etapas.append(
         {
             "nome": "Assinatura",
             "concluida": etapa_assinatura,
             "atual": etapa_pdf and not etapa_assinatura,
+            "ancora": "#secao-pdf",
         }
     )
 

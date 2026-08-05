@@ -2188,11 +2188,67 @@ geravam PDF (`test_gerar_pdf_relatorio_minuta_tem_marca_dagua_e_nao_muda_status`
 precisaram passar a setar `parecer_ia`/`planos_refinados_em` antes de chamar
 `gerar_pdf_relatorio`/`assinar_relatorio` — a trava nova se aplica a eles também, de propósito.
 
-**Pendente (fora do escopo desta implementação, registrado em `PLANO_ACAO_RELATORIO.md`)**: a
-reformulação visual do PDF (referência Solute/Hospital São Lucas — cards de indicador, cores de
-destaque, "Recortes" organizacionais, apêndice de integridade/hash, contador de supressões por
-k-anonimato) ainda não foi implementada — só a separação de tipos (Seção 2 do plano) entrou nesta
-rodada.
+---
+
+## 6.19 UX do fluxo de relatório + Panorama/apêndice técnico do PDF (2026-08-05)
+
+> Dois pedidos do usuário no mesmo dia, depois de testar a Seção 6.18 em produção: (1) a tela
+> `relatorio_detail.html` estava confusa (precisava rolar até o fim pra achar o botão de PDF, não
+> ficava claro qual botão liberava qual, e a divisão Diagnóstico vs. Diagnóstico + Plano de Ação
+> não aparecia em lugar nenhum); (2) implementar as Seções 3 e 4 do `PLANO_ACAO_RELATORIO.md`
+> (referência visual/conteúdo dos relatórios Solute e Hospital São Lucas), sem rodar a suíte de
+> testes completa antes de subir — só os testes direcionados às páreas tocadas.
+
+**UX do painel** (`relatorios/templates/painel/relatorio_detail.html`,
+`relatorios/painel_views.py::relatorio_detail`):
+- Banner "Próximo passo" logo no topo da página (antes de qualquer outro card), calculado a
+  partir do mesmo estado que já alimentava o stepper — mostra em uma frase o que falta fazer e um
+  botão "Ir para lá ↓" que pula direto pra seção certa via âncora (`#secao-parecer`,
+  `#secao-planos`, `#secao-pdf`) ou pro link de cadastro de perfil profissional.
+- Card "Tipo deste relatório" isolado logo abaixo, explicando em uma frase que o tipo é fixo, se o
+  PDF inclui ou não Plano de Ação, e um link direto pra criar um novo relatório (do outro tipo) na
+  mesma Unidade — resolve a confusão de "onde escolho Diagnóstico vs. Diagnóstico + Plano de
+  Ação" (o tipo é decidido na criação do Relatorio, Seção 6.18, não é um botão dentro desta tela).
+- O stepper virou clicável: cada etapa é um link `<a href="#ancora">` pra a seção correspondente,
+  com uma frase "clique numa etapa pra ir direto até ela" acima.
+- Cada card ganhou um `id` (`secao-tipo`, `secao-parecer`, `secao-planos`, `secao-pdf`) — são os
+  alvos das âncoras acima.
+
+**Panorama e apêndice técnico do PDF** (`relatorios/services/pdf.py`,
+`relatorios/templates/relatorios/inventario.html`) — implementa
+`PLANO_ACAO_RELATORIO.md` Seções 3 e 4:
+- Nova Seção 1 "Panorama" (antes da Base técnica, que virou Seção 2): eyebrow label + manchete no
+  tom do relatório de referência Solute RH ("O que os dados dizem."), 3 cards de indicador (Índice
+  consolidado — média simples dos escores 0-100 de todos os domínios não suprimidos deste
+  relatório, decisão de engenharia registrada no plano por falta de fórmula oficial publicada;
+  Participantes; Nível geral de risco — banda predominante entre Baixo/Moderado/Alto), um cartão
+  de destaque com o número de "frentes de atenção" (domínios fora de Aceitável), e duas colunas
+  "O que está protegendo" / "O que pede ação". **O semáforo continua sendo a única forma de
+  apresentar resultado por domínio** — o Panorama só resume em números o que as Seções seguintes
+  já mostram em detalhe, nunca substitui nem usa a lista ranqueada "N dimensões, uma leitura" da
+  Solute (ressalva inegociável do usuário, Seção 3.2 do plano). Implementado em
+  `pdf.py::_montar_panorama`.
+- Todas as seções seguintes renumeradas (Base técnica 2, Metodologia 3, Parecer técnico 4,
+  Resultados por GHE/domínio 5, Análise semáforo 6, Evidências complementares 7, Entrevista e
+  observação 8, Plano de ação 9 quando aplicável, Assinatura 9 ou 10).
+- Apêndice de integridade no rodapé da Seção de Assinatura: contador "X de Y domínio(s)/GHE
+  suprimido(s) por confidencialidade" (`pdf.py::_contador_supressao`, inspirado no relatório do
+  Hospital São Lucas — plano Seção 4.1 item 2) e um hash SHA-256
+  (`pdf.py::_hash_integridade`) calculado sobre os dados determinísticos que fundamentam o
+  documento (escores, N, supressão por domínio — nunca sobre o PDF final, que ainda não existe no
+  momento em que o contexto é montado), pra permitir conferir depois que o conteúdo numérico não
+  foi alterado fora do fluxo do sistema (plano Seção 4.1 item 3).
+- **Não implementado nesta rodada** (permanecem como pendência, ver `PLANO_ACAO_RELATORIO.md`
+  Seção 5): "Recortes" por setor/cargo (exige dado de cadastro que o sistema não coleta hoje);
+  paleta de cor definitiva (o acento laranja da Solute foi usado só nos elementos do Panorama,
+  como destaque pontual — a cor principal do sistema continua o azul-marinho); comparação de
+  tendência entre ciclos.
+
+**Cobertura de teste**: `relatorios/tests.py` (2 testes de numeração de seção ajustados pra
+refletir a nova Seção 1 "Panorama") e `relatorios/test_painel_views.py` passando — suíte completa
+não foi executada nesta rodada a pedido explícito do usuário ("não precisa rodar os testes, apenas
+suba pro vps que eu vou conferir olhando"); só os testes das áreas tocadas (`relatorios/tests.py`,
+`relatorios/test_painel_views.py`, `manage.py check`) foram rodados antes do push.
 
 ---
 

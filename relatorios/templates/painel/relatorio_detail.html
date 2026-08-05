@@ -7,9 +7,45 @@
     <p class="subtitulo">Inventário de Risco Psicossocial desta unidade.</p>
 </div>
 
-<div class="cartao">
+{% if relatorio.status != "assinado" %}
+<div class="cartao" style="background: var(--teal-50, #eafaf6); border: 1px solid var(--teal-500); display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+    <div>
+        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--teal-700); font-weight: 700; margin-bottom: 2px;">Próximo passo</div>
+        <div style="font-size: 14px; color: var(--slate-700); font-weight: 600;">
+            {% if not etapa_parecer %}
+                Gere o parecer técnico via IA.
+            {% elif exige_planos_refinados and not etapa_planos_refinados %}
+                Refine os planos de ação via IA.
+            {% elif not etapa_pdf %}
+                Gere o PDF.
+            {% elif not tem_perfil %}
+                Cadastre seu perfil profissional pra poder assinar.
+            {% else %}
+                Revise o PDF e assine o relatório.
+            {% endif %}
+        </div>
+    </div>
+    <a class="botao"
+        href="{% if not etapa_parecer %}#secao-parecer{% elif exige_planos_refinados and not etapa_planos_refinados %}#secao-planos{% elif not etapa_pdf %}#secao-pdf{% elif not tem_perfil %}{% url 'painel_relatorios:meu_perfil' %}{% else %}#secao-pdf{% endif %}">
+        Ir para lá &darr;
+    </a>
+</div>
+{% endif %}
+
+<div class="cartao" id="secao-tipo">
     <p>
-        Tipo: <strong>{{ relatorio.get_tipo_display }}</strong><br>
+        Tipo deste relatório: <strong>{{ relatorio.get_tipo_display }}</strong>
+        <span style="font-size: 12px; color: var(--slate-500);">
+            (fixo — não muda depois de criado.
+            {% if exige_planos_refinados %}
+                Este PDF inclui a Seção de Plano de Ação.
+            {% else %}
+                Este PDF NÃO inclui Plano de Ação — só o diagnóstico.
+            {% endif %}
+            Pra gerar o outro tipo, <a href="{% url 'painel_relatorios:relatorio_create' relatorio.unidade.pk %}">crie um novo relatório</a>.)
+        </span>
+    </p>
+    <p>
         Período: {{ relatorio.periodo_inicio }} – {{ relatorio.periodo_fim }}<br>
         Status:
         {% if relatorio.status == "assinado" %}<span class="badge aceitavel">Assinado</span>
@@ -52,28 +88,31 @@
 </div>
 
 <div class="cartao">
+    <p style="font-size: 11.5px; color: var(--slate-500); margin-bottom: 10px;">
+        Clique em uma etapa pra ir direto até ela.
+    </p>
     <div style="display: flex; gap: 0;">
         {% for etapa in etapas %}
-        <div style="flex: 1; text-align: center; position: relative;">
+        <a href="{{ etapa.ancora }}" style="flex: 1; text-align: center; position: relative; text-decoration: none;">
             {% if not forloop.first %}
             <div style="position: absolute; top: 12px; left: -50%; width: 100%; height: 2px; background: {% if etapa.concluida or etapa.atual %}var(--teal-500){% else %}var(--slate-200){% endif %};"></div>
             {% endif %}
             <div style="position: relative; width: 26px; height: 26px; border-radius: 50%; margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;
-                {% if forloop.counter == 3 and pdf_desatualizado %}background: var(--amber-100); color: var(--amber-700); border: 2px solid var(--amber-500);
+                {% if etapa.nome == "PDF" and pdf_desatualizado %}background: var(--amber-100); color: var(--amber-700); border: 2px solid var(--amber-500);
                 {% elif etapa.concluida %}background: var(--teal-500); color: #fff;
                 {% elif etapa.atual %}background: #fff; color: var(--teal-700); border: 2px solid var(--teal-500);
                 {% else %}background: var(--slate-100); color: var(--slate-400);{% endif %}">
-                {% if forloop.counter == 3 and pdf_desatualizado %}!{% elif etapa.concluida %}✓{% else %}{{ forloop.counter }}{% endif %}
+                {% if etapa.nome == "PDF" and pdf_desatualizado %}!{% elif etapa.concluida %}✓{% else %}{{ forloop.counter }}{% endif %}
             </div>
-            <div style="font-size: 11px; color: {% if forloop.counter == 3 and pdf_desatualizado %}var(--amber-700){% elif etapa.atual %}var(--teal-700){% else %}var(--slate-500){% endif %}; font-weight: {% if etapa.atual %}600{% else %}400{% endif %};">
-                {{ etapa.nome }}{% if forloop.counter == 3 and pdf_desatualizado %} (desatualizado){% endif %}
+            <div style="font-size: 11px; color: {% if etapa.nome == "PDF" and pdf_desatualizado %}var(--amber-700){% elif etapa.atual %}var(--teal-700){% else %}var(--slate-500){% endif %}; font-weight: {% if etapa.atual %}600{% else %}400{% endif %};">
+                {{ etapa.nome }}{% if etapa.nome == "PDF" and pdf_desatualizado %} (desatualizado){% endif %}
             </div>
-        </div>
+        </a>
         {% endfor %}
     </div>
 </div>
 
-<div class="cartao">
+<div class="cartao" id="secao-parecer">
     <h2>Parecer técnico (IA)</h2>
     {% if relatorio.parecer_ia %}
         <p><strong>Síntese executiva:</strong> {{ relatorio.parecer_ia.sintese_executiva }}</p>
@@ -153,7 +192,7 @@
 </div>
 
 {% if exige_planos_refinados %}
-<div class="cartao">
+<div class="cartao" id="secao-planos">
     <h2>Planos de ação ({{ planos_de_acao|length }})</h2>
     {% if planos_de_acao %}
     <table>
@@ -188,7 +227,7 @@
     {% endif %}
 </div>
 {% else %}
-<div class="cartao">
+<div class="cartao" id="secao-planos">
     <h2>Planos de ação</h2>
     <p style="font-size: 12.5px; color: #777;">
         Este relatório é do tipo <strong>Diagnóstico (sem Plano de Ação)</strong> — o PDF
@@ -198,7 +237,7 @@
 </div>
 {% endif %}
 
-<div class="cartao">
+<div class="cartao" id="secao-pdf">
     <h2>PDF</h2>
     {% if relatorio.pdf_path %}
     <p><a href="{{ relatorio.pdf_path.url }}" target="_blank" class="botao secundario">Baixar PDF atual</a>

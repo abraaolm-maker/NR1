@@ -16,6 +16,9 @@ data no banco, sem assinatura digital/criptográfica (decisão de 2026-07-17).
 
 from __future__ import annotations
 
+import hashlib
+import json
+
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from django.template.loader import render_to_string
@@ -162,6 +165,130 @@ def _criterio_classificacao_linhas(criterio_versao) -> list[dict]:
     return linhas
 
 
+NIVEL_GERAL_POR_BANDA = {"Aceitável": "Baixo", "Moderado": "Moderado", "Alto": "Alto", "Crítico": "Alto"}
+ORDEM_BANDA_GERAL = {"Baixo": 0, "Moderado": 1, "Alto": 2}
+
+
+def _montar_panorama(ghes: list[dict]) -> dict:
+    """Seção 1 (Panorama), inspirada no relatório de referência Solute RH (CLAUDE.md
+    Seção 6.18 / PLANO_ACAO_RELATORIO.md Seção 3): um resumo executivo com índice
+    consolidado, N de participantes, nível geral de risco e as "frentes de atenção" —
+    nunca substitui o semáforo por domínio (decisão inegociável do usuário), só
+    resume o que ele já mostra em números fáceis de captar de relance.
+
+    Índice consolidado = média simples dos escores (0-100) de todos os domínios não
+    suprimidos deste relatório (decisão de engenharia registrada em
+    PLANO_ACAO_RELATORIO.md Seção 5, item 3 — não há fórmula oficial publicada, mas
+    a média simples é a mesma lógica agregadora já usada por domínio, só um nível
+    acima). Nível geral de risco deriva da pior banda entre "Baixo" (Aceitável),
+    "Moderado" e "Alto" (Alto ou Crítico) predominante — usa a banda mais frequente,
+    não a pior isolada, pra não deixar 1 domínio Crítico (que já tem destaque próprio
+    na Seção 4) dominar sozinho a leitura executiva."""
+    escores = []
+    frentes_atencao = []
+    protegendo = []
+    pede_acao = []
+    n_respondentes_total = 0
+    dominios_ja_contados_n = set()
+
+    for item in ghes:
+        for d in item["dominios"]:
+            escore_dominio = d["escore_dominio"]
+            chave_n = (item["aplicacao"].pk,)
+            if chave_n not in dominios_ja_contados_n:
+                # N de participantes = maior N entre os domínios da Aplicacao (mesmo
+                # critério já usado em n_total_semaforo) — soma só uma vez por Aplicacao.
+                dominios_ja_contados_n.add(chave_n)
+
+            if escore_dominio.suprimido_por_confidencialidade:
+                continue
+
+            escores.append(float(escore_dominio.escore))
+            cr = d["classificacao_risco"]
+            banda = cr.banda if cr else "Aceitável"
+            entrada = {
+                "ghe_nome": item["ghe"].nome,
+                "dominio_codigo": escore_dominio.dominio.codigo,
+                "dominio_nome": escore_dominio.dominio.nome,
+                "banda": banda,
+                "banda_css": d["banda_css"],
+            }
+            if banda == "Aceitável":
+                protegendo.append(entrada)
+            else:
+                frentes_atencao.append(entrada)
+                pede_acao.append(entrada)
+
+    for item in ghes:
+        maior_n = max(
+            (d["escore_dominio"].n_respondentes for d in item["dominios"]), default=0
+        )
+        n_respondentes_total += maior_n
+
+    indice_consolidado = round(sum(escores) / len(escores), 1) if escores else None
+
+    if indice_consolidado is None:
+        nivel_geral_risco = None
+    else:
+        contagem_bandas = {"Baixo": 0, "Moderado": 0, "Alto": 0}
+        for entrada in [*protegendo, *frentes_atencao]:
+            contagem_bandas[NIVEL_GERAL_POR_BANDA.get(entrada["banda"], "Baixo")] += 1
+        nivel_geral_risco = max(contagem_bandas, key=lambda k: (contagem_bandas[k], ORDEM_BANDA_GERAL[k]))
+
+    return {
+        "indice_consolidado": indice_consolidado,
+        "nivel_geral_risco": nivel_geral_risco,
+        "n_participantes": n_respondentes_total,
+        "frentes_atencao": frentes_atencao,
+        "protegendo": protegendo,
+        "pede_acao": pede_acao,
+    }
+
+
+def _contador_supressao(ghes: list[dict]) -> dict:
+    """Pedido do usuário em 2026-08-05, a partir do Relatório 2 de referência
+    (Hospital São Lucas): mostrar explicitamente quantos domínios foram suprimidos
+    por confidencialidade no documento inteiro, em vez de só marcar "Suprimido" na
+    linha, sem nunca somar o total (PLANO_ACAO_RELATORIO.md Seção 4.1, item 2)."""
+    total = 0
+    suprimidos = 0
+    for item in ghes:
+        for d in item["dominios"]:
+            total += 1
+            if d["escore_dominio"].suprimido_por_confidencialidade:
+                suprimidos += 1
+    return {"total": total, "suprimidos": suprimidos}
+
+
+def _hash_integridade(relatorio: Relatorio, ghes: list[dict]) -> str:
+    """Apêndice de integridade (PLANO_ACAO_RELATORIO.md Seção 4.1, item 3): um hash
+    determinístico dos dados que fundamentam este documento (não do PDF em si, que
+    ainda não existe no momento em que este contexto é montado) — serve pra
+    conferir, depois, que o conteúdo numérico do relatório não foi alterado por
+    fora do fluxo do sistema. Baseado só em dado determinístico já persistido
+    (escores, classificações, N), nunca em timestamp de geração do PDF."""
+    partes = {
+        "relatorio_id": relatorio.pk,
+        "criterio_versao": relatorio.criterio_versao.codigo,
+        "dominios": sorted(
+            [
+                {
+                    "aplicacao_id": item["aplicacao"].pk,
+                    "dominio": d["escore_dominio"].dominio.codigo,
+                    "escore": str(d["escore_dominio"].escore),
+                    "n": d["escore_dominio"].n_respondentes,
+                    "suprimido": d["escore_dominio"].suprimido_por_confidencialidade,
+                }
+                for item in ghes
+                for d in item["dominios"]
+            ],
+            key=lambda x: (x["aplicacao_id"], x["dominio"]),
+        ),
+    }
+    canonico = json.dumps(partes, sort_keys=True, ensure_ascii=False)
+    return hashlib.sha256(canonico.encode("utf-8")).hexdigest()
+
+
 def _contexto_relatorio(relatorio: Relatorio, minuta: bool) -> dict:
     ghes = []
     for aplicacao in relatorio.aplicacoes.select_related("ghe", "instrumento").all():
@@ -223,6 +350,9 @@ def _contexto_relatorio(relatorio: Relatorio, minuta: bool) -> dict:
         "linhas_semaforo": linhas_semaforo,
         "resumo_semaforo": resumo_semaforo,
         "n_total_semaforo": n_total_semaforo,
+        "panorama": _montar_panorama(ghes),
+        "contador_supressao": _contador_supressao(ghes),
+        "hash_integridade": _hash_integridade(relatorio, ghes),
         "gerado_em": timezone.now(),
     }
 

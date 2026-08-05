@@ -6,10 +6,15 @@
 >
 > **Atualização de 2026-08-05**: a Seção 2 (separação de tipos de relatório,
 > Diagnóstico vs. Diagnóstico + Plano de Ação) foi **implementada** — ver
-> CLAUDE.md Seção 6.18 para o detalhamento final de como ficou. As Seções 3 e 4
-> (reformulação visual/conteúdo inspirada nos dois relatórios de referência,
-> Solute e Hospital São Lucas) **continuam pendentes**, não fizeram parte desta
-> rodada de implementação.
+> CLAUDE.md Seção 6.18 para o detalhamento final de como ficou.
+>
+> **Atualização de 2026-08-05 (mesmo dia)**: as Seções 3 e 4 também foram
+> **implementadas**, na parte que dava pra decidir sem abrir novas pendências —
+> ver CLAUDE.md Seção 6.19. Ficaram de fora (Seção 5 abaixo continua valendo
+> como pendência real): "Recortes" por setor/cargo, comparação de tendência
+> entre ciclos, e a decisão definitiva de paleta (o laranja foi usado como
+> acento pontual no Panorama, não substituiu o azul-marinho como cor
+> principal).
 
 ---
 
