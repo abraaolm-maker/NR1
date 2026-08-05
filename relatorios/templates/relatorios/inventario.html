@@ -23,14 +23,20 @@
 
     h1 { font-size: 22px; margin-bottom: 4px; }
     h2 {
-        font-size: 15px;
-        margin-top: 14px;
-        margin-bottom: 6px;
-        padding-bottom: 4px;
+        font-size: 17px;
+        margin-top: 4px;
+        margin-bottom: 10px;
+        padding-bottom: 6px;
         border-bottom: 2px solid #2b3a55;
         color: #2b3a55;
     }
     h3 { font-size: 12.5px; margin-top: 10px; margin-bottom: 4px; color: #2b3a55; }
+
+    /* Cabeçalho de seção no tom Solute (eyebrow + manchete), aplicado a TODAS as
+       seções do documento — não só o Panorama — pra manter o visual consistente do
+       início ao fim (achado do usuário em 2026-08-05: só a Seção 1 tinha o novo
+       estilo, o resto seguia o layout antigo). */
+    .secao { margin-top: 20px; }
 
     .capa {
         text-align: center;
@@ -312,7 +318,8 @@
 
 <!-- 2. BASE TÉCNICA E LEGAL -->
 <div class="secao">
-    <h2>2. Base técnica e legal utilizada</h2>
+    <div class="eyebrow">02 · BASE TÉCNICA</div>
+    <h2>Base técnica e legal utilizada</h2>
     <p>
         Avaliação realizada em conformidade com o Capítulo 1.5 da NR-01 (GRO/PGR), conforme
         alteração da Portaria MTE nº 1.419/2024, com prazo de vigência plena definido pela
@@ -354,7 +361,8 @@
 
 <!-- 3. METODOLOGIA -->
 <div class="secao">
-    <h2>3. Metodologia</h2>
+    <div class="eyebrow">03 · COMO FOI FEITO</div>
+    <h2>Metodologia</h2>
     <p>
         Coleta realizada por GHE (Grupo Homogêneo de Exposição), com aplicação anônima ou
         identificada conforme registrado, e cálculo determinístico de escore, classificação
@@ -394,7 +402,8 @@
 
 <!-- 4. PARECER TÉCNICO -->
 <div class="secao">
-    <h2>4. Parecer técnico</h2>
+    <div class="eyebrow">04 · PARECER TÉCNICO</div>
+    <h2>O que a análise técnica <span class="acento">aponta</span>.</h2>
     {% if parecer_exibicao %}
         <h3>Síntese executiva</h3>
         <p>{{ parecer_exibicao.sintese_executiva }}</p>
@@ -435,7 +444,8 @@
 
 <!-- 5. RESULTADOS POR GHE E POR DOMÍNIO -->
 <div class="secao">
-    <h2>5. Resultados por GHE e por domínio</h2>
+    <div class="eyebrow">05 · RESULTADOS</div>
+    <h2>Resultados por GHE e por domínio</h2>
 
     <div class="caixa-explicativa">
         <span class="titulo">Como ler a coluna "Banda"</span>
@@ -530,7 +540,8 @@
 
 <!-- 6. ANÁLISE SEMÁFORO -->
 <div class="secao">
-    <h2>6. Análise semáforo</h2>
+    <div class="eyebrow">06 · ONDE ESTÁ CONCENTRADA A CARGA</div>
+    <h2>Análise semáforo</h2>
 
     <div class="caixa-explicativa">
         <span class="titulo">Vermelho aqui não é automaticamente "Crítico" — e o inverso também vale</span>
@@ -617,7 +628,8 @@
 
 <!-- 7. EVIDÊNCIAS COMPLEMENTARES -->
 <div class="secao">
-    <h2>7. Evidências complementares</h2>
+    <div class="eyebrow">07 · EVIDÊNCIAS COMPLEMENTARES</div>
+    <h2>Evidências complementares</h2>
     {% for item in ghes %}
         <h3>GHE: {{ item.ghe.nome }}</h3>
         {% if item.indicadores %}
@@ -642,7 +654,8 @@
 
 <!-- 8. ENTREVISTA E OBSERVAÇÃO -->
 <div class="secao">
-    <h2>8. Entrevista e observação</h2>
+    <div class="eyebrow">08 · ENTREVISTA E OBSERVAÇÃO</div>
+    <h2>Entrevista e observação</h2>
     {% for item in ghes %}
         <h3>GHE: {{ item.ghe.nome }}</h3>
         {% if item.checklist_triangulacao %}
@@ -668,7 +681,8 @@
 {% if relatorio.tipo == "diagnostico_plano_acao" %}
 <!-- 9. PLANO DE AÇÃO -->
 <div class="secao">
-    <h2>9. Plano de ação</h2>
+    <div class="eyebrow">09 · O QUE FAZER COM ISSO</div>
+    <h2>Plano de ação</h2>
     <div class="caixa-explicativa">
         <span class="titulo">Ordem de leitura</span>
         As medidas abaixo estão listadas da mais urgente para a menos urgente:
@@ -704,7 +718,8 @@
 
 <!-- ASSINATURA -->
 <div class="secao">
-    <h2>{% if relatorio.tipo == "diagnostico_plano_acao" %}10{% else %}9{% endif %}. Assinatura do responsável técnico</h2>
+    <div class="eyebrow">{% if relatorio.tipo == "diagnostico_plano_acao" %}10{% else %}9{% endif %} · PRÓXIMO CICLO</div>
+    <h2>Assinatura do responsável técnico</h2>
     <div class="assinatura">
         {% if minuta %}
             <div class="linha pendente">Aguardando assinatura do profissional responsável</div>

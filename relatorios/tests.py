@@ -351,7 +351,7 @@ def test_pdf_diagnostico_nao_inclui_secao_plano_de_acao(relatorio_com_dominio_ca
     html = renderizar_html_relatorio(relatorio_com_dominio_calculado, minuta=True)
 
     assert "Plano de ação" not in html
-    assert "9. Assinatura" in html
+    assert "9 · PRÓXIMO CICLO" in html
 
 
 @pytest.mark.django_db
@@ -360,8 +360,8 @@ def test_pdf_diagnostico_plano_acao_inclui_secao_plano_de_acao(relatorio_com_dom
 
     html = renderizar_html_relatorio(relatorio_com_dominio_calculado, minuta=True)
 
-    assert "9. Plano de ação" in html
-    assert "10. Assinatura" in html
+    assert "09 · O QUE FAZER COM ISSO" in html
+    assert "10 · PRÓXIMO CICLO" in html
 
 
 @pytest.mark.django_db
