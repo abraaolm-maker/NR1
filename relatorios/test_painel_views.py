@@ -7,7 +7,7 @@ from django.urls import reverse
 from avaliacoes.models import Empresa, Unidade
 from avaliacoes.services.aplicacao_status import encerrar_coleta
 from avaliacoes.services.calculo_risco import calcular_dominio
-from relatorios.models import PerfilProfissional, Relatorio, StatusRelatorio
+from relatorios.models import PerfilProfissional, Relatorio, StatusRelatorio, TipoRelatorio
 
 
 @pytest.fixture
@@ -29,6 +29,7 @@ def test_criar_relatorio_scoped_a_unidade(client, gestor, aplicacao_copsoq, resp
     resp = client.post(
         reverse("painel_relatorios:relatorio_create", args=[unidade.pk]),
         {
+            "tipo": TipoRelatorio.DIAGNOSTICO_PLANO_ACAO,
             "criterio_versao": aplicacao_copsoq.criterio_versao_id,
             "aplicacoes": [aplicacao_copsoq.pk],
             "periodo_inicio": date.today().isoformat(),
@@ -164,6 +165,7 @@ def test_assinar_com_perfil_muda_status_e_gera_pdf(client, gestor, aplicacao_cop
         periodo_fim=date.today(),
     )
     relatorio.aplicacoes.add(aplicacao_copsoq)
+    relatorio.tipo = TipoRelatorio.DIAGNOSTICO
     relatorio.parecer_ia = {
         "sintese_executiva": "Panorama de teste.",
         "pareceres_por_dominio": [],
@@ -171,7 +173,7 @@ def test_assinar_com_perfil_muda_status_e_gera_pdf(client, gestor, aplicacao_cop
         "recomendacoes": [],
         "aviso_minuta": "Minuta sujeita a revisão.",
     }
-    relatorio.save(update_fields=["parecer_ia"])
+    relatorio.save(update_fields=["tipo", "parecer_ia"])
 
     client.post(reverse("painel_relatorios:relatorio_assinar", args=[relatorio.pk]))
 
@@ -228,6 +230,7 @@ def test_analise_ia_empresa_so_mostra_relatorios_assinados(aplicacao_copsoq, tmp
         periodo_fim=date.today(),
     )
     relatorio.aplicacoes.add(aplicacao_copsoq)
+    relatorio.tipo = TipoRelatorio.DIAGNOSTICO
     relatorio.parecer_ia = {
         "sintese_executiva": "Panorama de teste da empresa.",
         "pareceres_por_dominio": [],
@@ -235,7 +238,7 @@ def test_analise_ia_empresa_so_mostra_relatorios_assinados(aplicacao_copsoq, tmp
         "recomendacoes": [],
         "aviso_minuta": "Minuta.",
     }
-    relatorio.save(update_fields=["parecer_ia"])
+    relatorio.save(update_fields=["tipo", "parecer_ia"])
 
     client = Client()
     client.force_login(gestor_empresa)

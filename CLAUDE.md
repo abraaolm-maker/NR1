@@ -2144,6 +2144,58 @@ acompanha). Suíte completa reexecutada após a mudança.
 
 ---
 
+## 6.18 Separação de tipos de Relatório: Diagnóstico vs. Diagnóstico + Plano de Ação (2026-08-05)
+
+> Pedido do usuário em 2026-08-04, a partir de um print de proposta comercial: a empresa cobra
+> Aplicação, Diagnóstico e Plano de Ação como 3 serviços separados, mas o sistema só gerava um
+> único PDF com tudo junto — não havia como entregar só o diagnóstico. Implementado depois de o
+> usuário mandar dois relatórios de referência e confirmar "implemente o plano agora"
+> (`PLANO_ACAO_RELATORIO.md`, Seção 2, tem o detalhamento completo do que foi decidido antes de
+> implementar).
+
+**Modelo**: `Relatorio.tipo` (`TipoRelatorio`, `relatorios/models.py`) — `diagnostico` ou
+`diagnostico_plano_acao` (default, mantém o comportamento anterior pros relatórios já existentes).
+Escolhido na criação (`RelatorioForm`), não é editável depois (não há tela de "mudar o tipo" — se
+o gestor quiser o outro tipo, cria um novo Relatorio). Novo campo `Relatorio.planos_refinados_em`
+(DateTimeField, preenchido por `plano_acao_ia.py::gerar_e_salvar_planos_refinados` a cada
+execução bem-sucedida) marca que o refinamento por IA já rodou pelo menos uma vez.
+
+**Trava obrigatória antes de gerar o PDF** (`relatorios/services/pdf.py::validar_pre_requisitos_pdf`,
+chamada no início de `gerar_pdf_relatorio`): qualquer tipo de relatório exige `parecer_ia` não
+vazio (mesmo em minuta, o documento não pode sair sem a análise técnica); o tipo
+`diagnostico_plano_acao` exige adicionalmente `planos_refinados_em` não nulo. Levanta `ValueError`
+com mensagem clara, capturada pela view `relatorio_gerar_pdf` (mesmo padrão de
+`assinar_relatorio`) e mostrada como mensagem, nunca como erro 500.
+
+**Template do PDF** (`inventario.html`): a Seção 8 "Plano de ação" só é renderizada quando
+`relatorio.tipo == "diagnostico_plano_acao"`; a Seção de Assinatura é sempre a última, com o
+número (8 ou 9) calculado no próprio template a partir do tipo.
+
+**Painel** (`relatorio_detail.html`): mostra o tipo escolhido; o stepper ganha uma etapa extra
+"Refinar planos de ação" só quando o tipo exige; o botão "Gerar PDF" fica desabilitado
+(`disabled`, mais texto explicativo âmbar) até que os pré-requisitos do tipo estejam satisfeitos;
+o card "Planos de ação" mostra um aviso (em vez do formulário/lista) quando o tipo é `diagnostico`,
+deixando claro que esse relatório não inclui essa seção.
+
+**Cobertura de teste** (`relatorios/tests.py`): `test_gerar_pdf_sem_parecer_levanta_erro`,
+`test_gerar_pdf_diagnostico_plano_acao_sem_refinar_levanta_erro`,
+`test_gerar_pdf_diagnostico_nao_exige_planos_refinados`,
+`test_pdf_diagnostico_nao_inclui_secao_plano_de_acao`,
+`test_pdf_diagnostico_plano_acao_inclui_secao_plano_de_acao`,
+`test_gerar_e_salvar_planos_refinados_marca_planos_refinados_em`. Os testes existentes que já
+geravam PDF (`test_gerar_pdf_relatorio_minuta_tem_marca_dagua_e_nao_muda_status`,
+`test_gerar_pdf_relatorio_inclui_grafico_semaforo`, `test_assinar_relatorio_com_perfil_gera_pdf_final`)
+precisaram passar a setar `parecer_ia`/`planos_refinados_em` antes de chamar
+`gerar_pdf_relatorio`/`assinar_relatorio` — a trava nova se aplica a eles também, de propósito.
+
+**Pendente (fora do escopo desta implementação, registrado em `PLANO_ACAO_RELATORIO.md`)**: a
+reformulação visual do PDF (referência Solute/Hospital São Lucas — cards de indicador, cores de
+destaque, "Recortes" organizacionais, apêndice de integridade/hash, contador de supressões por
+k-anonimato) ainda não foi implementada — só a separação de tipos (Seção 2 do plano) entrou nesta
+rodada.
+
+---
+
 ## 7. Backend — cálculo da matriz de risco (valores definitivos, sem exemplos ilustrativos)
 
 A implementação de referência completa está no arquivo **`risk_engine.py`** entregue junto com

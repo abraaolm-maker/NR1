@@ -216,7 +216,7 @@
         estabelece que ele existe para viabilizar ação preventiva, e não deve ser aplicado
         quando não houver intenção de agir sobre os resultados encontrados. Por esse motivo,
         cada domínio avaliado neste documento é acompanhado, quando aplicável, de uma medida
-        preventiva sugerida (Seção 8, Plano de ação).
+        preventiva sugerida{% if relatorio.tipo == "diagnostico_plano_acao" %} (Seção 8, Plano de ação){% else %} no parecer técnico deste documento{% endif %}.
     </p>
     <h3>Instrumentos utilizados por GHE</h3>
     <table>
@@ -546,6 +546,7 @@
     {% endfor %}
 </div>
 
+{% if relatorio.tipo == "diagnostico_plano_acao" %}
 <!-- 8. PLANO DE AÇÃO -->
 <div class="secao">
     <h2>8. Plano de ação</h2>
@@ -580,10 +581,11 @@
         {% endwith %}
     {% endfor %}
 </div>
+{% endif %}
 
-<!-- 9. ASSINATURA -->
+<!-- ASSINATURA -->
 <div class="secao">
-    <h2>9. Assinatura do responsável técnico</h2>
+    <h2>{% if relatorio.tipo == "diagnostico_plano_acao" %}9{% else %}8{% endif %}. Assinatura do responsável técnico</h2>
     <div class="assinatura">
         {% if minuta %}
             <div class="linha pendente">Aguardando assinatura do profissional responsável</div>

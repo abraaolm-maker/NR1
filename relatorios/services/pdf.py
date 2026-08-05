@@ -25,7 +25,7 @@ from weasyprint import HTML
 from avaliacoes.models import ConformidadeChecklist, RespostaChecklistTriangulacao
 from avaliacoes.services.calculo_risco import BANDA_ORDEM, criterio_classificacao_linhas, media_nacional_comparavel
 from avaliacoes.services.semaforo import calcular_semaforo, leitura_resumida
-from relatorios.models import Relatorio, StatusRelatorio
+from relatorios.models import Relatorio, StatusRelatorio, TipoRelatorio
 
 BANDA_CSS = {
     "Aceitável": "aceitavel",
@@ -231,12 +231,33 @@ def renderizar_html_relatorio(relatorio: Relatorio, minuta: bool) -> str:
     return render_to_string("relatorios/inventario.html", _contexto_relatorio(relatorio, minuta))
 
 
+def validar_pre_requisitos_pdf(relatorio: Relatorio) -> None:
+    """Pedido do usuário em 2026-08-04: o PDF com Plano de Ação só pode ser gerado
+    depois de rodar obrigatoriamente "Gerar parecer via IA" e "Refinar planos de ação
+    com IA" — sem isso, o documento entregue como "Diagnóstico + Plano de Ação" teria
+    o parecer vazio e/ou as medidas genéricas do catálogo, sem nenhuma indicação de
+    que isso não é o que o tipo do relatório promete. O tipo "Diagnóstico" (sem plano)
+    só exige o parecer técnico — não depende do refinamento do plano, que nem aparece
+    nesse documento."""
+    if not relatorio.parecer_ia:
+        raise ValueError(
+            "Gere o parecer técnico via IA antes de gerar o PDF — o documento "
+            "(mesmo em minuta) não pode sair sem a análise técnica."
+        )
+    if relatorio.tipo == TipoRelatorio.DIAGNOSTICO_PLANO_ACAO and not relatorio.planos_refinados_em:
+        raise ValueError(
+            "Este relatório é do tipo \"Diagnóstico + Plano de Ação\" — refine os "
+            "planos de ação via IA antes de gerar o PDF."
+        )
+
+
 def gerar_pdf_relatorio(relatorio_id: int) -> Relatorio:
     """Gera o PDF (minuta se ainda não assinado, final se já assinado) e salva em
     Relatorio.pdf_path. Idempotente/re-executável — sempre reflete o estado atual."""
     relatorio = Relatorio.objects.select_related(
         "unidade__empresa", "assinado_por", "criterio_versao"
     ).get(pk=relatorio_id)
+    validar_pre_requisitos_pdf(relatorio)
     minuta = relatorio.status != StatusRelatorio.ASSINADO
 
     html = renderizar_html_relatorio(relatorio, minuta=minuta)

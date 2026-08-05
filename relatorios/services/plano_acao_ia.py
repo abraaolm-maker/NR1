@@ -19,6 +19,8 @@ a IA interpreta, não calcula nem decide classificação).
 
 import json
 
+from django.utils import timezone
+
 from relatorios.models import Relatorio
 from relatorios.services.analise_ia import MODEL
 
@@ -210,5 +212,8 @@ def gerar_e_salvar_planos_refinados(relatorio_id: int, client=None) -> int:
         plano.indicador = item["indicador"]
         plano.save(update_fields=["medida", "hierarquia", "indicador"])
         atualizados += 1
+
+    relatorio.planos_refinados_em = timezone.now()
+    relatorio.save(update_fields=["planos_refinados_em"])
 
     return atualizados

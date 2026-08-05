@@ -18,7 +18,7 @@ from avaliacoes.services.calculo_risco import BANDA_ORDEM
 from avaliacoes.services.tenancy import empresas_visiveis
 
 from .forms import ChaveApiClaudeForm, ParecerJSONForm, PerfilProfissionalForm, RelatorioForm
-from .models import ChaveApiClaude, PerfilProfissional, Relatorio, StatusRelatorio
+from .models import ChaveApiClaude, PerfilProfissional, Relatorio, StatusRelatorio, TipoRelatorio
 from .services.analise_ia import gerar_e_salvar_parecer
 from .services.plano_acao_ia import gerar_e_salvar_planos_refinados
 from .services.chaves_api import (
@@ -140,16 +140,34 @@ def relatorio_detail(request, pk):
     etapa_pdf = etapa_parecer and pdf_existe
     pdf_desatualizado = pdf_existe and not etapa_parecer
     etapa_assinatura = relatorio.status == StatusRelatorio.ASSINADO
+
+    # Pedido do usuário em 2026-08-04: só liberar "Gerar PDF" pro tipo Diagnóstico +
+    # Plano de Ação depois de rodar OBRIGATORIAMENTE os dois botões de IA — sem isso o
+    # documento sairia com parecer vazio e/ou medida genérica do catálogo sem avisar.
+    etapa_planos_refinados = bool(relatorio.planos_refinados_em)
+    exige_planos_refinados = relatorio.tipo == TipoRelatorio.DIAGNOSTICO_PLANO_ACAO
+    pode_gerar_pdf = etapa_parecer and (etapa_planos_refinados or not exige_planos_refinados)
+
     etapas = [
         {"nome": "Diagnósticos", "concluida": True, "atual": False},
         {"nome": "Parecer técnico", "concluida": etapa_parecer, "atual": not etapa_parecer},
-        {"nome": "PDF", "concluida": etapa_pdf, "atual": etapa_parecer and not etapa_pdf},
+    ]
+    if exige_planos_refinados:
+        etapas.append(
+            {
+                "nome": "Refinar planos de ação",
+                "concluida": etapa_planos_refinados,
+                "atual": etapa_parecer and not etapa_planos_refinados,
+            }
+        )
+    etapas.append({"nome": "PDF", "concluida": etapa_pdf, "atual": pode_gerar_pdf and not etapa_pdf})
+    etapas.append(
         {
             "nome": "Assinatura",
             "concluida": etapa_assinatura,
-            "atual": etapa_parecer and etapa_pdf and not etapa_assinatura,
-        },
-    ]
+            "atual": etapa_pdf and not etapa_assinatura,
+        }
+    )
 
     # Planos de ação de todas as Aplicações deste relatório, do mais urgente pro
     # menos urgente — mesma ordenação usada no PDF (relatorios/services/pdf.py::
@@ -172,6 +190,9 @@ def relatorio_detail(request, pk):
             "etapas": etapas,
             "etapa_parecer": etapa_parecer,
             "etapa_pdf": etapa_pdf,
+            "etapa_planos_refinados": etapa_planos_refinados,
+            "exige_planos_refinados": exige_planos_refinados,
+            "pode_gerar_pdf": pode_gerar_pdf,
             "pdf_desatualizado": pdf_desatualizado,
             "planos_de_acao": planos_de_acao,
         },
@@ -249,8 +270,11 @@ def relatorio_refinar_planos_ia(request, pk):
 def relatorio_gerar_pdf(request, pk):
     if request.method != "POST":
         return redirect("painel_relatorios:relatorio_detail", pk=pk)
-    gerar_pdf_relatorio(pk)
-    messages.success(request, "PDF gerado/atualizado.")
+    try:
+        gerar_pdf_relatorio(pk)
+        messages.success(request, "PDF gerado/atualizado.")
+    except ValueError as exc:
+        messages.error(request, str(exc))
     return redirect("painel_relatorios:relatorio_detail", pk=pk)
 
 

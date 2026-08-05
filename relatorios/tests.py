@@ -2,10 +2,11 @@ from datetime import date
 
 import pytest
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 
 from avaliacoes.models import PlanoDeAcao
 from avaliacoes.services.calculo_risco import calcular_dominio
-from relatorios.models import PerfilProfissional, Relatorio, StatusRelatorio
+from relatorios.models import PerfilProfissional, Relatorio, StatusRelatorio, TipoRelatorio
 from relatorios.services.analise_ia import MODEL, gerar_e_salvar_parecer, gerar_parecer, montar_payload_relatorio
 from relatorios.services.pdf import _contexto_relatorio, assinar_relatorio, gerar_pdf_relatorio
 from relatorios.services.plano_acao_ia import gerar_e_salvar_planos_refinados, montar_payload_planos
@@ -165,6 +166,10 @@ def test_gerar_e_salvar_parecer_incompleto_levanta_erro(relatorio_com_dominio_ca
 def test_gerar_pdf_relatorio_minuta_tem_marca_dagua_e_nao_muda_status(
     relatorio_com_dominio_calculado, media_root_tmp
 ):
+    relatorio_com_dominio_calculado.parecer_ia = PARECER_DE_TESTE
+    relatorio_com_dominio_calculado.planos_refinados_em = timezone.now()
+    relatorio_com_dominio_calculado.save(update_fields=["parecer_ia", "planos_refinados_em"])
+
     relatorio = gerar_pdf_relatorio(relatorio_com_dominio_calculado.pk)
 
     assert relatorio.status == StatusRelatorio.AGUARDANDO_REVISAO
@@ -213,6 +218,10 @@ def test_contexto_relatorio_inclui_grafico_semaforo_com_n_total(relatorio_com_do
 
 @pytest.mark.django_db
 def test_gerar_pdf_relatorio_inclui_grafico_semaforo(relatorio_com_dominio_calculado, media_root_tmp):
+    relatorio_com_dominio_calculado.parecer_ia = PARECER_DE_TESTE
+    relatorio_com_dominio_calculado.planos_refinados_em = timezone.now()
+    relatorio_com_dominio_calculado.save(update_fields=["parecer_ia", "planos_refinados_em"])
+
     relatorio = gerar_pdf_relatorio(relatorio_com_dominio_calculado.pk)
 
     conteudo = relatorio.pdf_path.read()
@@ -234,7 +243,8 @@ def test_assinar_relatorio_com_perfil_gera_pdf_final(relatorio_com_dominio_calcu
         user=user, titulo_profissional="Psicóloga do Trabalho", conselho="CRP", numero_registro="06/123456"
     )
     relatorio_com_dominio_calculado.parecer_ia = PARECER_DE_TESTE
-    relatorio_com_dominio_calculado.save(update_fields=["parecer_ia"])
+    relatorio_com_dominio_calculado.planos_refinados_em = timezone.now()
+    relatorio_com_dominio_calculado.save(update_fields=["parecer_ia", "planos_refinados_em"])
 
     relatorio = assinar_relatorio(relatorio_com_dominio_calculado.pk, user.pk)
 
@@ -294,6 +304,87 @@ def test_gerar_e_salvar_planos_refinados_atualiza_plano_existente(relatorio_com_
     assert plano.medida == "Medida refinada de teste para D1."
     assert plano.hierarquia == "organizacao"
     assert plano.indicador == "Indicador refinado de teste."
+
+
+@pytest.mark.django_db
+def test_gerar_pdf_sem_parecer_levanta_erro(relatorio_com_dominio_calculado, media_root_tmp):
+    """Pedido do usuário em 2026-08-04: o PDF (mesmo em minuta) não pode ser gerado
+    sem o parecer técnico, seja qual for o tipo do relatório."""
+    with pytest.raises(ValueError, match="parecer"):
+        gerar_pdf_relatorio(relatorio_com_dominio_calculado.pk)
+
+
+@pytest.mark.django_db
+def test_gerar_pdf_diagnostico_plano_acao_sem_refinar_levanta_erro(
+    relatorio_com_dominio_calculado, media_root_tmp
+):
+    """Relatório do tipo Diagnóstico + Plano de Ação (default) só pode gerar PDF
+    depois de "Gerar parecer via IA" E "Refinar planos de ação com IA"."""
+    relatorio_com_dominio_calculado.parecer_ia = PARECER_DE_TESTE
+    relatorio_com_dominio_calculado.save(update_fields=["parecer_ia"])
+
+    with pytest.raises(ValueError, match="Plano de Ação"):
+        gerar_pdf_relatorio(relatorio_com_dominio_calculado.pk)
+
+
+@pytest.mark.django_db
+def test_gerar_pdf_diagnostico_nao_exige_planos_refinados(relatorio_com_dominio_calculado, media_root_tmp):
+    """Relatório do tipo Diagnóstico (sem Plano de Ação) só exige o parecer técnico —
+    o refinamento do plano nem aparece nesse documento."""
+    relatorio_com_dominio_calculado.tipo = TipoRelatorio.DIAGNOSTICO
+    relatorio_com_dominio_calculado.parecer_ia = PARECER_DE_TESTE
+    relatorio_com_dominio_calculado.save(update_fields=["tipo", "parecer_ia"])
+
+    relatorio = gerar_pdf_relatorio(relatorio_com_dominio_calculado.pk)
+
+    conteudo = relatorio.pdf_path.read()
+    assert conteudo.startswith(b"%PDF")
+
+
+@pytest.mark.django_db
+def test_pdf_diagnostico_nao_inclui_secao_plano_de_acao(relatorio_com_dominio_calculado):
+    relatorio_com_dominio_calculado.tipo = TipoRelatorio.DIAGNOSTICO
+    relatorio_com_dominio_calculado.save(update_fields=["tipo"])
+
+    from relatorios.services.pdf import renderizar_html_relatorio
+
+    html = renderizar_html_relatorio(relatorio_com_dominio_calculado, minuta=True)
+
+    assert "Plano de ação" not in html
+    assert "8. Assinatura" in html
+
+
+@pytest.mark.django_db
+def test_pdf_diagnostico_plano_acao_inclui_secao_plano_de_acao(relatorio_com_dominio_calculado):
+    from relatorios.services.pdf import renderizar_html_relatorio
+
+    html = renderizar_html_relatorio(relatorio_com_dominio_calculado, minuta=True)
+
+    assert "8. Plano de ação" in html
+    assert "9. Assinatura" in html
+
+
+@pytest.mark.django_db
+def test_gerar_e_salvar_planos_refinados_marca_planos_refinados_em(relatorio_com_dominio_calculado):
+    resultado_ia = {
+        "planos_refinados": [
+            {
+                "ghe": "Equipe Teste",
+                "dominio": "D1",
+                "medida": "Medida refinada.",
+                "hierarquia_controle": "organizacao",
+                "indicador": "Indicador.",
+            }
+        ]
+    }
+    fake_response = _FakeResponse([_FakeToolUseBlock("refinar_plano_de_acao", resultado_ia)])
+    client = _FakeAnthropicClient(fake_response)
+
+    assert relatorio_com_dominio_calculado.planos_refinados_em is None
+    gerar_e_salvar_planos_refinados(relatorio_com_dominio_calculado.pk, client=client)
+
+    relatorio_com_dominio_calculado.refresh_from_db()
+    assert relatorio_com_dominio_calculado.planos_refinados_em is not None
 
 
 @pytest.mark.django_db

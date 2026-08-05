@@ -71,6 +71,17 @@ class StatusRelatorio(models.TextChoices):
     ASSINADO = "assinado", "Assinado"
 
 
+class TipoRelatorio(models.TextChoices):
+    """Separação pedida pelo usuário em 2026-08-04: a proposta comercial cobra
+    Aplicação, Diagnóstico e Plano de Ação como serviços distintos, mas o sistema só
+    gerava um único PDF com tudo junto. `DIAGNOSTICO` cobre só o resultado do
+    questionário (Seções 1 a 6 do inventário: capa, base técnica, metodologia,
+    parecer técnico, resultados por GHE/domínio, semáforo, evidências/entrevista);
+    `DIAGNOSTICO_PLANO_ACAO` adiciona a Seção de Plano de Ação e a Assinatura."""
+    DIAGNOSTICO = "diagnostico", "Diagnóstico (sem Plano de Ação)"
+    DIAGNOSTICO_PLANO_ACAO = "diagnostico_plano_acao", "Diagnóstico + Plano de Ação"
+
+
 class Relatorio(models.Model):
     """Um Inventário de Risco Psicossocial em PDF pode cobrir mais de um GHE/Aplicacao
     do mesmo ciclo de avaliação (CLAUDE.md Seção 8.3, item 4: "Resultados por GHE e por
@@ -78,6 +89,15 @@ class Relatorio(models.Model):
     período. A IA (Claude) só redige o parecer a partir de números já calculados; nunca
     decide classificação (Seção 8.1)."""
 
+    tipo = models.CharField(
+        max_length=25,
+        choices=TipoRelatorio.choices,
+        default=TipoRelatorio.DIAGNOSTICO_PLANO_ACAO,
+        verbose_name="Tipo de relatório",
+        help_text="Escolhido na criação e não muda depois — gerar o PDF com Plano de "
+        "Ação exige ter rodado \"Gerar parecer via IA\" e \"Refinar planos de ação "
+        "com IA\" antes.",
+    )
     unidade = models.ForeignKey(Unidade, on_delete=models.PROTECT, related_name="relatorios")
     aplicacoes = models.ManyToManyField(Aplicacao, related_name="relatorios", verbose_name="Aplicações")
     criterio_versao = models.ForeignKey(
@@ -101,6 +121,13 @@ class Relatorio(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
     )
     assinado_em = models.DateTimeField(null=True, blank=True)
+
+    planos_refinados_em = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Marca a última vez que \"Refinar planos de ação com IA\" rodou com "
+        "sucesso — pré-requisito pra gerar o PDF de tipo Diagnóstico + Plano de Ação.",
+    )
 
     gerado_em = models.DateTimeField(auto_now_add=True)
 
