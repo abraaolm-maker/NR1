@@ -37,6 +37,16 @@ BANDA_CSS = {
     "Crítico": "critico",
 }
 
+def _medida_em_bullets(medida: str) -> list[str]:
+    """Fase 4 da 3ª rodada de reformulação visual (PLANO_ACAO_RELATORIO.md Seção
+    3.6, item 4 do checklist do usuário): a medida gerada pelo catálogo/IA é um
+    parágrafo corrido com as sub-ações separadas por ponto e vírgula — vira lista
+    de bullets curtos em vez de bloco de texto denso, casando com o padrão de
+    escaneabilidade já usado no Parecer técnico."""
+    partes = [p.strip() for p in medida.split(";") if p.strip()]
+    return partes if len(partes) > 1 else [medida]
+
+
 def _planos_ordenados(ghes: list[dict]) -> list[dict]:
     """Seção 8 (Plano de ação) lista as medidas do mais urgente pro menos urgente —
     Crítico primeiro, depois Alto, Moderado — em vez da ordem de cadastro por GHE/
@@ -53,6 +63,7 @@ def _planos_ordenados(ghes: list[dict]) -> list[dict]:
                         "dominio_nome": d["escore_dominio"].dominio.nome,
                         "banda": d["classificacao_risco"].banda,
                         "banda_css": d["banda_css"],
+                        "medida_bullets": _medida_em_bullets(plano.medida),
                     }
                 )
     planos.sort(key=lambda p: BANDA_ORDEM.get(p["banda"], 0), reverse=True)
@@ -168,6 +179,7 @@ def _criterio_classificacao_linhas(criterio_versao) -> list[dict]:
 
 NIVEL_GERAL_POR_BANDA = {"Aceitável": "Baixo", "Moderado": "Moderado", "Alto": "Alto", "Crítico": "Alto"}
 ORDEM_BANDA_GERAL = {"Baixo": 0, "Moderado": 1, "Alto": 2}
+NIVEL_GERAL_CSS = {"Baixo": "aceitavel", "Moderado": "moderado", "Alto": "alto"}
 
 
 def _montar_panorama(ghes: list[dict]) -> dict:
@@ -239,6 +251,7 @@ def _montar_panorama(ghes: list[dict]) -> dict:
     return {
         "indice_consolidado": indice_consolidado,
         "nivel_geral_risco": nivel_geral_risco,
+        "nivel_geral_risco_css": NIVEL_GERAL_CSS.get(nivel_geral_risco, ""),
         "n_participantes": n_respondentes_total,
         "frentes_atencao": frentes_atencao,
         "protegendo": protegendo,

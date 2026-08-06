@@ -2349,6 +2349,42 @@ atualizadas pro novo eyebrow/manchete) e suíte completa de `relatorios/` (32 te
 passando. Suíte geral do projeto não foi executada nesta rodada, a pedido explícito
 do usuário — só os testes da área tocada.
 
+## 6.22 Quarta auditoria visual: masthead, páginas vazias, bullets, alinhamento (2026-08-05)
+
+> Usuário trouxe uma comparação visual profunda (não só de texto) entre o PDF real
+> e a referência Solute, com um checklist priorizado de 6 itens. Implementados os 6.
+
+1. **Masthead em toda página interna**: `@page { @top-left / @top-right }` com CSS
+   Paged Media (`string-set: nome-secao content()` no `.eyebrow`, `content:
+   string(nome-secao)` no `@top-right`) — mostra "● INVENTÁRIO DE RISCO
+   PSICOSSOCIAL" à esquerda e o nome da seção atual à direita, com linha divisória
+   fina, em toda página exceto a capa (`@page :first` zera os dois boxes).
+2. **Página de encerramento deixou de ficar quase vazia**: nova seção
+   `.encerramento-conteudo` antes do bloco de assinatura, com "O que esperar da
+   reaplicação" (lista), nota de "Conformidade" com a NR-01, e aviso de sigilo —
+   preenche a última página com conteúdo real em vez de só título + assinatura.
+3. **Plano de ação vira bullets, não parágrafo corrido**: `pdf.py::_medida_em_bullets`
+   quebra o texto da medida pelos pontos e vírgulas (o catálogo/IA já escreve
+   sub-ações separadas por `;`) em uma lista `<ul>` — só cai de volta pro parágrafo
+   corrido quando a medida não tem múltiplas partes.
+4. **Assinatura alinhada à esquerda**: `.assinatura` deixou de ser centralizada
+   (`text-align: center`, linha de 60% centralizada) — agora segue o alinhamento à
+   esquerda do resto do documento.
+5. **Tags de contexto qualitativo nos cards do Panorama**: badge colorido (mesma
+   paleta aceitável/moderado/alto) abaixo de cada card de indicador — "Faixa Baixo/
+   Moderado/Alto" no Índice consolidado, "Amostra válida" em Participantes, "N
+   frente(s)" no Nível geral de risco — pra dar leitura instantânea sem precisar
+   interpretar o número sozinho.
+6. **Uso mais consistente do acento laranja**: bullet do masthead e bullet do selo
+   "CONFIDENCIAL" no rodapé agora usam a mesma cor de destaque — reforça repetição
+   visual sem abandonar o azul-marinho como cor primária do sistema (decisão já
+   registrada, paleta definitiva continua como pendência aberta, Seção 5 do
+   `PLANO_ACAO_RELATORIO.md`).
+
+**Cobertura de teste**: `manage.py check` + suíte completa de `relatorios/` (32
+testes) passando. Suíte geral do projeto não executada nesta rodada, a pedido
+explícito do usuário.
+
 ---
 
 ## 7. Backend — cálculo da matriz de risco (valores definitivos, sem exemplos ilustrativos)

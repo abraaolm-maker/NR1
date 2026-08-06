@@ -6,18 +6,44 @@
 <style>
     @page {
         size: A4;
-        margin: 3cm 1.8cm 1.8cm;
+        margin: 3.2cm 1.8cm 1.8cm;
+        @top-left {
+            content: "● INVENTÁRIO DE RISCO PSICOSSOCIAL";
+            font-size: 7.5px;
+            letter-spacing: .08em;
+            color: #c76b1f;
+            font-weight: bold;
+            border-bottom: 1px solid #e5e5e5;
+            padding-bottom: 6px;
+            vertical-align: bottom;
+        }
+        @top-right {
+            content: string(nome-secao);
+            font-size: 7.5px;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: #888;
+            border-bottom: 1px solid #e5e5e5;
+            padding-bottom: 6px;
+            vertical-align: bottom;
+        }
         @bottom-left {
-            content: "CONFIDENCIAL · Inventário de Risco Psicossocial";
+            content: "● CONFIDENCIAL · Inventário de Risco Psicossocial";
             font-size: 8px;
             letter-spacing: .04em;
-            color: #999;
+            color: #c76b1f;
         }
         @bottom-right {
             content: "Página " counter(page) " de " counter(pages);
             font-size: 9px;
             color: #666;
         }
+    }
+    /* Masthead (barra fina no topo com marca + label da seção atual) não aparece
+       na capa — página de rosto não precisa de orientação de "em que seção estou". */
+    @page :first {
+        @top-left { content: none; border-bottom: none; }
+        @top-right { content: none; border-bottom: none; }
     }
 
     body {
@@ -48,6 +74,7 @@
         text-transform: uppercase;
         color: #888;
         margin-bottom: 4px;
+        string-set: nome-secao content();
     }
     .manchete {
         font-size: 27px;
@@ -243,14 +270,26 @@
     .rodape-nota { font-size: 9px; color: #777; margin-top: 8px; }
     .rodape-nota .quadrado { font-weight: bold; }
 
-    .assinatura { margin-top: 60px; text-align: center; }
+    /* Alinhamento à esquerda pra ficar consistente com o resto do documento
+       (achado da 3ª rodada de auditoria: bloco de assinatura centralizado quebrava
+       o ritmo visual de um documento que é todo alinhado à esquerda). */
+    .assinatura { margin-top: 40px; text-align: left; }
     .assinatura .linha {
-        width: 60%;
-        margin: 0 auto;
+        width: 45%;
         border-top: 1px solid #333;
         padding-top: 4px;
     }
     .assinatura .pendente { color: #999; font-style: italic; }
+    .encerramento-conteudo { margin-bottom: 20px; }
+    .encerramento-conteudo ul { margin: 0 0 14px; padding-left: 18px; font-size: 10.5px; }
+    .encerramento-conteudo li { margin-bottom: 5px; }
+    .encerramento-conteudo .sigilo {
+        font-size: 9.5px;
+        color: #777;
+        margin-top: 16px;
+        padding-top: 10px;
+        border-top: 1px solid #eee;
+    }
 
     /* Fase 4 — medidas agrupadas por horizonte (prazo), com fichas curtas
        (medida em texto corrido) e os campos operacionais consolidados numa única
@@ -269,6 +308,8 @@
         margin-bottom: 3px;
     }
     .item-plano-compacto p { margin: 0; font-size: 10.5px; }
+    .item-plano-compacto ul { margin: 0; padding-left: 16px; font-size: 10.5px; }
+    .item-plano-compacto li { margin-bottom: 3px; }
 
     .cards-panorama { display: flex; gap: 10px; margin-bottom: 16px; }
     .card-indicador {
@@ -374,16 +415,19 @@
             <div class="numero">{{ panorama.indice_consolidado|default:"—" }}{% if panorama.indice_consolidado %}/100{% endif %}</div>
             <div class="rotulo">ÍNDICE CONSOLIDADO</div>
             <div class="legenda">Média dos domínios não suprimidos</div>
+            {% if panorama.nivel_geral_risco %}<span class="badge {{ panorama.nivel_geral_risco_css }}" style="margin-top: 6px;">Faixa {{ panorama.nivel_geral_risco }}</span>{% endif %}
         </div>
         <div class="card-indicador">
             <div class="numero">{{ panorama.n_participantes }}</div>
             <div class="rotulo">PARTICIPANTES</div>
             <div class="legenda">Total de respondentes considerados</div>
+            <span class="badge aceitavel" style="margin-top: 6px;">Amostra válida</span>
         </div>
         <div class="card-indicador">
             <div class="numero">{{ panorama.nivel_geral_risco|default:"—" }}</div>
             <div class="rotulo">NÍVEL GERAL DE RISCO</div>
             <div class="legenda">Predominância entre os domínios avaliados</div>
+            {% if panorama.nivel_geral_risco_css %}<span class="badge {{ panorama.nivel_geral_risco_css }}" style="margin-top: 6px;">{{ panorama.frentes_atencao|length }} frente(s)</span>{% endif %}
         </div>
     </div>
 
@@ -771,7 +815,15 @@
             {% with plano=entrada.plano %}
             <div class="item-plano-compacto borda-{{ entrada.banda_css }}">
                 <div class="titulo-item">{{ plano.codigo|default:"—" }} — {{ entrada.ghe_nome }} — {{ entrada.dominio_nome }} ({{ entrada.dominio_codigo }})</div>
+                {% if entrada.medida_bullets|length > 1 %}
+                <ul>
+                {% for bullet in entrada.medida_bullets %}
+                    <li>{{ bullet }}</li>
+                {% endfor %}
+                </ul>
+                {% else %}
                 <p>{{ plano.medida }}</p>
+                {% endif %}
             </div>
             {% endwith %}
         {% endfor %}
@@ -812,6 +864,41 @@
 <div class="secao">
     <div class="eyebrow">{% if relatorio.tipo == "diagnostico_plano_acao" %}10{% else %}9{% endif %} · Encerramento</div>
     <div class="manchete">Próximo <span class="acento">ciclo</span>.</div>
+
+    <div class="encerramento-conteudo">
+        <p>
+            Este inventário é uma fotografia técnica do ciclo avaliado. Seu maior valor está
+            em servir de base de comparação para os ciclos seguintes, transformando a gestão
+            de fatores psicossociais em algo acompanhável ao longo do tempo, com indicadores
+            objetivos em vez de percepção isolada.
+        </p>
+        <h3>O que esperar da reaplicação</h3>
+        <ul>
+            <li>Comparativo direto com este ciclo, fator a fator e por GHE, permitindo
+                identificar avanços e retrocessos.</li>
+            <li>Indicadores de eficácia das medidas do Plano de Ação implementadas neste
+                intervalo, com leitura sobre o que efetivamente mudou.</li>
+            <li>Eventuais novos focos de atenção que ainda não estavam visíveis neste ciclo,
+                especialmente em áreas em transformação.</li>
+            <li>Atualização do inventário dentro do Programa de Gerenciamento de Riscos (PGR),
+                mantendo a documentação viva e auditável perante fiscalização.</li>
+        </ul>
+        <h3>Conformidade</h3>
+        <p>
+            Este inventário atende às exigências da NR-01 (Capítulo 1.5, GRO/PGR) do
+            Ministério do Trabalho e Emprego quanto à identificação e avaliação de fatores de
+            risco psicossocial. Os resultados são integráveis à documentação ocupacional da
+            empresa; o instrumento utilizado (COPSOQ) é tecnicamente validado e adaptado à
+            realidade brasileira.
+        </p>
+        <p class="sigilo">
+            Sigilo: este documento é confidencial e destinado exclusivamente à liderança da
+            organização avaliada. Reprodução ou redistribuição depende de autorização expressa.
+            Os dados brutos que originaram este relatório permanecem em ambiente seguro do
+            sistema pelo prazo legal aplicável.
+        </p>
+    </div>
+
     <div class="assinatura">
         {% if minuta %}
             <div class="linha pendente">Aguardando assinatura do profissional responsável</div>
