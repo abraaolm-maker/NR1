@@ -2492,6 +2492,68 @@ full-height na capa, marca "S" quadrada, cartão de destaque em preto
 quase puro (hoje ainda navy), marcadores de lista em traço laranja em vez
 de bullet redondo, layout de 2 colunas no Plano de Ação por horizonte.
 
+## 6.25 Correção de regressão crítica da migração + ajustes visuais finais (2026-08-05)
+
+> O usuário testou a migração de motor (Seção 6.24) com um documento real de 13
+> páginas e trouxe uma nova auditoria técnica (fontes, pt, hex) mostrando que a
+> fonte e o tamanho ficaram praticamente idênticos à referência — mas achou uma
+> **regressão crítica**: a Seção de Encerramento (assinatura, hash de
+> integridade, "Próximo ciclo") tinha sumido do PDF real, e todo rodapé mostrava
+> "Página X de 0".
+
+**Causa raiz (única, para os dois bugs)**: `_renderizar_pdf_via_chromium`
+esperava só o elemento `.pagedjs_pages` aparecer no DOM + 500ms fixos antes de
+chamar `page.pdf()`. Esse elemento é criado no **início** da paginação do
+Paged.js, não no fim — num documento curto (3 páginas, testado antes da
+integração real) os 500ms bastavam por acaso; num documento de 13-19 páginas,
+não: o PDF era impresso **enquanto o Paged.js ainda estava renderizando**,
+cortando o conteúdo final (a Seção de Encerramento) e capturando o contador
+`pages` antes de ele ser resolvido pro valor final (daí o "de 0").
+
+**Correção**: usar o sinal de conclusão correto do próprio Paged.js —
+`window.PagedConfig.after`, callback que só dispara quando `previewer.preview()`
+resolve (paginação e contadores definitivamente prontos). Substitui o
+`wait_for_selector` + timeout fixo por
+`page.wait_for_function("window.__pagedjsPronto === true")`, setado via
+`page.evaluate` antes de injetar o script do Paged.js. Validado com o mesmo
+documento real: "Página X de 13" correto em todas as páginas, Seção de
+Encerramento completa (lista, conformidade, sigilo, assinatura, apêndice de
+integridade com hash).
+
+**Ajustes visuais finais** (Etapa 5 do plano, PLANO_ACAO_RELATORIO.md Seção
+3.7.4/3.7.5 — viabilizados pela migração de motor, agora implementados):
+- Capa: barra lateral laranja full-height, sangrando até a borda física da
+  página via offset negativo igual à margem do `@page` (só possível com
+  confiança num motor de navegador real).
+- Cartão de destaque do Panorama ("N frentes de atenção"): fundo trocado de
+  navy (`#2b3a55`) pra preto quase puro (`#1a1a1a`), igual à referência.
+- Marcadores de lista (colunas "protegendo"/"pede ação", encerramento, itens
+  do plano de ação): trocados de bullet redondo pra traço laranja ("–"), via
+  `list-style: none` + `::before` com `content: "–"`.
+- Plano de ação: layout de 2 colunas por horizonte (rótulo do horizonte +
+  prazo à esquerda, itens à direita) — antes era um `<h3>` empilhado acima dos
+  itens, numa coluna só.
+- Título "Cada fator, uma leitura." (Seção 5): destaque de cor corrigido pra
+  "uma leitura" (2 palavras, igual ao padrão "Oito dimensões, **uma leitura**"
+  da referência) — antes destacava só "leitura" (1 palavra), inconsistente com
+  o padrão já adotado nos outros títulos.
+
+**Redesenho de conteúdo da Seção 5 (Resultados)**: por pedido do usuário, a
+tabela `GHE: X (Y)` com 7 colunas foi removida — ela repetia exatamente a
+mesma informação que a Seção 6 (Análise semáforo) já mostra de forma mais
+visual. No lugar, cada domínio virou uma **linha de leitura** no formato da
+referência (nome + escore alinhados nas pontas, acento laranja curto, e uma
+linha secundária com % em risco/prazo + badge de banda) — mantém todo o dado
+regulatoriamente relevante (escore, % em risco, prazo, banda), só sem a
+grade de tabela. A coluna "Média nacional" foi descartada dessa visão (dado
+comparativo secundário, não exigido pela NR-01); o "GHE: X" como rótulo de
+agrupamento só aparece quando há mais de 1 GHE no relatório.
+
+**Cobertura de teste**: suíte completa de `relatorios/` (32 testes) passando.
+Validação end-to-end repetida com o mesmo documento real de 13 páginas,
+confirmando visualmente (não só por teste automatizado) que os dois bugs
+críticos foram corrigidos e os 5 ajustes visuais renderizam corretamente.
+
 ---
 
 ## 7. Backend — cálculo da matriz de risco (valores definitivos, sem exemplos ilustrativos)

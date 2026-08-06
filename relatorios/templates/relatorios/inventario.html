@@ -100,11 +100,22 @@
     }
     .acento { color: #F47B20; }
 
-    /* Fase 6 — Capa */
+    /* Fase 6 — Capa. Motor Chromium (2026-08-05) viabiliza a barra lateral
+       full-height que o WeasyPrint não reproduzia com confiança — bleed até a
+       borda física da página via offset negativo igual à margem do @page. */
     .capa {
+        position: relative;
         text-align: center;
         margin-top: 5cm;
         page-break-after: always;
+    }
+    .capa .barra-lateral {
+        position: absolute;
+        top: -3.2cm;
+        left: -1.8cm;
+        width: 1cm;
+        height: 29.7cm;
+        background: #F47B20;
     }
     .capa .marca {
         width: 40px;
@@ -283,6 +294,19 @@
 
     .ghe-bloco { margin-bottom: 20px; }
 
+    /* Seção 5 (Resultados) redesenhada no formato lista da referência (2026-08-05):
+       o usuário notou que a tabela "GHE: X" duplicava a mesma informação já
+       visual no semáforo (Seção 6), sem agregar nada. Cada domínio vira uma linha
+       compacta — nome + escore alinhados nas pontas, acento laranja curto, e uma
+       linha secundária com % em risco/prazo + badge de banda — em vez de tabela. */
+    .linha-dominio { padding: 10px 0; border-bottom: 1px solid #eee; }
+    .linha-dominio .cabecalho-linha { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+    .linha-dominio .nome { font-weight: bold; font-size: 14px; color: #1a1a1a; }
+    .linha-dominio .escore { font-weight: bold; font-size: 14px; color: #2b3a55; white-space: nowrap; }
+    .linha-dominio .escore .unidade { font-size: 11px; font-weight: normal; color: #999; }
+    .linha-dominio .acento-linha { width: 40px; height: 2px; background: #F47B20; margin: 4px 0 6px; }
+    .linha-dominio .rodape-linha { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 11px; color: #777; }
+
     /* Gráfico semáforo — barras empilhadas horizontais via HTML/CSS puro (WeasyPrint
        não roda JS/Chart.js/canvas). Referência visual: COPSOQ Manual Portugal 2013,
        Gráfico 1 (p. 15). */
@@ -313,8 +337,9 @@
     }
     .assinatura .pendente { color: #999; font-style: italic; }
     .encerramento-conteudo { margin-bottom: 20px; }
-    .encerramento-conteudo ul { margin: 0 0 14px; padding-left: 18px; font-size: 13px; }
-    .encerramento-conteudo li { margin-bottom: 5px; }
+    .encerramento-conteudo ul { margin: 0 0 14px; padding-left: 16px; font-size: 13px; list-style: none; }
+    .encerramento-conteudo li { margin-bottom: 5px; position: relative; }
+    .encerramento-conteudo li::before { content: "–"; color: #F47B20; position: absolute; left: -16px; font-weight: bold; }
     .encerramento-conteudo .sigilo {
         font-size: 12px;
         color: #777;
@@ -340,7 +365,25 @@
         margin-bottom: 3px;
     }
     .item-plano-compacto p { margin: 0; font-size: 13px; }
-    .item-plano-compacto ul { margin: 0; padding-left: 16px; font-size: 13px; }
+    .item-plano-compacto ul { margin: 0; padding-left: 16px; font-size: 13px; list-style: none; }
+    .item-plano-compacto ul li { position: relative; }
+    .item-plano-compacto ul li::before { content: "–"; color: #F47B20; position: absolute; left: -16px; font-weight: bold; }
+
+    /* Layout de 2 colunas por horizonte (rótulo + prazo à esquerda, medidas à
+       direita), no padrão do relatório de referência — antes empilhava tudo
+       numa coluna só com um <h3>. */
+    .horizonte-plano {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 18px;
+        padding-top: 10px;
+        border-top: 1px solid #eee;
+    }
+    .horizonte-plano:first-of-type { border-top: none; padding-top: 0; }
+    .horizonte-rotulo { width: 110px; flex-shrink: 0; }
+    .horizonte-nome { font-weight: bold; font-size: 13px; color: #2b3a55; text-transform: uppercase; letter-spacing: .03em; }
+    .horizonte-prazo { font-size: 10.5px; color: #999; margin-top: 2px; }
+    .horizonte-conteudo { flex: 1; }
     .item-plano-compacto li { margin-bottom: 3px; }
 
     .cards-panorama { display: flex; gap: 10px; margin-bottom: 16px; }
@@ -355,7 +398,7 @@
     .card-indicador .rotulo { font-size: 11.5px; color: #666; margin-top: 2px; }
     .card-indicador .legenda { font-size: 11px; color: #999; margin-top: 4px; }
     .card-destaque {
-        background: #2b3a55;
+        background: #1a1a1a;
         color: #fff;
         border-radius: 4px;
         padding: 12px 16px;
@@ -369,8 +412,9 @@
     .colunas-leitura { display: flex; gap: 14px; }
     .coluna-leitura { flex: 1; }
     .coluna-leitura h3 { margin-top: 0; }
-    .coluna-leitura ul { margin: 0; padding-left: 16px; font-size: 13px; }
-    .coluna-leitura li { margin-bottom: 4px; }
+    .coluna-leitura ul { margin: 0; padding-left: 16px; font-size: 13px; list-style: none; }
+    .coluna-leitura li { margin-bottom: 4px; position: relative; }
+    .coluna-leitura li::before { content: "–"; color: #F47B20; position: absolute; left: -16px; font-weight: bold; }
 
     .apendice-tecnico {
         font-size: 10px;
@@ -392,6 +436,7 @@
 
 <!-- CAPA -->
 <div class="capa">
+    <div class="barra-lateral"></div>
     <div class="marca">IRP</div>
     <div class="selo">Inventário de Risco Psicossocial</div>
     <h1>{{ empresa.nome }}</h1>
@@ -611,10 +656,10 @@
 <!-- 5. RESULTADOS POR GHE E POR DOMÍNIO -->
 <div class="secao">
     <div class="eyebrow">05 · Resultados</div>
-    <div class="manchete">Cada fator, uma <span class="acento">leitura</span>.</div>
+    <div class="manchete">Cada fator, <span class="acento">uma leitura</span>.</div>
 
     <div class="caixa-explicativa">
-        <span class="titulo">Como ler a coluna "Banda"</span>
+        <span class="titulo">Como ler o selo de Banda</span>
         Poucas pessoas na faixa de risco → <strong>Aceitável</strong>; uma parte relevante →
         <strong>Moderado</strong> (90 dias); a maioria → <strong>Alto</strong> (30 dias).
         <strong>Crítico</strong> (15 dias) não depende do percentual: basta 1 relato
@@ -651,45 +696,30 @@
 
     {% for item in ghes %}
     <div class="ghe-bloco">
-        <h3>GHE: {{ item.ghe.nome }}{% if item.ghe.setor %} ({{ item.ghe.setor }}){% endif %}</h3>
-        <table class="zebra">
-            <thead>
-                <tr>
-                    <th>Domínio</th><th>Escore</th><th>Média nacional*</th><th>Classificação</th><th>% em risco</th>
-                    <th>Banda</th><th>Prazo (dias)</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for d in item.dominios %}
-                <tr>
-                    <td>{{ d.escore_dominio.dominio.codigo }} — {{ d.escore_dominio.dominio.nome }}</td>
-                    {% if d.escore_dominio.suprimido_por_confidencialidade %}
-                        <td colspan="6">Suprimido por confidencialidade (N &lt; mínimo)</td>
-                    {% else %}
-                        <td>{{ d.escore_dominio.escore }}</td>
-                        <td>{{ d.media_nacional|default:"—" }}</td>
-                        <td>{{ d.escore_dominio.classificacao }}</td>
-                        <td>{% widthratio d.escore_dominio.percentual_elevados 1 100 %}%</td>
-                        <td><span class="badge {{ d.banda_css }}">{{ d.classificacao_risco.banda }}</span></td>
-                        <td>{{ d.classificacao_risco.prazo_dias_plano_de_acao|default:"—" }}</td>
-                    {% endif %}
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-        {% if item.dominios %}
-        <p class="rodape-nota">
-            * Média nacional (referência): valor normalizado à mesma escala 0-100 e mesma
-            direção (maior = mais risco) do Escore desta aplicação. "—" = sem valor de
-            referência publicado ou domínio de polaridade mista.
-        </p>
-        {% endif %}
+        {% if ghes|length > 1 %}<h3>{{ item.ghe.nome }}{% if item.ghe.setor %} ({{ item.ghe.setor }}){% endif %}</h3>{% endif %}
         {% for d in item.dominios %}
+        <div class="linha-dominio">
+            <div class="cabecalho-linha">
+                <span class="nome">{{ d.escore_dominio.dominio.codigo }} — {{ d.escore_dominio.dominio.nome }}</span>
+                {% if not d.escore_dominio.suprimido_por_confidencialidade %}
+                <span class="escore">{{ d.escore_dominio.escore }}<span class="unidade"> / 100</span></span>
+                {% endif %}
+            </div>
+            <div class="acento-linha"></div>
+            {% if d.escore_dominio.suprimido_por_confidencialidade %}
+            <div class="rodape-linha"><span>Suprimido por confidencialidade (N abaixo do mínimo).</span></div>
+            {% else %}
+            <div class="rodape-linha">
+                <span>
+                    {% widthratio d.escore_dominio.percentual_elevados 1 100 %}% dos respondentes na faixa elevada{% if d.classificacao_risco.prazo_dias_plano_de_acao %} · prazo de {{ d.classificacao_risco.prazo_dias_plano_de_acao }} dias{% endif %}
+                </span>
+                <span class="badge {{ d.banda_css }}">{{ d.classificacao_risco.banda }}</span>
+            </div>
             {% if d.escore_dominio.dominio.nota %}
-            <p class="rodape-nota">
-                <strong>{{ d.escore_dominio.dominio.codigo }}:</strong> {{ d.escore_dominio.dominio.nota }}
-            </p>
+            <p class="rodape-nota" style="margin-top: 4px;">{{ d.escore_dominio.dominio.nota }}</p>
             {% endif %}
+            {% endif %}
+        </div>
         {% endfor %}
     </div>
     {% endfor %}
@@ -835,30 +865,36 @@
 
     {% regroup planos_ordenados by banda as grupos_banda %}
     {% for grupo in grupos_banda %}
-        <h3>
-            {{ grupo.grouper }}
-            {% if grupo.grouper == "Crítico" %} — prazo de 15 dias, com aviso imediato à liderança/CIPA
-            {% elif grupo.grouper == "Alto" %} — prazo de 30 dias
-            {% elif grupo.grouper == "Moderado" %} — prazo de 90 dias
-            {% else %} — sem prazo, monitoramento no próximo ciclo
-            {% endif %}
-        </h3>
-        {% for entrada in grupo.list %}
-            {% with plano=entrada.plano %}
-            <div class="item-plano-compacto borda-{{ entrada.banda_css }}">
-                <div class="titulo-item">{{ plano.codigo|default:"—" }} — {{ entrada.ghe_nome }} — {{ entrada.dominio_nome }} ({{ entrada.dominio_codigo }})</div>
-                {% if entrada.medida_bullets|length > 1 %}
-                <ul>
-                {% for bullet in entrada.medida_bullets %}
-                    <li>{{ bullet }}</li>
-                {% endfor %}
-                </ul>
-                {% else %}
-                <p>{{ plano.medida }}</p>
-                {% endif %}
+        <div class="horizonte-plano">
+            <div class="horizonte-rotulo">
+                <div class="horizonte-nome">{{ grupo.grouper }}</div>
+                <div class="horizonte-prazo">
+                    {% if grupo.grouper == "Crítico" %}15 dias, aviso imediato à liderança/CIPA
+                    {% elif grupo.grouper == "Alto" %}30 dias
+                    {% elif grupo.grouper == "Moderado" %}90 dias
+                    {% else %}Sem prazo — monitoramento
+                    {% endif %}
+                </div>
             </div>
-            {% endwith %}
-        {% endfor %}
+            <div class="horizonte-conteudo">
+                {% for entrada in grupo.list %}
+                    {% with plano=entrada.plano %}
+                    <div class="item-plano-compacto borda-{{ entrada.banda_css }}">
+                        <div class="titulo-item">{{ plano.codigo|default:"—" }} — {{ entrada.ghe_nome }} — {{ entrada.dominio_nome }} ({{ entrada.dominio_codigo }})</div>
+                        {% if entrada.medida_bullets|length > 1 %}
+                        <ul>
+                        {% for bullet in entrada.medida_bullets %}
+                            <li>{{ bullet }}</li>
+                        {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p>{{ plano.medida }}</p>
+                        {% endif %}
+                    </div>
+                    {% endwith %}
+                {% endfor %}
+            </div>
+        </div>
     {% endfor %}
 
     <h3>Acompanhamento</h3>

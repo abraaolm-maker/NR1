@@ -611,6 +611,16 @@ sem chip pra faixa, caixa de síntese no mesmo padrão de `.caixa-explicativa`.
 > de motor foi isolada num commit próprio pra não misturar com ajuste de
 > CSS, exatamente como o plano recomendava.
 
+> **Atualização de 2026-08-05 (rodada seguinte, mesmo dia)**: um relatório
+> real de 13 páginas revelou uma regressão crítica na migração (Seção de
+> Encerramento sumindo + contador "Página X de 0") — causa raiz e correção
+> documentadas em CLAUDE.md Seção 6.25. Corrigida a regressão, a Etapa 5
+> (ajustes visuais listados acima) foi **implementada e validada** no mesmo
+> lote, junto com o redesenho da Seção 5 (Resultados) pedido pelo usuário
+> (tabela por GHE removida, substituída por lista de leitura no formato da
+> referência) e a correção do acento de título em "Cada fator, uma leitura."
+> — ver CLAUDE.md Seção 6.25 para o detalhamento completo.
+
 ---
 
 ## 4. Referência visual e de conteúdo — Relatório 2 (Hospital São Lucas, "COPSOQ-inspired")

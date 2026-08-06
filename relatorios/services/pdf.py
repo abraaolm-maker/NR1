@@ -52,16 +52,29 @@ def _renderizar_pdf_via_chromium(html: str) -> bytes:
     não depender de internet em produção), espera a paginação terminar de
     assentar, e imprime o resultado já paginado em PDF. As margens do `@page`
     já ficam "assadas" no HTML paginado pelo Paged.js, então `page.pdf()` roda
-    sem margem adicional do Chrome (senão a margem seria somada duas vezes)."""
+    sem margem adicional do Chrome (senão a margem seria somada duas vezes).
+
+    Achado de 2026-08-05 (bug real "Página X de 0" reportado pelo usuário num
+    documento de 19 páginas): esperar só o elemento `.pagedjs_pages` aparecer no
+    DOM não é suficiente — esse container é criado no INÍCIO da paginação, antes
+    de o Paged.js terminar de renderizar todas as páginas e resolver o contador
+    `pages` (que ele implementa via CSS custom property, não o `counter(pages)`
+    nativo do navegador). Num documento curto isso passava despercebido (a
+    paginação terminava dentro dos 500ms de espera fixa); num documento longo,
+    não. O sinal correto de conclusão é o callback `after` do próprio Paged.js
+    (`window.PagedConfig.after`), que só dispara quando `previewer.preview()`
+    resolve — ou seja, com a paginação e os contadores definitivamente prontos."""
     pagedjs_source = PAGEDJS_PATH.read_text(encoding="utf-8")
 
     with sync_playwright() as p:
         browser = p.chromium.launch()
         page = browser.new_page()
         page.set_content(html, wait_until="networkidle")
+        page.evaluate(
+            "window.PagedConfig = { auto: true, after: () => { window.__pagedjsPronto = true; } };"
+        )
         page.add_script_tag(content=pagedjs_source)
-        page.wait_for_selector(".pagedjs_pages", timeout=30000)
-        page.wait_for_timeout(500)
+        page.wait_for_function("window.__pagedjsPronto === true", timeout=60000)
         pdf_bytes = page.pdf(
             print_background=True,
             prefer_css_page_size=True,
