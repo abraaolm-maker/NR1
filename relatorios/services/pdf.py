@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
@@ -38,13 +39,21 @@ BANDA_CSS = {
 }
 
 def _medida_em_bullets(medida: str) -> list[str]:
-    """Fase 4 da 3ª rodada de reformulação visual (PLANO_ACAO_RELATORIO.md Seção
-    3.6, item 4 do checklist do usuário): a medida gerada pelo catálogo/IA é um
-    parágrafo corrido com as sub-ações separadas por ponto e vírgula — vira lista
-    de bullets curtos em vez de bloco de texto denso, casando com o padrão de
-    escaneabilidade já usado no Parecer técnico."""
+    """Fase 4 da 3ª rodada + item 6 da 4ª auditoria (PLANO_ACAO_RELATORIO.md Seção
+    3.6): a medida gerada pelo catálogo/IA vira lista de bullets curtos em vez de
+    parágrafo corrido denso, casando com o padrão de escaneabilidade já usado no
+    Parecer técnico. Tenta primeiro separar por ponto e vírgula (sub-ações
+    explícitas); a maioria das medidas reais, porém, não usa ";" — é uma sequência
+    de frases separadas por ponto final (achado da 4ª auditoria: o split por ";"
+    sozinho deixava praticamente todo item como um único bloco de texto). Nesse
+    caso, cada frase completa (terminada em "." e seguida de maiúscula) vira um
+    bullet próprio."""
     partes = [p.strip() for p in medida.split(";") if p.strip()]
-    return partes if len(partes) > 1 else [medida]
+    if len(partes) > 1:
+        return partes
+
+    frases = [f.strip() for f in re.split(r"(?<=[.!?])\s+(?=[A-ZÀ-Ú])", medida.strip()) if f.strip()]
+    return frases if len(frases) > 1 else [medida]
 
 
 def _planos_ordenados(ghes: list[dict]) -> list[dict]:

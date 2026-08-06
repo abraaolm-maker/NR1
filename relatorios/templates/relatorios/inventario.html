@@ -4,14 +4,22 @@
 <meta charset="utf-8">
 <title>Inventário de Risco Psicossocial — {{ unidade.nome }}</title>
 <style>
+    /* Achado da 4ª auditoria visual (2026-08-05, pdffonts): as margin boxes de
+       @page (header/footer) NÃO herdam o font-family do body em WeasyPrint — sem
+       declarar explicitamente, elas caem no serif padrão, criando duas famílias
+       de fonte no mesmo documento (DejaVu Sans no corpo, DejaVu Serif no
+       cabeçalho/rodapé de toda página). Cada margin box abaixo declara a stack
+       sans-serif explicitamente por isso. */
     @page {
         size: A4;
         margin: 3.2cm 1.8cm 1.8cm;
+        font-family: "DejaVu Sans", Arial, sans-serif;
         @top-left {
             content: "● INVENTÁRIO DE RISCO PSICOSSOCIAL";
+            font-family: "DejaVu Sans", Arial, sans-serif;
             font-size: 7.5px;
             letter-spacing: .08em;
-            color: #c76b1f;
+            color: #F47B20;
             font-weight: bold;
             border-bottom: 1px solid #e5e5e5;
             padding-bottom: 6px;
@@ -19,6 +27,7 @@
         }
         @top-right {
             content: string(nome-secao);
+            font-family: "DejaVu Sans", Arial, sans-serif;
             font-size: 7.5px;
             letter-spacing: .06em;
             text-transform: uppercase;
@@ -29,12 +38,14 @@
         }
         @bottom-left {
             content: "● CONFIDENCIAL · Inventário de Risco Psicossocial";
+            font-family: "DejaVu Sans", Arial, sans-serif;
             font-size: 8px;
             letter-spacing: .04em;
-            color: #c76b1f;
+            color: #F47B20;
         }
         @bottom-right {
             content: "Página " counter(page) " de " counter(pages);
+            font-family: "DejaVu Sans", Arial, sans-serif;
             font-size: 9px;
             color: #666;
         }
@@ -46,17 +57,21 @@
         @top-right { content: none; border-bottom: none; }
     }
 
+    /* Achado da 4ª auditoria visual (2026-08-05, pdfplumber): o corpo de texto
+       estava rodando a ~7,9pt contra 10,5pt da referência — cerca de 30% menor.
+       Escala tipográfica inteira subiu proporcionalmente (fator ~1,33, já que 1px
+       equivale a 0,75pt no WeasyPrint: 14px = 10,5pt). */
     body {
         font-family: "DejaVu Sans", Arial, sans-serif;
-        font-size: 11px;
+        font-size: 14px;
         color: #1a1a1a;
         line-height: 1.55;
     }
 
     p { margin: 0 0 10px; }
 
-    h1 { font-size: 22px; margin-bottom: 4px; }
-    h3 { font-size: 12.5px; margin-top: 14px; margin-bottom: 6px; color: #2b3a55; }
+    h1 { font-size: 30px; margin-bottom: 4px; }
+    h3 { font-size: 16px; margin-top: 14px; margin-bottom: 6px; color: #2b3a55; }
 
     /* Fase 1/3 da 3ª rodada de reformulação visual (2026-08-05,
        PLANO_ACAO_RELATORIO.md Seção 3.6): cabeçalho de seção único no tom Solute
@@ -68,7 +83,7 @@
         page-break-before: always;
     }
     .eyebrow {
-        font-size: 9.5px;
+        font-size: 12.5px;
         font-weight: bold;
         letter-spacing: 0.12em;
         text-transform: uppercase;
@@ -77,13 +92,13 @@
         string-set: nome-secao content();
     }
     .manchete {
-        font-size: 27px;
+        font-size: 29px;
         font-weight: 800;
-        color: #2b3a55;
+        color: #1a1a1a;
         line-height: 1.2;
         margin: 0 0 16px;
     }
-    .acento { color: #c76b1f; }
+    .acento { color: #F47B20; }
 
     /* Fase 6 — Capa */
     .capa {
@@ -106,16 +121,16 @@
         letter-spacing: .02em;
     }
     .capa .selo {
-        font-size: 12px;
+        font-size: 14px;
         letter-spacing: 2px;
         text-transform: uppercase;
         color: #666;
     }
-    .capa h1 { font-size: 30px; margin-top: 14px; }
+    .capa h1 { font-size: 38px; margin-top: 14px; }
     .capa .resumo {
         max-width: 11cm;
         margin: 14px auto 0;
-        font-size: 11px;
+        font-size: 14px;
         color: #555;
         line-height: 1.6;
     }
@@ -123,7 +138,7 @@
         width: 64px;
         height: 4px;
         margin: 20px auto 0;
-        background: #c76b1f;
+        background: #F47B20;
         border-radius: 2px;
     }
     .capa .meta-linha {
@@ -135,16 +150,16 @@
     }
     .capa .meta-item { text-align: center; }
     .capa .meta-item .rotulo {
-        font-size: 8.5px;
+        font-size: 11px;
         letter-spacing: .08em;
         text-transform: uppercase;
         color: #999;
         margin-bottom: 2px;
     }
-    .capa .meta-item .valor { font-size: 11.5px; color: #333; font-weight: 600; }
+    .capa .meta-item .valor { font-size: 14px; color: #333; font-weight: 600; }
     .capa .identificacao {
         margin-top: 20px;
-        font-size: 10px;
+        font-size: 12.5px;
         color: #777;
     }
     .capa .identificacao div { margin-bottom: 3px; }
@@ -155,7 +170,7 @@
         width: 100%;
         border-collapse: collapse;
         margin-bottom: 14px;
-        font-size: 10px;
+        font-size: 12.5px;
     }
     th, td {
         border: none;
@@ -168,7 +183,7 @@
         background: none;
         color: #2b3a55;
         border-bottom: 2px solid #2b3a55;
-        font-size: 9px;
+        font-size: 11px;
         text-transform: uppercase;
         letter-spacing: .03em;
     }
@@ -181,19 +196,36 @@
         border-radius: 3px;
         font-weight: bold;
         color: #fff;
-        font-size: 9.5px;
+        font-size: 11.5px;
     }
     .aceitavel { background: #3a9d5d; }
     .moderado { background: #d1a316; }
     .alto { background: #c0392b; }
     .critico { background: #c0392b; border: 2px solid #e07b1a; }
 
+    /* Item 5 da 4ª auditoria: variante "pálida" do badge (fundo com leve tint +
+       texto colorido, sem preenchimento sólido) reservada pra status
+       informativos/neutros (tags de contexto nos cards de métrica). As bandas de
+       risco (Aceitável/Moderado/Alto/Crítico) continuam sólidas de propósito —
+       alto contraste é funcionalmente desejável em informação de segurança do
+       trabalho, inclusive impressa em P&B. */
+    .badge-suave {
+        display: inline-block;
+        padding: 1px 8px;
+        border-radius: 3px;
+        font-weight: 600;
+        font-size: 11.5px;
+    }
+    .badge-suave.aceitavel { background: #E8F2E8; color: #2f6b3f; }
+    .badge-suave.moderado { background: #FBF1DC; color: #8a6a12; }
+    .badge-suave.alto { background: #FBE6E2; color: #96301f; }
+
     .aviso-minuta {
         border: 1px solid #c0392b;
         background: #fdecea;
         color: #922;
         padding: 8px 10px;
-        font-size: 10.5px;
+        font-size: 13px;
         margin-top: 16px;
     }
 
@@ -204,7 +236,7 @@
         background: #f4f6f9;
         color: #1a1a1a;
         padding: 10px 14px;
-        font-size: 10.5px;
+        font-size: 13px;
         margin: 4px 0 16px;
     }
     .caixa-explicativa .titulo {
@@ -213,13 +245,13 @@
         display: block;
         margin-bottom: 4px;
         text-transform: uppercase;
-        font-size: 9.5px;
+        font-size: 11.5px;
         letter-spacing: .04em;
     }
     .caixa-explicativa .nota-longa {
         display: block;
         margin-top: 6px;
-        font-size: 9px;
+        font-size: 11px;
         color: #777;
         line-height: 1.5;
     }
@@ -254,20 +286,20 @@
     /* Gráfico semáforo — barras empilhadas horizontais via HTML/CSS puro (WeasyPrint
        não roda JS/Chart.js/canvas). Referência visual: COPSOQ Manual Portugal 2013,
        Gráfico 1 (p. 15). */
-    .grafico-semaforo-titulo { font-weight: bold; font-size: 12.5px; color: #2b3a55; margin-bottom: 2px; }
-    .grafico-semaforo-subtitulo { font-size: 10px; color: #666; margin-bottom: 12px; }
-    .escala-x { display: flex; margin: 0 0 4px 208px; font-size: 8px; color: #888; }
+    .grafico-semaforo-titulo { font-weight: bold; font-size: 15px; color: #2b3a55; margin-bottom: 2px; }
+    .grafico-semaforo-subtitulo { font-size: 12.5px; color: #666; margin-bottom: 12px; }
+    .escala-x { display: flex; margin: 0 0 4px 220px; font-size: 10px; color: #888; }
     .escala-x span { flex: 1; text-align: left; }
     .escala-x span:last-child { flex: 0; text-align: right; }
     .barra-semaforo { display: flex; align-items: center; margin-bottom: 6px; }
-    .label-dominio { width: 200px; font-size: 9px; text-align: right; padding-right: 8px; }
-    .barra-container { flex: 1; display: flex; height: 22px; border: 1px solid #ddd; }
-    .segmento { display: flex; align-items: center; justify-content: center; font-size: 8px; color: #fff; font-weight: bold; }
+    .label-dominio { width: 212px; font-size: 10.5px; text-align: right; padding-right: 8px; }
+    .barra-container { flex: 1; display: flex; height: 24px; border: 1px solid #ddd; }
+    .segmento { display: flex; align-items: center; justify-content: center; font-size: 9.5px; color: #fff; font-weight: bold; }
     .segmento.vermelho { background: #c0392b; }
     .segmento.amarelo { background: #f1c40f; color: #333; }
     .segmento.verde { background: #27ae60; }
 
-    .rodape-nota { font-size: 9px; color: #777; margin-top: 8px; }
+    .rodape-nota { font-size: 11px; color: #777; margin-top: 8px; }
     .rodape-nota .quadrado { font-weight: bold; }
 
     /* Alinhamento à esquerda pra ficar consistente com o resto do documento
@@ -281,10 +313,10 @@
     }
     .assinatura .pendente { color: #999; font-style: italic; }
     .encerramento-conteudo { margin-bottom: 20px; }
-    .encerramento-conteudo ul { margin: 0 0 14px; padding-left: 18px; font-size: 10.5px; }
+    .encerramento-conteudo ul { margin: 0 0 14px; padding-left: 18px; font-size: 13px; }
     .encerramento-conteudo li { margin-bottom: 5px; }
     .encerramento-conteudo .sigilo {
-        font-size: 9.5px;
+        font-size: 12px;
         color: #777;
         margin-top: 16px;
         padding-top: 10px;
@@ -304,11 +336,11 @@
     .item-plano-compacto .titulo-item {
         font-weight: bold;
         color: #2b3a55;
-        font-size: 10.5px;
+        font-size: 13px;
         margin-bottom: 3px;
     }
-    .item-plano-compacto p { margin: 0; font-size: 10.5px; }
-    .item-plano-compacto ul { margin: 0; padding-left: 16px; font-size: 10.5px; }
+    .item-plano-compacto p { margin: 0; font-size: 13px; }
+    .item-plano-compacto ul { margin: 0; padding-left: 16px; font-size: 13px; }
     .item-plano-compacto li { margin-bottom: 3px; }
 
     .cards-panorama { display: flex; gap: 10px; margin-bottom: 16px; }
@@ -319,9 +351,9 @@
         padding: 10px 12px;
         background: #fafafa;
     }
-    .card-indicador .numero { font-size: 22px; font-weight: bold; color: #2b3a55; }
-    .card-indicador .rotulo { font-size: 9.5px; color: #666; margin-top: 2px; }
-    .card-indicador .legenda { font-size: 9px; color: #999; margin-top: 4px; }
+    .card-indicador .numero { font-size: 26px; font-weight: bold; color: #2b3a55; }
+    .card-indicador .rotulo { font-size: 11.5px; color: #666; margin-top: 2px; }
+    .card-indicador .legenda { font-size: 11px; color: #999; margin-top: 4px; }
     .card-destaque {
         background: #2b3a55;
         color: #fff;
@@ -332,16 +364,16 @@
         align-items: center;
         gap: 16px;
     }
-    .card-destaque .numero { font-size: 30px; font-weight: bold; color: #f1c40f; }
-    .card-destaque .texto { font-size: 10.5px; line-height: 1.5; }
+    .card-destaque .numero { font-size: 34px; font-weight: bold; color: #f1c40f; }
+    .card-destaque .texto { font-size: 13px; line-height: 1.5; }
     .colunas-leitura { display: flex; gap: 14px; }
     .coluna-leitura { flex: 1; }
     .coluna-leitura h3 { margin-top: 0; }
-    .coluna-leitura ul { margin: 0; padding-left: 16px; font-size: 10.5px; }
+    .coluna-leitura ul { margin: 0; padding-left: 16px; font-size: 13px; }
     .coluna-leitura li { margin-bottom: 4px; }
 
     .apendice-tecnico {
-        font-size: 8.5px;
+        font-size: 10px;
         color: #999;
         margin-top: 24px;
         padding-top: 8px;
@@ -403,7 +435,7 @@
 <!-- 1. PANORAMA -->
 <div class="secao">
     <div class="eyebrow">01 · Panorama</div>
-    <div class="manchete">O que os <span class="acento">dados</span> dizem.</div>
+    <div class="manchete">O que <span class="acento">os dados</span> dizem.</div>
     <p>
         Resumo executivo deste ciclo de avaliação: índice consolidado, participação e
         as frentes que concentram a maior parte da carga psicossocial relatada. Os
@@ -415,19 +447,19 @@
             <div class="numero">{{ panorama.indice_consolidado|default:"—" }}{% if panorama.indice_consolidado %}/100{% endif %}</div>
             <div class="rotulo">ÍNDICE CONSOLIDADO</div>
             <div class="legenda">Média dos domínios não suprimidos</div>
-            {% if panorama.nivel_geral_risco %}<span class="badge {{ panorama.nivel_geral_risco_css }}" style="margin-top: 6px;">Faixa {{ panorama.nivel_geral_risco }}</span>{% endif %}
+            {% if panorama.nivel_geral_risco %}<span class="badge-suave {{ panorama.nivel_geral_risco_css }}" style="margin-top: 6px;">Faixa {{ panorama.nivel_geral_risco }}</span>{% endif %}
         </div>
         <div class="card-indicador">
             <div class="numero">{{ panorama.n_participantes }}</div>
             <div class="rotulo">PARTICIPANTES</div>
             <div class="legenda">Total de respondentes considerados</div>
-            <span class="badge aceitavel" style="margin-top: 6px;">Amostra válida</span>
+            <span class="badge-suave aceitavel" style="margin-top: 6px;">Amostra válida</span>
         </div>
         <div class="card-indicador">
             <div class="numero">{{ panorama.nivel_geral_risco|default:"—" }}</div>
             <div class="rotulo">NÍVEL GERAL DE RISCO</div>
             <div class="legenda">Predominância entre os domínios avaliados</div>
-            {% if panorama.nivel_geral_risco_css %}<span class="badge {{ panorama.nivel_geral_risco_css }}" style="margin-top: 6px;">{{ panorama.frentes_atencao|length }} frente(s)</span>{% endif %}
+            {% if panorama.nivel_geral_risco_css %}<span class="badge-suave {{ panorama.nivel_geral_risco_css }}" style="margin-top: 6px;">{{ panorama.frentes_atencao|length }} frente(s)</span>{% endif %}
         </div>
     </div>
 
@@ -666,7 +698,7 @@
 <!-- 6. ANÁLISE SEMÁFORO -->
 <div class="secao">
     <div class="eyebrow">06 · Distribuição</div>
-    <div class="manchete">Onde está concentrada a <span class="acento">carga</span>.</div>
+    <div class="manchete">Onde está <span class="acento">concentrada</span> a carga.</div>
 
     <div class="caixa-explicativa">
         <span class="titulo">Vermelho aqui não é automaticamente "Crítico"</span>

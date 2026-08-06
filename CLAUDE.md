@@ -2385,6 +2385,54 @@ do usuário — só os testes da área tocada.
 testes) passando. Suíte geral do projeto não executada nesta rodada, a pedido
 explícito do usuário.
 
+## 6.23 Quinta auditoria visual: extração de dados reais do PDF (fontes, pt, hex) (2026-08-05)
+
+> Usuário trouxe uma análise técnica baseada em inspeção direta dos dois PDFs
+> (`pdffonts`, `pdfplumber`, amostragem de pixel) — não impressão visual, dados
+> extraídos. Achou um bug real de font-family e confirmou que o corpo de texto
+> estava sistematicamente menor que a referência. Checklist de 6 itens, todos
+> implementados.
+
+1. **Bug real: serif vazando no cabeçalho/rodapé de toda página.** `@page` margin
+   boxes (`@top-left`, `@top-right`, `@bottom-left`, `@bottom-right`) não herdam o
+   `font-family` do `body` no WeasyPrint — sem declarar explicitamente, caíam no
+   serif padrão, criando duas famílias de fonte no mesmo documento. Corrigido
+   declarando `font-family: "DejaVu Sans", Arial, sans-serif` em cada margin box
+   (e no `@page` em si).
+2. **Corpo de texto ~30% menor que a referência** (7,9pt vs. 10,5pt, medido via
+   `pdfplumber`). Toda a escala tipográfica subiu proporcionalmente (fator ~1,33,
+   já que 1px = 0,75pt no WeasyPrint): `body` de 11px para 14px (10,5pt), e todos
+   os tamanhos secundários (tabelas, badges, caixas explicativas, cards, notas de
+   rodapé) escalados junto.
+3. **Cor**: laranja trocado de `#c76b1f` para `#F47B20` (tom exato amostrado por
+   pixel na referência); cor-base da manchete trocada de azul-marinho (`#2b3a55`)
+   para preto quase puro (`#1a1a1a`) — evita duas cores de ênfase competindo no
+   mesmo título (a cor estrutural do sistema, navy, continua em uso em tabelas,
+   badges e componentes, só não no texto-base dos títulos de seção).
+4. **Padrão de destaque nos títulos**: confirmado que não existe fórmula
+   posicional confiável (a referência ora destaca o sujeito, ora o verbo, ora o
+   complemento) — os 2 títulos que ainda seguiam a regra mecânica "últimas
+   palavras antes do ponto" foram ajustados manualmente pro conceito
+   semanticamente central: "O que **os dados** dizem." e "Onde está
+   **concentrada** a carga."
+5. **Variante "pálida" de badge** (`.badge-suave`, fundo com tint leve + texto
+   colorido, sem preenchimento sólido) criada especificamente para status
+   informativos/neutros (as tags de contexto qualitativo do Panorama: "Faixa
+   Baixo", "Amostra válida", "N frente(s)") — as bandas de risco
+   (Aceitável/Moderado/Alto/Crítico) continuam com o badge sólido de alto
+   contraste, decisão deliberada (informação de segurança do trabalho precisa
+   ser lida rápido, inclusive em P&B).
+6. **Bug real: Plano de ação ainda em parágrafo corrido apesar da Fase 4 anterior.**
+   `pdf.py::_medida_em_bullets` só quebrava a medida por `;`, mas a maioria das
+   medidas reais geradas pelo catálogo/IA não usa esse separador — é uma
+   sequência de frases separadas por ponto final. Corrigido: quando não há `;`, a
+   função agora quebra por frase (regex `(?<=[.!?])\s+(?=[A-ZÀ-Ú])`), preservando
+   o fallback de parágrafo único quando a medida é mesmo uma frase só.
+
+**Cobertura de teste**: `manage.py check` + suíte completa de `relatorios/` (32
+testes) passando. Suíte geral do projeto não executada nesta rodada, a pedido
+explícito do usuário.
+
 ---
 
 ## 7. Backend — cálculo da matriz de risco (valores definitivos, sem exemplos ilustrativos)
