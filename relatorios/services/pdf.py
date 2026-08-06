@@ -1,4 +1,5 @@
-"""Geração do PDF final (WeasyPrint) — CLAUDE.md Etapa 6 / Seção 8.3.
+"""Geração do PDF final (Chromium via Playwright + Paged.js) — CLAUDE.md Etapa 6 /
+Seção 8.3, migração de motor registrada em PLANO_ACAO_RELATORIO.md Seção 3.7.
 
 Duas variantes do mesmo documento, controladas por `minuta` (decisão de 2026-07-17):
 - minuta=True (relatorio.status != assinado): marca d'água "MINUTA", bloco de
@@ -12,24 +13,63 @@ sobrescreve, não há minuta e final coexistindo como dois arquivos.
 
 "Assinar" (`assinar_relatorio`) é um registro interno simples — status + usuário +
 data no banco, sem assinatura digital/criptográfica (decisão de 2026-07-17).
-"""
+
+Motor de renderização (2026-08-05): trocado de WeasyPrint pra Chromium headless
+(Playwright) + Paged.js. WeasyPrint não é motor de navegador — suporte parcial a
+sombra/gradiente/CSS moderno e a `@page` margin boxes (bug real de font-family
+corrigido antes da migração, CLAUDE.md Seção 6.23). Chromium sozinho resolve
+fidelidade visual, mas a API nativa `page.pdf()` só aceita header/footer
+ESTÁTICOS — sem equivalente a `string-set`/`content: string()` pro masthead mudar
+de texto por seção. Paged.js é um polyfill de CSS Paged Media que roda dentro do
+Chromium (via `page.add_script_tag`) e implementa esse recurso corretamente,
+resolvendo os dois problemas com o mesmo HTML/CSS que já existia — nenhuma
+reescrita de template foi necessária pra migrar."""
 
 from __future__ import annotations
 
 import hashlib
 import json
 import re
+from pathlib import Path
 
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from django.template.loader import render_to_string
 from django.utils import timezone
-from weasyprint import HTML
+from playwright.sync_api import sync_playwright
 
 from avaliacoes.models import ConformidadeChecklist, RespostaChecklistTriangulacao
 from avaliacoes.services.calculo_risco import BANDA_ORDEM, criterio_classificacao_linhas, media_nacional_comparavel
 from avaliacoes.services.semaforo import calcular_semaforo, leitura_resumida
 from relatorios.models import Relatorio, StatusRelatorio, TipoRelatorio
+
+PAGEDJS_PATH = Path(__file__).resolve().parent.parent / "vendor" / "paged.polyfill.js"
+
+
+def _renderizar_pdf_via_chromium(html: str) -> bytes:
+    """Abre uma página Chromium headless, injeta o Paged.js (vendorizado em
+    `relatorios/vendor/paged.polyfill.js` — nunca buscado de CDN em runtime, pra
+    não depender de internet em produção), espera a paginação terminar de
+    assentar, e imprime o resultado já paginado em PDF. As margens do `@page`
+    já ficam "assadas" no HTML paginado pelo Paged.js, então `page.pdf()` roda
+    sem margem adicional do Chrome (senão a margem seria somada duas vezes)."""
+    pagedjs_source = PAGEDJS_PATH.read_text(encoding="utf-8")
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page()
+        page.set_content(html, wait_until="networkidle")
+        page.add_script_tag(content=pagedjs_source)
+        page.wait_for_selector(".pagedjs_pages", timeout=30000)
+        page.wait_for_timeout(500)
+        pdf_bytes = page.pdf(
+            print_background=True,
+            prefer_css_page_size=True,
+            margin={"top": "0", "bottom": "0", "left": "0", "right": "0"},
+        )
+        browser.close()
+
+    return pdf_bytes
 
 BANDA_CSS = {
     "Aceitável": "aceitavel",
@@ -414,7 +454,7 @@ def gerar_pdf_relatorio(relatorio_id: int) -> Relatorio:
     minuta = relatorio.status != StatusRelatorio.ASSINADO
 
     html = renderizar_html_relatorio(relatorio, minuta=minuta)
-    pdf_bytes = HTML(string=html).write_pdf()
+    pdf_bytes = _renderizar_pdf_via_chromium(html)
 
     nome_arquivo = f"relatorio_{relatorio.pk}_{'minuta' if minuta else 'final'}.pdf"
     relatorio.pdf_path.save(nome_arquivo, ContentFile(pdf_bytes), save=False)

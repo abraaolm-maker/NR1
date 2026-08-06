@@ -2433,6 +2433,65 @@ explícito do usuário.
 testes) passando. Suíte geral do projeto não executada nesta rodada, a pedido
 explícito do usuário.
 
+## 6.24 Migração do motor de renderização: WeasyPrint → Chromium + Paged.js (2026-08-05)
+
+> Depois de 5 rodadas de auditoria visual sem fechar de vez a distância pro
+> relatório de referência (Solute RH), o usuário perguntou diretamente qual
+> biblioteca gera o PDF e se ela é o teto do problema. Resposta: sim — o
+> WeasyPrint não é motor de navegador, tem suporte parcial a sombra/
+> gradiente/CSS moderno e a `@page` margin boxes. Plano completo em
+> `PLANO_ACAO_RELATORIO.md` Seção 3.7, validado e implementado no mesmo dia.
+
+**Motor novo**: Chromium headless via **Playwright**, com **Paged.js**
+(polyfill de CSS Paged Media rodando dentro do Chromium) pra suportar
+`string-set`/`content: string()` — recurso que a API nativa `page.pdf()` do
+Chrome não tem (ela só aceita header/footer estáticos, iguais em toda
+página). O Paged.js resolve os dois problemas de uma vez: qualidade de
+motor de navegador real (fontes com kerning completo, sombras, gradientes,
+CSS moderno) **e** o masthead dinâmico que muda de seção por página —
+usando o MESMO HTML/CSS que já existia no template, sem reescrever nada.
+
+**Implementação** (`relatorios/services/pdf.py`):
+- `_renderizar_pdf_via_chromium(html)`: abre uma página Chromium, injeta o
+  Paged.js (vendorizado em `relatorios/vendor/paged.polyfill.js` — nunca
+  buscado de CDN em runtime, pra não depender de internet em produção),
+  espera `.pagedjs_pages` aparecer no DOM (paginação concluída), e chama
+  `page.pdf(prefer_css_page_size=True, margin=0)` — margem zerada porque o
+  Paged.js já "assa" a margem do `@page` no HTML paginado; somar a margem
+  do Chrome por cima duplicaria o espaço em branco.
+- `gerar_pdf_relatorio` trocou só a chamada `HTML(string=html).write_pdf()`
+  (WeasyPrint) por `_renderizar_pdf_via_chromium(html)` — mesma assinatura
+  de função, nenhuma mudança no fluxo síncrono já decidido nem nas views.
+
+**Infraestrutura**:
+- `requirements.txt`: `weasyprint` e suas dependências transitivas
+  (cffi, cssselect2, fonttools, pydyf, pyphen, tinycss2, tinyhtml5, zopfli,
+  brotli) removidas; `playwright` e `pyee` adicionadas.
+- `Dockerfile`: `RUN playwright install --with-deps chromium` instala o
+  binário do Chromium + todas as dependências de sistema (libnss, libatk,
+  fontes) via apt automaticamente. As libs nativas do WeasyPrint (Pango,
+  Cairo, GDK-Pixbuf) foram removidas do `apt-get install` — não são mais
+  necessárias.
+
+**Validação end-to-end**: gerado um PDF real (Relatório #4, GHE Pedreiro,
+9 domínios COPSOQ) com o motor novo — confirmado visualmente que o
+masthead muda corretamente de seção por página ("01 · PANORAMA" → "02 ·
+COMO FOI FEITO" → ... → "10 · ENCERRAMENTO"), a fonte é consistente em
+todo o documento (sem o bug de serif vazando corrigido na Seção 6.23, que
+deixa de existir por completo com este motor), e todos os componentes
+visuais das rodadas anteriores (cards, badges, cores) renderizam
+corretamente.
+
+**Cobertura de teste**: suíte completa de `relatorios/` (32 testes)
+passando com o motor novo, sem alteração nos testes em si — só o motor por
+trás mudou. `manage.py check` sem erros.
+
+**Pendente** (Seção 3.7.4/3.7.5 do plano, ajustes visuais finos que a
+migração viabiliza mas ainda não foram aplicados): barra lateral laranja
+full-height na capa, marca "S" quadrada, cartão de destaque em preto
+quase puro (hoje ainda navy), marcadores de lista em traço laranja em vez
+de bullet redondo, layout de 2 colunas no Plano de Ação por horizonte.
+
 ---
 
 ## 7. Backend — cálculo da matriz de risco (valores definitivos, sem exemplos ilustrativos)

@@ -373,6 +373,246 @@ apresentar resultado por domínio (ressalva inegociável, Seção 3.2).
 
 ---
 
+## 3.7 Plano de migração do motor de renderização: WeasyPrint → Chromium (2026-08-05)
+
+> Depois de 5 rodadas de auditoria visual (Seções 3.5, 3.6 e as 2 seguintes,
+> "4ª" e "5ª auditoria" registradas no CLAUDE.md 6.20-6.23), o usuário
+> perguntou diretamente qual biblioteca gera o PDF hoje e se ela é o teto do
+> problema. Resposta: sim. **Este documento é o plano de migração + a
+> especificação visual completa extraída página a página do PDF de
+> referência (Solute RH), pronta pra implementar — nada disto foi
+> implementado ainda.**
+
+### 3.7.1 Por que o WeasyPrint é o teto
+
+O WeasyPrint converte HTML/CSS pra PDF **sem motor de navegador** — ele
+implementa um subconjunto próprio de CSS2.1/CSS3. Isso explica, com precisão
+técnica, cada rodada de ajuste que não fechou de vez:
+
+- `@page` margin boxes (o masthead) têm suporte incompleto: não herdam
+  `font-family` do body (bug real corrigido na Seção 6.23), e `string-set`/
+  `content: string()` funcionam mas de forma frágil.
+- Sombras, gradientes, `border-radius` combinados com `overflow` e efeitos
+  de profundidade têm suporte parcial — a "textura" premium da referência
+  (blob de gradiente na capa, sombras suaves nos cards) não é replicável com
+  confiança.
+- Tipografia sem os recursos completos de OpenType (kerning fino,
+  hinting) — mesmo corrigindo o tamanho em pt (Seção 6.23), a "qualidade de
+  type" nunca fica idêntica à de um navegador real.
+- Sem JavaScript, sem reflow computado — qualquer coisa que dependa de medir
+  texto dinamicamente não existe.
+
+O PDF de referência tem características (gradiente decorativo na capa,
+kerning fino, sombras/cards com acabamento consistente, cabeçalho que muda
+de texto por página com precisão) típicas de renderização por **motor de
+navegador real** (Chromium), não por um conversor HTML→PDF simplificado.
+
+### 3.7.2 Duas opções de migração
+
+**Opção A — Playwright + Chromium `page.pdf()` puro.**
+Renderiza o HTML/CSS com o motor completo do Chrome (CSS moderno, fontes com
+kerning real, sombras, gradientes). Limitação real: a API `page.pdf()` do
+Chrome só aceita `headerTemplate`/`footerTemplate` **estáticos** (mesmo HTML
+em toda página) — não existe equivalente ao `string-set` do CSS Paged Media
+pra mostrar "em que seção estou" mudando por página automaticamente. Pra
+replicar o masthead dinâmico da referência (que muda de "PANORAMA GERAL" pra
+"METODOLOGIA" pra "RESULTADOS POR DIMENSÃO" em cada página), seria preciso
+renderizar cada seção como um PDF separado (1 chamada de `page.pdf()` por
+seção, cada uma com seu próprio `headerTemplate`) e depois juntar os PDFs
+com `pypdf`/`pikepdf` — funciona, mas é mais complexo de manter.
+
+**Opção B — Playwright/Puppeteer + Paged.js (recomendada).**
+[Paged.js](https://pagedjs.org/) é um polyfill JavaScript de CSS Paged Media
+que roda **dentro de um navegador real** (Chromium via Puppeteer/Playwright)
+e implementa `string-set`, `content: string()`, contadores de página,
+`@page` completo — exatamente os recursos que o WeasyPrint tenta oferecer,
+só que com o motor de renderização certo por trás. Isso resolve os dois
+problemas ao mesmo tempo: (1) qualidade visual de motor de navegador real
+(fontes, sombras, gradientes, CSS moderno) e (2) masthead dinâmico por
+seção, exatamente como a referência faz, sem precisar quebrar o documento em
+PDFs separados. É o padrão de facto pra ferramentas de "book/relatório de
+qualidade editorial gerado a partir de HTML" — mesma categoria de problema
+que este projeto tem.
+
+**Decisão proposta**: Opção B (Paged.js sobre Chromium). Opção A fica como
+plano B se a integração do Paged.js se mostrar complexa demais no ambiente
+Docker do projeto.
+
+### 3.7.3 Impacto técnico da migração
+
+- **Dependência nova**: `playwright` (Python) + binário do Chromium
+  (`playwright install chromium --with-deps`) — ou `pyppeteer` como
+  alternativa mais leve. Paged.js entra como um script JS servido/injetado
+  na página antes de imprimir (via CDN local ou `staticfiles`).
+- **Dockerfile**: imagem cresce ~300-500MB pelo Chromium; precisa garantir
+  as dependências de sistema do Chromium headless (`--with-deps` cobre isso
+  em base Debian/Ubuntu, que já é o caso deste projeto).
+- **`relatorios/services/pdf.py`**: a função que hoje faz
+  `HTML(string=html).write_pdf()` (WeasyPrint) é substituída por uma função
+  que abre uma página Chromium, injeta o HTML + Paged.js, espera a
+  paginação terminar (`window.PagedPolyfill` expõe um evento de conclusão),
+  e chama `page.pdf()`. Mantém a mesma assinatura (`renderizar_html_relatorio`
+  continua devolvendo o HTML; só `gerar_pdf_relatorio` muda o motor por
+  baixo) — nenhuma mudança na Django view nem no fluxo de geração síncrona
+  já decidido (CLAUDE.md, sem Celery).
+- **CSS do template**: a sintaxe de `@page`/`string-set` já escrita
+  continua válida (é justamente o que o Paged.js interpreta) — não precisa
+  reescrever do zero, só validar contra o polyfill e ajustar onde ele
+  diverge do WeasyPrint.
+- **Latência**: abrir um Chromium headless por PDF gerado é mais lento que
+  o WeasyPrint (alguns segundos a mais). Aceitável dado que a geração já é
+  síncrona e o usuário já espera pela chamada de IA no mesmo fluxo.
+- **Testes**: os testes que hoje checam `conteudo.startswith(b"%PDF")`
+  continuam funcionando sem alteração — só o motor por trás muda.
+
+### 3.7.4 Especificação visual extraída da referência (página a página)
+
+> Leitura minuciosa do PDF da Solute, com posição, cor, estrutura e padrão
+> de cada elemento — pronta pra guiar a implementação quando a migração
+> acontecer.
+
+**Capa**
+- Barra vertical laranja sólida (`#F47B20`) ocupando toda a lateral esquerda
+  da página (~1,2cm de largura) — elemento que a versão atual não tem (só
+  uma barra horizontal curta abaixo do título).
+- Marca quadrada "S" (laranja, canto arredondado ~4px, letra branca bold)
+  no canto superior esquerdo do conteúdo, ao lado do nome da consultoria em
+  caps + subtítulo cinza pequeno abaixo.
+- Blob decorativo de gradiente laranja suave no canto superior direito —
+  puramente decorativo, prioridade baixa.
+- Eyebrow laranja caps com letter-spacing, linha fina abaixo.
+- Título grande preto bold em 3 linhas, altamente compacto (~40pt).
+- Parágrafo de descrição cinza.
+- "Preparado para [Cliente]" em negrito.
+- Bloco de metadados (Emissão/Ciclo/Participação) como pares rótulo/valor
+  pequenos, canto inferior esquerdo.
+- Selo "CONFIDENCIAL" como **contorno** laranja (borda laranja, texto
+  laranja, sem preenchimento) — a versão atual não tem esse selo na capa.
+
+**Masthead (todas as páginas internas)**
+- Esquerda: bullet laranja + "SOLUTE CONSULTORIA" (nome da consultoria, não
+  o nome do documento) em caps pequeno.
+- Direita: **nome da seção atual**, mudando por página ("PANORAMA GERAL",
+  "METODOLOGIA", "RESULTADOS POR DIMENSÃO", "LEITURA POR ÁREA", "PLANO DE
+  AÇÃO", "ENCERRAMENTO") — já implementado via `string-set` no sistema
+  atual, só precisa sobreviver à migração de motor.
+- Linha fina horizontal abaixo dos dois.
+- Rodapé: "Solute RH · Diagnóstico Psicossocial · Modelo" à esquerda + nº de
+  página à direita, linha fina acima.
+
+**Padrão de cabeçalho de seção** (confirma o padrão já adotado): eyebrow
+"0N · NOME CURTO" em laranja caps, manchete grande preta com 1 trecho em
+laranja, parágrafo de contexto logo abaixo. Já implementado — manter.
+
+**Panorama**
+- 4 cards de métrica em linha, **sem caixa/borda ao redor** — só uma linha
+  de acento laranja curta (~30px) logo abaixo do número grande, depois
+  rótulo cinza caps, depois uma legenda **em laranja** (não um badge/chip —
+  é texto colorido simples: "Faixa favorável", "Alta confiabilidade",
+  "Modelo Karasek + Siegrist", "Manter monitoramento"). A versão atual usa
+  cards com borda/fundo cinza claro — a referência é mais limpa/plana.
+- Cartão de destaque ("3 Frentes de atenção"): fundo **quase preto**
+  (não azul-marinho como o sistema atual usa) — `#1a1a1a` ou muito próximo,
+  número grande, texto branco com trechos em negrito branco (não laranja)
+  dentro do parágrafo.
+- Duas colunas "O que está protegendo" / "O que pede ação": marcador é um
+  **traço/en-dash laranja** ("−"), não bullet redondo — cada item é
+  "**Frase-chave em negrito** — descrição em texto normal".
+
+**Metodologia (Base técnica)**
+- 3 cards de processo em linha ("01 · Coleta", "02 · Mensuração",
+  "03 · Classificação"), cada um com uma linha fina laranja no topo do
+  card, subtítulo em negrito, descrição pequena.
+- Lista "Referências teóricas" com marcador traço laranja, "**Termo em
+  negrito** — explicação".
+- Tabela "Faixas de interpretação": cabeçalho caps cinza pequeno, linha
+  fina inferior, a coluna "Faixa" mostra **texto colorido sem chip**
+  (verde "Favorável", laranja "Atenção", vermelho "Crítico") — mesma
+  filosofia "pálida"/sem preenchimento sólido já adotada pro `.badge-suave`
+  do sistema atual, mas aqui é até mais minimalista (nem tem fundo tint,
+  só o texto colorido).
+- Caixa "Sobre confidencialidade": fundo laranja bem pálido, borda esquerda
+  laranja — já é exatamente o padrão de `.caixa-explicativa` do sistema
+  atual.
+
+**Resultados por dimensão**
+- **Lista, não tabela em grade** — cada domínio é uma linha com: título em
+  negrito + escore alinhado à direita na mesma linha; linha fina laranja
+  curta (decorativa, não proporcional ao escore) abaixo do título;
+  descrição pequena cinza à esquerda e badge de faixa (chip verde pálido)
+  à direita, na mesma linha; linha divisória fina horizontal separando
+  cada domínio. É um padrão mais "lista de leitura" que "tabela de dados" —
+  mais aplicável quando há poucos domínios (8, no caso da Solute); pra
+  este sistema, com até 26-35 domínios (COPSOQ Oficial), continua fazendo
+  sentido manter a tabela genuinamente tabular pros domínios completos
+  (decisão já registrada na Seção 3.5) — mas os poucos domínios fora de
+  Aceitável no Parecer técnico (que já viraram cards) podem adotar esse
+  estilo de "linha com escore alinhado à direita" em vez do formato atual
+  de card com sub-tabela interna.
+
+**Recortes** — feature ainda não implementada neste sistema (pendência já
+registrada na Seção 5, item 2) — tabelas simples por corte, texto colorido
+sem chip pra faixa, caixa de síntese no mesmo padrão de `.caixa-explicativa`.
+
+**Plano de ação**
+- Layout de **2 colunas por horizonte**: coluna esquerda estreita com o
+  rótulo do horizonte + prazo ("CURTO" / "0–90 dias"), coluna direita com
+  subtítulo em negrito + lista de bullets (traço laranja). O sistema atual
+  já agrupa por horizonte (Fase 4, Seção 3.6) mas empilha tudo numa coluna
+  só com `<h3>` — ajuste de layout, não de conteúdo.
+- Caixa "Recomendação central": mesmo padrão pálido/borda esquerda, com
+  trecho em negrito embutido no meio do parágrafo.
+
+**Encerramento**
+- "O que esperar da reaplicação" e "Conformidade" em sequência (já
+  implementado, Seção 6.22 item 2).
+- Bloco de assinatura em **2 colunas lado a lado** ("Responsável técnico" /
+  "Aprovação interna") quando há duas partes assinando — o sistema atual
+  tem só 1 assinante (o profissional responsável do SaaS, CLAUDE.md Seção
+  6.8) então o layout de 1 coluna alinhada à esquerda (já corrigido na
+  Seção 6.22 item 4) continua correto pro nosso caso de uso; a referência
+  usa 2 colunas porque o fluxo deles inclui aprovação do cliente também —
+  não é uma incompatibilidade, é um fluxo de assinatura diferente.
+
+### 3.7.5 Cores e tipografia — valores finais a adotar
+
+| Token | Valor atual do sistema | Valor da referência | Ação |
+|---|---|---|---|
+| Acento laranja | `#F47B20` | `#F47B20` | Já corrigido (Seção 6.23) — manter |
+| Texto de título (manchete) | `#1a1a1a` | preto quase puro | Já corrigido (Seção 6.23) — manter |
+| Fundo do cartão de destaque | `#2b3a55` (navy) | quase preto (`~#1a1a1a`) | **Trocar** — é a divergência de cor mais visível ainda pendente |
+| Badge de faixa (informativo) | `.badge-suave` (tint leve + texto colorido) | texto colorido, praticamente sem tint de fundo | Já próximo (Seção 6.23) — ajuste fino opcional |
+| Fonte | DejaVu Sans (via WeasyPrint) | Liberation Sans (via Chromium) | Resolvido automaticamente pela migração de motor |
+
+### 3.7.6 Ordem de execução recomendada
+
+1. Configurar Playwright + Chromium no ambiente de desenvolvimento local e
+   confirmar que `manage.py` consegue chamar `page.pdf()` num template de
+   teste simples.
+2. Integrar Paged.js (script servido localmente, sem dependência de CDN
+   externo em produção) e confirmar que `string-set`/`content: string()`
+   funcionam no polyfill com o template atual, sem reescrever o HTML.
+3. Trocar o motor dentro de `relatorios/services/pdf.py`
+   (`gerar_pdf_relatorio`), mantendo a mesma assinatura de função.
+4. Atualizar o `Dockerfile` (instalar Chromium + dependências) e testar a
+   geração dentro do container antes de subir ao VPS.
+5. Só depois de confirmada a migração funcionando, aplicar os ajustes
+   visuais da Seção 3.7.4 (barra lateral da capa, cartão de destaque em
+   preto, layout de 2 colunas no Plano de Ação, listas com traço laranja
+   em vez de bullet redondo) — pra não misturar "trocar o motor" com
+   "ajustar o CSS" no mesmo commit e dificultar isolar qualquer regressão.
+
+> **Atualização de 2026-08-05 (mesmo dia)**: a migração de motor (Seções
+> 3.7.1 a 3.7.3, Etapas 1 a 4 da ordem de execução) foi **implementada e
+> validada com um relatório real** — ver CLAUDE.md Seção 6.24. A
+> especificação visual da Seção 3.7.4/3.7.5 (Etapa 5 — capa com barra
+> lateral, cartão de destaque em preto, marcadores em traço, layout de
+> 2 colunas no Plano de Ação) continua pendente, de propósito: a migração
+> de motor foi isolada num commit próprio pra não misturar com ajuste de
+> CSS, exatamente como o plano recomendava.
+
+---
+
 ## 4. Referência visual e de conteúdo — Relatório 2 (Hospital São Lucas, "COPSOQ-inspired")
 
 > Analisado em 2026-08-04 (`RelatriodeAvaliaodeRiscosPsicossociais.md`, 42 páginas,
