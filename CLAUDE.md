@@ -2299,6 +2299,56 @@ literalmente os valores de `resumo_contagens` na síntese executiva.
 passando após a mudança — nenhum teste dependia da estrutura exata das tabelas removidas, só do
 conteúdo (que continua presente, só reformatado). `manage.py check` sem erros de template.
 
+## 6.21 Terceira rodada de redesenho do PDF, 6 fases (2026-08-05)
+
+> Usuário reportou cabeçalho duplicado ("02 · BASE TÉCNICA / Base técnica e legal
+> utilizada") e disse que o PDF ainda parecia distante do relatório de referência
+> Solute mesmo depois das Fases A a D (Seção 6.20). Auditoria concluiu: as fases
+> anteriores consertaram o *estilo* (cor, borda, tipografia isolada); o que ainda
+> separava os dois documentos era **densidade, ritmo de página e voz** — a Solute
+> tem 6 páginas para 6 seções, o nosso tinha 19 páginas de fluxo contínuo. Plano
+> completo em `PLANO_ACAO_RELATORIO.md` Seção 3.6.
+
+**Fase 1 (cabeçalhos)**: toda seção passou a usar eyebrow (curto) + manchete (frase
+própria, com ponto final, nunca repetindo as palavras do eyebrow) — substitui o
+`<h2>` sublinhado antigo em todas as 9 seções de conteúdo. Eyebrows de seções afins
+("Base técnica"/"Metodologia", "Evidências"/"Entrevista") compartilham a categoria
+("Como foi feito", "Triangulação") mas cada manchete é única.
+
+**Fase 2 (ritmo de página)**: `page-break-before: always` em toda `.secao` — cada
+seção agora começa numa página limpa, igual à Solute. Margem superior do `@page`
+subiu de 2.2cm para 3cm.
+
+**Fase 3 (tipografia e respiro)**: manchete de 19px para 27px; `line-height` do
+corpo de 1.4 para 1.55; caixas explicativas cortadas para 3-4 linhas de destaque,
+com o texto mais longo virando `.nota-longa` (9px, cinza) dentro da própria caixa.
+
+**Fase 4 (Plano de ação por horizonte)**: as 9 fichas de 12 linhas rótulo/valor
+viraram itens compactos (`{% regroup planos_ordenados by banda %}`) agrupados por
+prazo (Alto=30 dias, Moderado=90 dias, Crítico=15 dias), cada um só com código,
+domínio e a medida em texto corrido. Os campos operacionais (responsável, prazo,
+status, hierarquia) viraram uma única tabela de acompanhamento no fim da seção — os
+campos de pós-execução (evidência, verificação de eficácia, data de revisão,
+observações) saíram do PDF (ficam em branco até a ação avançar) com nota explicando
+que são atualizados no painel.
+
+**Fase 5 (fundir parecer e riscos)**: `pdf.py::_parecer_para_exibicao` reescrita —
+em vez de duas listas (`pareceres_por_dominio`, `riscos_e_recomendacoes`) repetindo
+os mesmos domínios, agora monta uma única lista `achados` por domínio fora de
+Aceitável, com 3 campos (o que foi encontrado, por que é prioritário, o que fazer),
+casando as 3 fontes do parecer da IA (`pareceres_por_dominio`, `riscos_prioritarios`,
+`recomendacoes`) pela chave `(ghe, dominio)`.
+
+**Fase 6 (capa)**: manchete maior com o nome da empresa, parágrafo curto descrevendo
+o documento, e metadados numa linha horizontal com rótulo pequeno acima do valor
+(Emissão / Período / Documento / Status) — no lugar da pilha vertical de 5 linhas
+iguais.
+
+**Cobertura de teste**: `relatorios/tests.py` (2 assertions de texto de seção
+atualizadas pro novo eyebrow/manchete) e suíte completa de `relatorios/` (32 testes)
+passando. Suíte geral do projeto não foi executada nesta rodada, a pedido explícito
+do usuário — só os testes da área tocada.
+
 ---
 
 ## 7. Backend — cálculo da matriz de risco (valores definitivos, sem exemplos ilustrativos)

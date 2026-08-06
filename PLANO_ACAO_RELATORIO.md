@@ -244,6 +244,135 @@ Recortes por setor/cargo, tendência entre ciclos, fórmula alternativa de
 
 ---
 
+## 3.6 Terceira auditoria: por que ainda parece distante da Solute (2026-08-05)
+
+> O usuário comparou de novo o PDF gerado (`relatorio teste.pdf`, 19 páginas)
+> com o `Diagnostico_Psicossocial_Modelo_Solute.pdf` (6 páginas) e disse que
+> ainda sente "uma distância muito grande". Também apontou um bug concreto:
+> tópicos duplicados no cabeçalho de seção. Esta auditoria identifica **por
+> que** a distância persiste mesmo depois das Fases A a D.
+
+**A conclusão central**: as Fases A a D consertaram o *estilo* (cor, borda,
+tipografia, componentes). O que ainda separa os dois documentos não é estilo,
+é **densidade, ritmo de página e voz**. A Solute é um documento que se lê em
+6 fôlegos; o nosso é um anexo técnico contínuo de 19 páginas. Nenhum ajuste
+de CSS resolve isso sozinho, porque o problema está em como o conteúdo é
+distribuído e quanto dele existe.
+
+### 3.6.1 Bug confirmado: cabeçalho duplicado
+
+Na Solute, o eyebrow é o **nome curto da seção** e a manchete é uma **frase
+conversacional diferente**, sempre terminada em ponto. Nunca as mesmas
+palavras. No nosso, 4 das 10 seções repetem o mesmo texto duas vezes:
+
+| Seção | Eyebrow atual | Manchete atual | Problema |
+|---|---|---|---|
+| 02 | BASE TÉCNICA | Base técnica e legal utilizada | duplicado |
+| 05 | RESULTADOS | Resultados por GHE e por domínio | duplicado |
+| 07 | EVIDÊNCIAS COMPLEMENTARES | Evidências complementares | duplicado |
+| 08 | ENTREVISTA E OBSERVAÇÃO | Entrevista e observação | duplicado |
+| 10 | PRÓXIMO CICLO | Assinatura do responsável técnico | incoerente (eyebrow não descreve o conteúdo) |
+
+### 3.6.2 As sete diferenças estruturais restantes
+
+1. **Ritmo de página.** A Solute quebra página a cada seção: 6 seções, 6
+   páginas. O nosso é fluxo contínuo, então uma seção começa no meio da
+   página, logo abaixo do fim da anterior, e parágrafos são cortados na
+   virada (a frase "sobre os resultados encontrados" termina na página 3
+   começando com a palavra "encontrados", órfã). Isso é o que mais faz o
+   documento parecer denso e desorganizado.
+2. **Densidade de texto.** A Solute usa cerca de metade da página em branco.
+   O nosso preenche de margem a margem. Mesmo com o mesmo CSS, um bloco de
+   texto de 8 linhas corridas lê diferente de 3 linhas com respiro.
+3. **Escala tipográfica.** A manchete da Solute é aproximadamente o dobro do
+   tamanho da nossa, e o contraste entre título e corpo é muito maior. Nossa
+   manchete de 19px compete com o corpo de 11px; a deles domina a página.
+4. **Plano de Ação como despejo de banco de dados.** Cada ficha tem 12 linhas
+   rótulo/valor, e 9 fichas ocupam 9 das 19 páginas. Metade do documento é
+   uma tabela vertical repetida. A Solute agrupa recomendações em 3 blocos
+   por horizonte de execução (curto, médio, longo), com 3 bullets cada,
+   cabendo tudo em 1 página.
+5. **Caixas explicativas gigantes.** "COMO LER A COLUNA BANDA" tem 12 linhas
+   de texto corrido dentro de uma caixa. Os callouts da Solute têm 2 a 3
+   linhas. Uma caixa que ocupa um terço da página deixa de ser um destaque e
+   vira mais um bloco de leitura obrigatória.
+6. **Voz dos títulos.** Nossos títulos ainda são rótulos técnicos
+   ("Metodologia", "Evidências complementares", "Análise semáforo"). Os da
+   Solute falam com o leitor ("Base técnica e protocolo de leitura.", "Onde
+   está concentrada a carga.", "O que fazer com isso."). Já fizemos isso em
+   2 seções (Panorama e Parecer), falta nas outras 8.
+7. **Capa.** A Solute tem manchete grande com ponto final, um parágrafo
+   descrevendo o que é o documento, e os metadados numa linha horizontal com
+   rótulo pequeno acima do valor ("Emissão · maio de 2026 | Ciclo · 2026.1 |
+   Participação · 142 colaboradores"). A nossa é uma pilha vertical de 5
+   linhas do mesmo tamanho, sem hierarquia.
+
+### 3.6.3 Redundância de conteúdo (fora do visual)
+
+"Pareceres por domínio" e "Riscos prioritários e recomendações" dizem
+praticamente a mesma coisa para os mesmos 9 domínios, em sequência, com
+textos parecidos. São 2 páginas do documento repetindo informação. A Solute
+nunca repete: cada dado aparece uma vez, no lugar onde é mais útil.
+
+### 3.6.4 Plano de execução (6 fases)
+
+**Fase 1 — Cabeçalhos: eliminar duplicação e ajustar a voz**
+Tabela definitiva de eyebrow/manchete, no padrão Solute (eyebrow = categoria
+curta, manchete = frase com ponto final, nunca repetindo as mesmas palavras):
+
+| Nº | Eyebrow | Manchete |
+|---|---|---|
+| 01 | PANORAMA | O que os **dados** dizem. |
+| 02 | COMO FOI FEITO | Base técnica e protocolo de **leitura**. |
+| 03 | COMO FOI FEITO | A **coleta**, passo a passo. |
+| 04 | PARECER TÉCNICO | O que a análise técnica **aponta**. |
+| 05 | RESULTADOS | Cada fator, uma **leitura**. |
+| 06 | DISTRIBUIÇÃO | Onde está concentrada a **carga**. |
+| 07 | TRIANGULAÇÃO | O que as outras **fontes** mostram. |
+| 08 | O QUE FAZER | Do diagnóstico à **ação**. |
+| 09 | ENCERRAMENTO | **Próximo** ciclo. |
+
+**Fase 2 — Ritmo de página (maior impacto isolado)**
+`page-break-before: always` em cada `.secao`, para que toda seção comece numa
+página limpa, exatamente como a Solute. Margem superior maior (3cm) para dar
+o respiro característico do topo da página deles. Nenhum parágrafo órfão na
+virada.
+
+**Fase 3 — Escala tipográfica e respiro**
+Manchete sobe de 19px para 30px. Corpo ganha `line-height: 1.65` e
+`max-width` de coluna (nunca texto de margem a margem em bloco corrido).
+Espaço entre blocos aumenta de 10px para 18px. Caixas explicativas reduzidas
+a no máximo 4 linhas, com o texto longo virando nota de rodapé pequena.
+
+**Fase 4 — Plano de Ação reformatado por horizonte**
+Substituir as 9 fichas de 12 linhas por 3 blocos agrupados por prazo (30
+dias, 90 dias, sem prazo), cada bloco com uma lista compacta de medidas
+(código, domínio, banda, medida em 2 a 3 linhas). Os campos operacionais
+(responsável, status, evidência de execução, verificação de eficácia, data
+de revisão, observações) viram **uma tabela única de acompanhamento** no fim
+da seção, com uma linha por ação, em vez de 12 linhas repetidas por ficha.
+Estimativa: de 9 páginas para 2.
+
+**Fase 5 — Eliminar a redundância parecer/riscos**
+Fundir "Pareceres por domínio" e "Riscos prioritários e recomendações" numa
+única lista por domínio, com 3 campos (o que foi encontrado, por que é
+prioritário, o que fazer). Elimina cerca de 2 páginas de repetição.
+
+**Fase 6 — Capa no padrão Solute**
+Manchete grande com ponto final, parágrafo curto explicando o que é o
+documento, e metadados numa linha horizontal com rótulo pequeno em maiúsculas
+acima do valor. Selo CONFIDENCIAL destacado no rodapé da capa.
+
+**Resultado esperado**: de 19 páginas densas e contínuas para algo entre 10 e
+12 páginas com ritmo de leitura, seção por página, sem repetição — mantendo
+todo o conteúdo técnico exigido pela NR-01 e o semáforo como forma única de
+apresentar resultado por domínio (ressalva inegociável, Seção 3.2).
+
+> **Atualização de 2026-08-05 (mesmo dia)**: as 6 fases foram **implementadas**
+> — ver CLAUDE.md Seção 6.21 para o detalhamento final de como ficou cada uma.
+
+---
+
 ## 4. Referência visual e de conteúdo — Relatório 2 (Hospital São Lucas, "COPSOQ-inspired")
 
 > Analisado em 2026-08-04 (`RelatriodeAvaliaodeRiscosPsicossociais.md`, 42 páginas,

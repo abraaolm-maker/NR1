@@ -64,16 +64,16 @@ def _mapa_nomes_dominio(ghes: list[dict]) -> dict[str, str]:
 
 
 def _parecer_para_exibicao(parecer_ia: dict | None, ghes: list[dict]) -> dict | None:
-    """Seção 3 (Parecer técnico): acha de 2026-08-03 (relatório real revisado pelo
+    """Seção 4 (Parecer técnico): acha de 2026-08-03 (relatório real revisado pelo
     usuário) — mostrar só o código do domínio ("EE") obriga quem lê a decorar 29
-    códigos diferentes; e as tabelas "Riscos prioritários" e "Recomendações" listavam
-    os mesmos domínios em duas tabelas separadas, restatando a mesma banda duas
-    vezes. Esta função prepara uma versão só pra exibição (nunca sobrescreve o JSON
-    original salvo em `Relatorio.parecer_ia`): troca o código pelo nome completo e
-    funde as duas tabelas numa só (Domínio, Banda, Justificativa, Medida preventiva).
-    A coluna "GHE" e a coluna "Instrumento" só aparecem quando há mais de 1 GHE ou
-    mais de 1 instrumento neste relatório — repetir "Escritório"/"COPSOQ_OFICIAL" em
-    toda linha quando só existe um GHE/instrumento no ciclo não ajuda a leitura."""
+    códigos diferentes. Achado de 2026-08-05 (Fase 5, PLANO_ACAO_RELATORIO.md Seção
+    3.6): "Pareceres por domínio" e "Riscos prioritários e recomendações" diziam
+    quase a mesma coisa sobre os mesmos domínios em duas listas separadas — fundidas
+    aqui numa única lista "achados" por domínio (Domínio/Banda, o que foi encontrado,
+    por que é prioritário, o que fazer), nunca sobrescrevendo o JSON original salvo em
+    `Relatorio.parecer_ia`. A coluna "GHE" só aparece quando há mais de 1 GHE neste
+    relatório — repetir "Escritório" em toda linha quando só existe um GHE no ciclo
+    não ajuda a leitura."""
     if not parecer_ia:
         return None
 
@@ -86,34 +86,35 @@ def _parecer_para_exibicao(parecer_ia: dict | None, ghes: list[dict]) -> dict | 
     ghes_distintos = {p.get("ghe") for p in parecer_ia.get("pareceres_por_dominio", [])}
     mostrar_ghe = len(ghes_distintos) > 1
 
-    pareceres = []
-    for p in parecer_ia.get("pareceres_por_dominio", []):
-        pareceres.append({**p, "dominio_rotulo": _rotulo(p.get("dominio", ""))})
-
+    pareceres_por_chave = {(p.get("ghe"), p.get("dominio")): p for p in parecer_ia.get("pareceres_por_dominio", [])}
     riscos_por_chave = {(r.get("ghe"), r.get("dominio")): r for r in parecer_ia.get("riscos_prioritarios", [])}
     recomendacoes_por_chave = {
         (r.get("ghe"), r.get("dominio")): r for r in parecer_ia.get("recomendacoes", [])
     }
-    chaves = list(dict.fromkeys([*riscos_por_chave, *recomendacoes_por_chave]))  # preserva ordem, sem duplicar
+    chaves = list(dict.fromkeys([*pareceres_por_chave, *riscos_por_chave, *recomendacoes_por_chave]))
 
-    riscos_e_recomendacoes = []
+    achados = []
     for chave in chaves:
+        parecer = pareceres_por_chave.get(chave, {})
+        banda = parecer.get("banda", "")
+        if banda == "Aceitável":
+            continue
         risco = riscos_por_chave.get(chave, {})
         recomendacao = recomendacoes_por_chave.get(chave, {})
-        riscos_e_recomendacoes.append(
+        achados.append(
             {
                 "ghe": chave[0],
                 "dominio_rotulo": _rotulo(chave[1] or ""),
-                "banda": risco.get("banda") or recomendacao.get("banda", ""),
-                "justificativa": risco.get("justificativa", ""),
-                "medida_preventiva": recomendacao.get("medida_preventiva", ""),
+                "banda": banda or risco.get("banda") or recomendacao.get("banda", ""),
+                "o_que_foi_encontrado": parecer.get("parecer", ""),
+                "por_que_e_prioritario": risco.get("justificativa", ""),
+                "o_que_fazer": recomendacao.get("medida_preventiva", ""),
             }
         )
 
     return {
         "sintese_executiva": parecer_ia.get("sintese_executiva", ""),
-        "pareceres_por_dominio": pareceres,
-        "riscos_e_recomendacoes": riscos_e_recomendacoes,
+        "achados": achados,
         "aviso_minuta": parecer_ia.get("aviso_minuta", ""),
         "mostrar_ghe": mostrar_ghe,
     }

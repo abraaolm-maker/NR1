@@ -6,7 +6,7 @@
 <style>
     @page {
         size: A4;
-        margin: 2.2cm 1.8cm 1.8cm;
+        margin: 3cm 1.8cm 1.8cm;
         @bottom-left {
             content: "CONFIDENCIAL · Inventário de Risco Psicossocial";
             font-size: 8px;
@@ -24,29 +24,44 @@
         font-family: "DejaVu Sans", Arial, sans-serif;
         font-size: 11px;
         color: #1a1a1a;
-        line-height: 1.4;
+        line-height: 1.55;
     }
+
+    p { margin: 0 0 10px; }
 
     h1 { font-size: 22px; margin-bottom: 4px; }
-    h2 {
-        font-size: 17px;
-        margin-top: 4px;
-        margin-bottom: 10px;
-        padding-bottom: 6px;
-        border-bottom: 2px solid #2b3a55;
-        color: #2b3a55;
+    h3 { font-size: 12.5px; margin-top: 14px; margin-bottom: 6px; color: #2b3a55; }
+
+    /* Fase 1/3 da 3ª rodada de reformulação visual (2026-08-05,
+       PLANO_ACAO_RELATORIO.md Seção 3.6): cabeçalho de seção único no tom Solute
+       (eyebrow curto + manchete grande, frase própria, nunca repetindo as mesmas
+       palavras do eyebrow) — aplicado a TODAS as seções, sem o sublinhado azul que
+       o antigo <h2> usava. */
+    .secao {
+        margin-top: 0;
+        page-break-before: always;
     }
-    h3 { font-size: 12.5px; margin-top: 10px; margin-bottom: 4px; color: #2b3a55; }
+    .eyebrow {
+        font-size: 9.5px;
+        font-weight: bold;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #888;
+        margin-bottom: 4px;
+    }
+    .manchete {
+        font-size: 27px;
+        font-weight: 800;
+        color: #2b3a55;
+        line-height: 1.2;
+        margin: 0 0 16px;
+    }
+    .acento { color: #c76b1f; }
 
-    /* Cabeçalho de seção no tom Solute (eyebrow + manchete), aplicado a TODAS as
-       seções do documento — não só o Panorama — pra manter o visual consistente do
-       início ao fim (achado do usuário em 2026-08-05: só a Seção 1 tinha o novo
-       estilo, o resto seguia o layout antigo). */
-    .secao { margin-top: 20px; }
-
+    /* Fase 6 — Capa */
     .capa {
         text-align: center;
-        margin-top: 6.5cm;
+        margin-top: 5cm;
         page-break-after: always;
     }
     .capa .marca {
@@ -63,29 +78,52 @@
         font-weight: bold;
         letter-spacing: .02em;
     }
-    .capa .barra-acento {
-        width: 64px;
-        height: 4px;
-        margin: 18px auto 0;
-        background: #c76b1f;
-        border-radius: 2px;
-    }
     .capa .selo {
         font-size: 12px;
         letter-spacing: 2px;
         text-transform: uppercase;
         color: #666;
     }
-    .capa h1 { font-size: 26px; margin-top: 12px; }
-    .capa .meta { margin-top: 24px; font-size: 12px; color: #444; }
-    .capa .meta div { margin-bottom: 4px; }
+    .capa h1 { font-size: 30px; margin-top: 14px; }
+    .capa .resumo {
+        max-width: 11cm;
+        margin: 14px auto 0;
+        font-size: 11px;
+        color: #555;
+        line-height: 1.6;
+    }
+    .capa .barra-acento {
+        width: 64px;
+        height: 4px;
+        margin: 20px auto 0;
+        background: #c76b1f;
+        border-radius: 2px;
+    }
+    .capa .meta-linha {
+        margin-top: 28px;
+        display: flex;
+        justify-content: center;
+        gap: 22px;
+        flex-wrap: wrap;
+    }
+    .capa .meta-item { text-align: center; }
+    .capa .meta-item .rotulo {
+        font-size: 8.5px;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: #999;
+        margin-bottom: 2px;
+    }
+    .capa .meta-item .valor { font-size: 11.5px; color: #333; font-weight: 600; }
+    .capa .identificacao {
+        margin-top: 20px;
+        font-size: 10px;
+        color: #777;
+    }
+    .capa .identificacao div { margin-bottom: 3px; }
 
-    /* Fase A da reformulação visual (2026-08-05, PLANO_ACAO_RELATORIO.md Seção 3.5):
-       a Solute nunca usa grade de tabela em nenhuma página — o peso visual vem de
-       whitespace, cards e linhas finas, não de bordas cruzadas. Tabelas continuam
-       existindo aqui só onde o dado é genuinamente tabular (Resultados por domínio),
-       mas sem grade completa: sem borda lateral, só linha divisória horizontal fina
-       e cabeçalho com borda inferior mais forte na cor primária. */
+    /* Fase A/C das rodadas anteriores — tabelas sem grade completa, só linha
+       divisória fina + zebra nas duas que continuam genuinamente tabulares. */
     table {
         width: 100%;
         border-collapse: collapse;
@@ -103,7 +141,7 @@
         background: none;
         color: #2b3a55;
         border-bottom: 2px solid #2b3a55;
-        font-size: 9.5px;
+        font-size: 9px;
         text-transform: uppercase;
         letter-spacing: .03em;
     }
@@ -123,26 +161,24 @@
     .alto { background: #c0392b; }
     .critico { background: #c0392b; border: 2px solid #e07b1a; }
 
-    .matriz-tabela td, .matriz-tabela th { text-align: center; }
-    .matriz-cel { color: #fff; font-weight: bold; }
-
     .aviso-minuta {
         border: 1px solid #c0392b;
         background: #fdecea;
         color: #922;
         padding: 8px 10px;
         font-size: 10.5px;
-        margin-top: 12px;
+        margin-top: 16px;
     }
 
+    /* Fase 3 — caixas explicativas enxutas (no máximo poucas linhas de destaque;
+       o texto mais longo vira nota pequena abaixo, não compete com o corpo). */
     .caixa-explicativa {
-        border: 1px solid #2b3a55;
-        border-left: 5px solid #2b3a55;
-        background: #eef1f6;
+        border-left: 4px solid #2b3a55;
+        background: #f4f6f9;
         color: #1a1a1a;
         padding: 10px 14px;
         font-size: 10.5px;
-        margin: 10px 0 14px;
+        margin: 4px 0 16px;
     }
     .caixa-explicativa .titulo {
         font-weight: bold;
@@ -150,8 +186,15 @@
         display: block;
         margin-bottom: 4px;
         text-transform: uppercase;
-        font-size: 10px;
+        font-size: 9.5px;
         letter-spacing: .04em;
+    }
+    .caixa-explicativa .nota-longa {
+        display: block;
+        margin-top: 6px;
+        font-size: 9px;
+        color: #777;
+        line-height: 1.5;
     }
 
     .ficha-acao {
@@ -159,7 +202,7 @@
         border-left: 4px solid #2b3a55;
         border-radius: 6px;
         padding: 10px 12px;
-        margin-bottom: 12px;
+        margin-bottom: 14px;
         background: #fdfdfd;
         page-break-inside: avoid;
     }
@@ -179,7 +222,7 @@
         background: #f7f8fa;
     }
 
-    .ghe-bloco { margin-bottom: 18px; }
+    .ghe-bloco { margin-bottom: 20px; }
 
     /* Gráfico semáforo — barras empilhadas horizontais via HTML/CSS puro (WeasyPrint
        não roda JS/Chart.js/canvas). Referência visual: COPSOQ Manual Portugal 2013,
@@ -196,43 +239,38 @@
     .segmento.vermelho { background: #c0392b; }
     .segmento.amarelo { background: #f1c40f; color: #333; }
     .segmento.verde { background: #27ae60; }
-    .rodape-nota { font-size: 9.5px; color: #555; margin-top: 10px; }
+
+    .rodape-nota { font-size: 9px; color: #777; margin-top: 8px; }
     .rodape-nota .quadrado { font-weight: bold; }
 
-    .assinatura {
-        margin-top: 60px;
-        text-align: center;
-    }
+    .assinatura { margin-top: 60px; text-align: center; }
     .assinatura .linha {
         width: 60%;
         margin: 0 auto;
         border-top: 1px solid #333;
         padding-top: 4px;
     }
-    .assinatura .pendente {
-        color: #999;
-        font-style: italic;
+    .assinatura .pendente { color: #999; font-style: italic; }
+
+    /* Fase 4 — medidas agrupadas por horizonte (prazo), com fichas curtas
+       (medida em texto corrido) e os campos operacionais consolidados numa única
+       tabela de acompanhamento no fim, em vez de repetir 12 linhas por item. */
+    .item-plano-compacto {
+        border-left: 3px solid #2b3a55;
+        padding: 6px 10px;
+        margin-bottom: 10px;
     }
-
-    .rodape-nota { font-size: 9px; color: #777; margin-top: 6px; }
-
-    /* Panorama (Seção 2) — tom e visual inspirados no relatório de referência
-       Solute RH (PLANO_ACAO_RELATORIO.md Seção 3): eyebrow label + manchete com
-       palavra de destaque, cards de indicador, cartão escuro pra "frentes de
-       atenção", duas colunas "protegendo"/"pede ação". O acento laranja é só
-       usado aqui, nunca substitui o azul-marinho como cor principal do sistema
-       (decisão registrada no plano: manter a identidade visual já existente). */
-    .acento { color: #c76b1f; }
-    .eyebrow {
-        font-size: 9.5px;
+    .item-plano-compacto.borda-alto, .item-plano-compacto.borda-critico { border-left-color: #c0392b; }
+    .item-plano-compacto.borda-moderado { border-left-color: #d1a316; }
+    .item-plano-compacto .titulo-item {
         font-weight: bold;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: #888;
-        margin-bottom: 2px;
+        color: #2b3a55;
+        font-size: 10.5px;
+        margin-bottom: 3px;
     }
-    .manchete { font-size: 19px; font-weight: bold; color: #2b3a55; margin: 0 0 10px; }
-    .cards-panorama { display: flex; gap: 10px; margin-bottom: 14px; }
+    .item-plano-compacto p { margin: 0; font-size: 10.5px; }
+
+    .cards-panorama { display: flex; gap: 10px; margin-bottom: 16px; }
     .card-indicador {
         flex: 1;
         border: 1px solid #ddd;
@@ -248,7 +286,7 @@
         color: #fff;
         border-radius: 4px;
         padding: 12px 16px;
-        margin-bottom: 14px;
+        margin-bottom: 16px;
         display: flex;
         align-items: center;
         gap: 16px;
@@ -260,10 +298,11 @@
     .coluna-leitura h3 { margin-top: 0; }
     .coluna-leitura ul { margin: 0; padding-left: 16px; font-size: 10.5px; }
     .coluna-leitura li { margin-bottom: 4px; }
+
     .apendice-tecnico {
         font-size: 8.5px;
         color: #999;
-        margin-top: 20px;
+        margin-top: 24px;
         padding-top: 8px;
         border-top: 1px dashed #ccc;
         word-break: break-all;
@@ -278,18 +317,39 @@
 </div>
 {% endif %}
 
-<!-- 1. CAPA -->
+<!-- CAPA -->
 <div class="capa">
     <div class="marca">IRP</div>
     <div class="selo">Inventário de Risco Psicossocial</div>
     <h1>{{ empresa.nome }}</h1>
     <div class="barra-acento"></div>
-    <div class="meta">
+    <p class="resumo">
+        Diagnóstico técnico dos fatores de risco psicossociais relacionados ao trabalho,
+        elaborado em conformidade com o Capítulo 1.5 da NR-01 (GRO/PGR), com leitura por
+        domínio, análise técnica e{% if relatorio.tipo == "diagnostico_plano_acao" %} plano de ação{% else %} parecer{% endif %}
+        estruturado para a unidade {{ unidade.nome }}.
+    </p>
+    <div class="meta-linha">
+        <div class="meta-item">
+            <div class="rotulo">Emissão</div>
+            <div class="valor">{{ gerado_em|date:"d \d\e F \d\e Y" }}</div>
+        </div>
+        <div class="meta-item">
+            <div class="rotulo">Período</div>
+            <div class="valor">{{ relatorio.periodo_inicio|date:"d/m/Y" }} a {{ relatorio.periodo_fim|date:"d/m/Y" }}</div>
+        </div>
+        <div class="meta-item">
+            <div class="rotulo">Documento</div>
+            <div class="valor">nº {{ relatorio.pk }}</div>
+        </div>
+        <div class="meta-item">
+            <div class="rotulo">Status</div>
+            <div class="valor">{{ relatorio.get_status_display }}</div>
+        </div>
+    </div>
+    <div class="identificacao">
         <div>CNPJ: {{ empresa.cnpj }}</div>
         <div>Unidade: {{ unidade.nome }}{% if unidade.cnpj %} — CNPJ {{ unidade.cnpj }}{% endif %}</div>
-        <div>Período de aplicação: {{ relatorio.periodo_inicio }} a {{ relatorio.periodo_fim }}</div>
-        <div>Documento nº {{ relatorio.pk }} — gerado em {{ gerado_em }}</div>
-        <div>Status: {{ relatorio.get_status_display }}</div>
     </div>
     {% if minuta %}
     <div class="aviso-minuta">
@@ -367,8 +427,8 @@
 
 <!-- 2. BASE TÉCNICA E LEGAL -->
 <div class="secao">
-    <div class="eyebrow">02 · BASE TÉCNICA</div>
-    <h2>Base técnica e legal utilizada</h2>
+    <div class="eyebrow">02 · Como foi feito</div>
+    <div class="manchete">Base técnica e protocolo de <span class="acento">leitura</span>.</div>
     <p>
         Avaliação realizada em conformidade com o Capítulo 1.5 da NR-01 (GRO/PGR), conforme
         alteração da Portaria MTE nº 1.419/2024, com prazo de vigência plena definido pela
@@ -403,8 +463,8 @@
 
 <!-- 3. METODOLOGIA -->
 <div class="secao">
-    <div class="eyebrow">03 · COMO FOI FEITO</div>
-    <h2>Metodologia</h2>
+    <div class="eyebrow">03 · Como foi feito</div>
+    <div class="manchete">A <span class="acento">coleta</span>, passo a passo.</div>
     <p>
         Coleta realizada por GHE (Grupo Homogêneo de Exposição), com aplicação anônima ou
         identificada conforme registrado, e cálculo determinístico de escore, classificação
@@ -438,45 +498,33 @@
 
 <!-- 4. PARECER TÉCNICO -->
 <div class="secao">
-    <div class="eyebrow">04 · PARECER TÉCNICO</div>
-    <h2>O que a análise técnica <span class="acento">aponta</span>.</h2>
+    <div class="eyebrow">04 · Parecer técnico</div>
+    <div class="manchete">O que a análise técnica <span class="acento">aponta</span>.</div>
     {% if parecer_exibicao %}
         <h3>Síntese executiva</h3>
         <p>{{ parecer_exibicao.sintese_executiva }}</p>
 
-        <h3>Pareceres por domínio (fora da faixa Aceitável)</h3>
-        <p style="font-size: 10px; color: #777; margin-top: -4px;">
+        <h3>Domínios fora da faixa Aceitável</h3>
+        <p style="font-size: 10px; color: #777; margin-top: -6px;">
             Domínios em faixa Aceitável já aparecem na coluna "O que está protegendo" do
             Panorama (Seção 1) — não repetidos aqui pra manter o foco no que precisa de
             leitura mais atenta.
         </p>
-        {% with pareceres_relevantes=parecer_exibicao.pareceres_por_dominio|dictsortreversed:"banda" %}
-        {% for p in pareceres_relevantes %}
-            {% if p.banda != "Aceitável" %}
-            <div class="ficha-acao borda-{{ p.banda|slugify }}">
+        {% with achados_ordenados=parecer_exibicao.achados|dictsortreversed:"banda" %}
+        {% for a in achados_ordenados %}
+            <div class="ficha-acao borda-{{ a.banda|slugify }}">
                 <div class="ficha-titulo">
-                    {% if parecer_exibicao.mostrar_ghe %}{{ p.ghe }} — {% endif %}{{ p.dominio_rotulo }} /
-                    <span class="badge {{ p.banda|slugify }}">{{ p.banda }}</span>
-                </div>
-                <p style="margin: 0; font-size: 10.5px;">{{ p.parecer }}</p>
-            </div>
-            {% endif %}
-        {% endfor %}
-        {% endwith %}
-
-        <h3>Riscos prioritários e recomendações</h3>
-        {% for r in parecer_exibicao.riscos_e_recomendacoes %}
-            <div class="ficha-acao borda-{{ r.banda|slugify }}">
-                <div class="ficha-titulo">
-                    {% if parecer_exibicao.mostrar_ghe %}{{ r.ghe }} — {% endif %}{{ r.dominio_rotulo }} /
-                    <span class="badge {{ r.banda|slugify }}">{{ r.banda }}</span>
+                    {% if parecer_exibicao.mostrar_ghe %}{{ a.ghe }} — {% endif %}{{ a.dominio_rotulo }} /
+                    <span class="badge {{ a.banda|slugify }}">{{ a.banda }}</span>
                 </div>
                 <table style="margin-bottom: 0;">
-                    <tr><td class="rotulo">Por que é prioritário</td><td>{{ r.justificativa }}</td></tr>
-                    <tr><td class="rotulo">Medida preventiva</td><td>{{ r.medida_preventiva }}</td></tr>
+                    <tr><td class="rotulo">O que foi encontrado</td><td>{{ a.o_que_foi_encontrado }}</td></tr>
+                    <tr><td class="rotulo">Por que é prioritário</td><td>{{ a.por_que_e_prioritario }}</td></tr>
+                    <tr><td class="rotulo">O que fazer</td><td>{{ a.o_que_fazer }}</td></tr>
                 </table>
             </div>
         {% endfor %}
+        {% endwith %}
 
         <p class="rodape-nota">{{ parecer_exibicao.aviso_minuta }}</p>
     {% else %}
@@ -486,37 +534,30 @@
 
 <!-- 5. RESULTADOS POR GHE E POR DOMÍNIO -->
 <div class="secao">
-    <div class="eyebrow">05 · RESULTADOS</div>
-    <h2>Resultados por GHE e por domínio</h2>
+    <div class="eyebrow">05 · Resultados</div>
+    <div class="manchete">Cada fator, uma <span class="acento">leitura</span>.</div>
 
     <div class="caixa-explicativa">
         <span class="titulo">Como ler a coluna "Banda"</span>
-        <strong>% em risco</strong> é quantas pessoas responderam que sentem alta
-        exposição àquele fator (ex.: ritmo de trabalho, pressão por prazos). Quanto
-        mais gente marca alta exposição, mais séria fica a Banda:
-        poucas pessoas → <strong>Aceitável</strong>; uma parte relevante →
-        <strong>Moderado</strong>; a maioria ou todo mundo → <strong>Alto</strong>
-        (prazo de 30 dias pra agir). A Banda <strong>Crítico</strong> não vem do
-        percentual — ela é acionada quando <strong>pelo menos 1 pessoa</strong>
-        relatou concretamente um episódio grave (violência, ameaça, assédio moral ou
-        discriminação), e nesse caso o prazo cai pra 15 dias com aviso imediato à
-        liderança/CIPA. Por isso um domínio pode aparecer com poucos ou nenhum
-        respondente na faixa de risco (escore médio baixo, % em risco baixo ou até
-        0%) e ainda assim sair como Crítico: a média do grupo não anula nem dilui um
-        relato individual grave — 1 relato confirmado já é suficiente, mesmo que
-        todos os demais respondentes tenham respondido bem nesse domínio.
+        Poucas pessoas na faixa de risco → <strong>Aceitável</strong>; uma parte relevante →
+        <strong>Moderado</strong> (90 dias); a maioria → <strong>Alto</strong> (30 dias).
+        <strong>Crítico</strong> (15 dias) não depende do percentual: basta 1 relato
+        confirmado de evento grave (violência, ameaça, assédio moral ou discriminação).
+        <span class="nota-longa">
+        Por isso um domínio pode ter poucos respondentes na faixa de risco e ainda sair
+        como Crítico — 1 relato individual grave já é suficiente, mesmo que o restante do
+        grupo tenha respondido bem.
         {% if dominios_criticos_evento_grave %}
-        <br><br><strong>Neste relatório, isso realmente ocorreu em:</strong>
+        Neste relatório, isso ocorreu em:
         {% for dc in dominios_criticos_evento_grave %}{{ dc.ghe_nome }} — {{ dc.dominio_codigo }} ({{ dc.dominio_nome }}){% if not forloop.last %}; {% endif %}{% endfor %}.
         {% else %}
-        <br><br><strong>Neste relatório, nenhum domínio foi elevado a Crítico por
-        evento grave</strong> — a explicação acima é só uma referência de como o
-        critério funciona, caso venha a ocorrer em ciclos futuros.
+        Neste relatório, nenhum domínio foi elevado a Crítico por evento grave.
         {% endif %}
+        </span>
     </div>
 
     <h3>Critério de classificação da Banda</h3>
-    <table style="width: 75%;">
+    <table class="zebra" style="width: 75%;">
         <thead>
             <tr><th>Prioridade</th><th>Condição</th><th>Banda</th><th>Prazo do plano de ação</th></tr>
         </thead>
@@ -563,10 +604,8 @@
         {% if item.dominios %}
         <p class="rodape-nota">
             * Média nacional (referência): valor normalizado à mesma escala 0-100 e mesma
-            direção (maior = mais risco) do Escore desta aplicação, calculado a partir da
-            média bruta publicada no manual de referência do instrumento (quando disponível
-            e o domínio não tiver polaridade mista). "—" = sem valor de referência publicado
-            pra este domínio, ou domínio de polaridade mista (não comparável de forma direta).
+            direção (maior = mais risco) do Escore desta aplicação. "—" = sem valor de
+            referência publicado ou domínio de polaridade mista.
         </p>
         {% endif %}
         {% for d in item.dominios %}
@@ -582,36 +621,28 @@
 
 <!-- 6. ANÁLISE SEMÁFORO -->
 <div class="secao">
-    <div class="eyebrow">06 · ONDE ESTÁ CONCENTRADA A CARGA</div>
-    <h2>Análise semáforo</h2>
+    <div class="eyebrow">06 · Distribuição</div>
+    <div class="manchete">Onde está concentrada a <span class="acento">carga</span>.</div>
 
     <div class="caixa-explicativa">
-        <span class="titulo">Vermelho aqui não é automaticamente "Crítico" — e o inverso também vale</span>
-        O vermelho mostra quantas pessoas relataram alta exposição àquele fator —
-        é a mesma informação que define a Banda "Alto" na Seção 5 (Resultados por GHE
-        e por domínio), só que agregada por Unidade em vez de por GHE. Um domínio
-        100% vermelho aqui é sério e sai como Banda "Alto" (30 dias pra agir). Mas o
-        inverso também acontece: um domínio pode aparecer <strong>quase todo verde
-        aqui</strong> e ainda sair como Banda <strong>Crítico</strong> na Seção 5 —
-        porque o Crítico não depende da média do grupo, depende só de existir
-        <strong>pelo menos 1 relato individual</strong> de evento grave (violência,
-        ameaça, assédio moral ou discriminação). Um caso grave isolado não aparece
-        neste gráfico (que mostra médias), mas sozinho já é suficiente pra elevar a
-        Banda — ver a nota da Seção 5.
+        <span class="titulo">Vermelho aqui não é automaticamente "Crítico"</span>
+        Mostra quantas pessoas relataram alta exposição — a mesma informação da Banda
+        "Alto" da Seção 5, agregada por Unidade. Um domínio pode aparecer quase todo verde
+        aqui e ainda sair como Crítico na Seção 5, porque o Crítico depende de 1 relato
+        individual grave, não da média do grupo.
+        <span class="nota-longa">
         {% if dominios_criticos_evento_grave %}
-        <br><br><strong>Neste ciclo, isso aconteceu em:</strong>
+        Neste ciclo, isso aconteceu em:
         {% for dc in dominios_criticos_evento_grave %}{{ dc.ghe_nome }} — {{ dc.dominio_codigo }} ({{ dc.dominio_nome }}){% if not forloop.last %}; {% endif %}{% endfor %}.
         {% else %}
-        <br><br><strong>Neste ciclo, não ocorreu nenhum caso desse tipo</strong> — a
-        explicação acima é só uma referência de como o critério funciona.
+        Neste ciclo, não ocorreu nenhum caso desse tipo.
         {% endif %}
+        </span>
     </div>
 
     <p>
         Distribuição percentual dos respondentes em 3 faixas por domínio, agregando
-        todas as Aplicações desta Unidade. Um GHE suprimido isoladamente entra na
-        soma, mas o resultado só é exibido quando o total agregado também atinge o
-        N mínimo de confidencialidade.
+        todas as Aplicações desta Unidade.
     </p>
     {% if linhas_semaforo %}
     <div class="grafico-semaforo-titulo">DISTRIBUIÇÃO DOS FATORES PSICOSSOCIAIS POR FAIXA DE RISCO</div>
@@ -670,12 +701,12 @@
 
 <!-- 7. EVIDÊNCIAS COMPLEMENTARES -->
 <div class="secao">
-    <div class="eyebrow">07 · EVIDÊNCIAS COMPLEMENTARES</div>
-    <h2>Evidências complementares</h2>
+    <div class="eyebrow">07 · Triangulação</div>
+    <div class="manchete">O que outras <span class="acento">fontes</span> confirmam.</div>
     {% for item in ghes %}
         <h3>GHE: {{ item.ghe.nome }}</h3>
         {% if item.indicadores %}
-        <table>
+        <table class="zebra">
             <thead><tr><th>Tipo</th><th>Período de referência</th><th>Domínio relacionado</th><th>Descrição</th></tr></thead>
             <tbody>
             {% for ind in item.indicadores %}
@@ -696,12 +727,12 @@
 
 <!-- 8. ENTREVISTA E OBSERVAÇÃO -->
 <div class="secao">
-    <div class="eyebrow">08 · ENTREVISTA E OBSERVAÇÃO</div>
-    <h2>Entrevista e observação</h2>
+    <div class="eyebrow">08 · Triangulação</div>
+    <div class="manchete">A leitura de quem está no <span class="acento">campo</span>.</div>
     {% for item in ghes %}
         <h3>GHE: {{ item.ghe.nome }}</h3>
         {% if item.checklist_triangulacao %}
-        <table>
+        <table class="zebra">
             <thead><tr><th>Tipo</th><th>Item</th><th>Conformidade</th><th>Evidência/observação</th></tr></thead>
             <tbody>
             {% for resposta in item.checklist_triangulacao %}
@@ -723,45 +754,64 @@
 {% if relatorio.tipo == "diagnostico_plano_acao" %}
 <!-- 9. PLANO DE AÇÃO -->
 <div class="secao">
-    <div class="eyebrow">09 · O QUE FAZER COM ISSO</div>
-    <h2>Plano de ação</h2>
-    <div class="caixa-explicativa">
-        <span class="titulo">Ordem de leitura</span>
-        As medidas abaixo estão listadas da mais urgente para a menos urgente:
-        Crítico primeiro, depois Alto, depois Moderado.
-    </div>
-    {% for entrada in planos_ordenados %}
-        {% with plano=entrada.plano %}
-        <div class="ficha-acao borda-{{ entrada.banda_css }}">
-            <div class="ficha-titulo">
-                {{ plano.codigo|default:"—" }} — {{ entrada.ghe_nome }} —
-                {{ entrada.dominio_nome }} ({{ entrada.dominio_codigo }}) /
-                <span class="badge {{ entrada.banda_css }}">{{ entrada.banda }}</span>
+    <div class="eyebrow">09 · O que fazer</div>
+    <div class="manchete">Do diagnóstico à <span class="acento">ação</span>.</div>
+
+    {% regroup planos_ordenados by banda as grupos_banda %}
+    {% for grupo in grupos_banda %}
+        <h3>
+            {{ grupo.grouper }}
+            {% if grupo.grouper == "Crítico" %} — prazo de 15 dias, com aviso imediato à liderança/CIPA
+            {% elif grupo.grouper == "Alto" %} — prazo de 30 dias
+            {% elif grupo.grouper == "Moderado" %} — prazo de 90 dias
+            {% else %} — sem prazo, monitoramento no próximo ciclo
+            {% endif %}
+        </h3>
+        {% for entrada in grupo.list %}
+            {% with plano=entrada.plano %}
+            <div class="item-plano-compacto borda-{{ entrada.banda_css }}">
+                <div class="titulo-item">{{ plano.codigo|default:"—" }} — {{ entrada.ghe_nome }} — {{ entrada.dominio_nome }} ({{ entrada.dominio_codigo }})</div>
+                <p>{{ plano.medida }}</p>
             </div>
-            <table>
-                <tr><td class="rotulo">Medida escolhida</td><td>{{ plano.medida }}</td></tr>
-                <tr><td class="rotulo">Hierarquia de controle</td><td>{{ plano.get_hierarquia_display|default:"—" }}</td></tr>
-                <tr><td class="rotulo">Evidência do diagnóstico</td><td>{{ plano.evidencia_diagnostico|default:"—" }}</td></tr>
-                <tr><td class="rotulo">Indicador de acompanhamento</td><td>{{ plano.indicador|default:"—" }}</td></tr>
-                <tr><td class="rotulo">Meta</td><td>{{ plano.meta|default:"—" }}</td></tr>
-                <tr><td class="rotulo">Responsável</td><td>{{ plano.responsavel|default:"A definir" }}</td></tr>
-                <tr><td class="rotulo">Prazo</td><td>{{ plano.prazo|default:"—" }}</td></tr>
-                <tr><td class="rotulo">Status</td><td>{{ plano.get_status_display }}</td></tr>
-                <tr><td class="rotulo">Evidência de execução</td><td>{{ plano.evidencia_execucao|default:"—" }}</td></tr>
-                <tr><td class="rotulo">Verificação de eficácia</td><td>{{ plano.verificacao_eficacia|default:"—" }}</td></tr>
-                <tr><td class="rotulo">Data da revisão</td><td>{{ plano.data_revisao|default:"—" }}</td></tr>
-                <tr><td class="rotulo">Observações</td><td>{{ plano.observacoes|default:"—" }}</td></tr>
-            </table>
-        </div>
-        {% endwith %}
+            {% endwith %}
+        {% endfor %}
     {% endfor %}
+
+    <h3>Acompanhamento</h3>
+    <table class="zebra">
+        <thead>
+            <tr>
+                <th>Código</th><th>Domínio</th><th>Hierarquia de controle</th><th>Responsável</th>
+                <th>Prazo</th><th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for entrada in planos_ordenados %}
+            {% with plano=entrada.plano %}
+            <tr>
+                <td>{{ plano.codigo|default:"—" }}</td>
+                <td>{{ entrada.dominio_codigo }} · <span class="badge {{ entrada.banda_css }}">{{ entrada.banda }}</span></td>
+                <td>{{ plano.get_hierarquia_display|default:"—" }}</td>
+                <td>{{ plano.responsavel|default:"A definir" }}</td>
+                <td>{{ plano.prazo|default:"—" }}</td>
+                <td>{{ plano.get_status_display }}</td>
+            </tr>
+            {% endwith %}
+        {% endfor %}
+        </tbody>
+    </table>
+    <p class="rodape-nota">
+        Campos de acompanhamento pós-execução (evidência de execução, verificação de
+        eficácia, data da revisão, observações) ficam em branco até a ação ser executada e
+        revisada — atualize-os diretamente no painel conforme o plano avança.
+    </p>
 </div>
 {% endif %}
 
 <!-- ASSINATURA -->
 <div class="secao">
-    <div class="eyebrow">{% if relatorio.tipo == "diagnostico_plano_acao" %}10{% else %}9{% endif %} · PRÓXIMO CICLO</div>
-    <h2>Assinatura do responsável técnico</h2>
+    <div class="eyebrow">{% if relatorio.tipo == "diagnostico_plano_acao" %}10{% else %}9{% endif %} · Encerramento</div>
+    <div class="manchete">Próximo <span class="acento">ciclo</span>.</div>
     <div class="assinatura">
         {% if minuta %}
             <div class="linha pendente">Aguardando assinatura do profissional responsável</div>
