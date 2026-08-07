@@ -1,7 +1,11 @@
 from django.contrib import admin, messages
+from django.contrib.auth import get_user_model
+from django.contrib.auth.admin import UserAdmin
 
 from .models import ChaveApiClaude, PerfilProfissional, Relatorio
 from .services.pdf import assinar_relatorio, gerar_pdf_relatorio
+
+User = get_user_model()
 
 
 @admin.register(ChaveApiClaude)
@@ -22,6 +26,26 @@ class ChaveApiClaudeAdmin(admin.ModelAdmin):
 class PerfilProfissionalAdmin(admin.ModelAdmin):
     list_display = ("user", "titulo_profissional", "conselho", "numero_registro")
     search_fields = ("user__username", "user__first_name", "user__last_name", "numero_registro")
+    fields = ("user", "titulo_profissional", "conselho", "numero_registro", "assinatura_imagem")
+
+
+class PerfilProfissionalInline(admin.StackedInline):
+    """Pedido do usuário em 2026-08-06: cadastrar a assinatura (PNG) direto na tela
+    do usuário no Admin, sem precisar navegar até um cadastro separado de
+    PerfilProfissional."""
+
+    model = PerfilProfissional
+    can_delete = False
+    fk_name = "user"
+    fields = ("titulo_profissional", "conselho", "numero_registro", "assinatura_imagem")
+
+
+class CustomUserAdmin(UserAdmin):
+    inlines = (PerfilProfissionalInline,)
+
+
+admin.site.unregister(User)
+admin.site.register(User, CustomUserAdmin)
 
 
 @admin.action(description="Gerar/atualizar PDF (minuta ou final conforme status)")

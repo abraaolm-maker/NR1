@@ -142,75 +142,55 @@
 </div>
 {% endif %}
 
-<div class="cartao">
-    <h2>Respondentes ({{ respondentes|length }})</h2>
-    {% if respondentes %}
-    <table>
-        <thead><tr><th>Alias</th><th>Tempo na organização</th><th>Modalidade</th><th>Consentiu</th><th>Concluiu</th></tr></thead>
-        <tbody>
-        {% for respondente in respondentes %}
-            <tr>
-                <td>{{ respondente.alias_anonimo }}</td>
-                <td>{{ respondente.get_tempo_na_organizacao_display|default:"—" }}</td>
-                <td>{{ respondente.get_modalidade_trabalho_display|default:"—" }}</td>
-                <td>{{ respondente.consentimento_aceito_em|default:"—" }}</td>
-                <td>{{ respondente.concluido_em|default:"—" }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <p>Ninguém respondeu ainda. Distribua o link acima.</p>
-    {% endif %}
-</div>
+{% include "painel/_partials/respondentes_card.html" %}
 
-<div class="cartao">
-    <h2>Resultados por domínio</h2>
-    {% if escores %}
-    <div style="border: 1px solid var(--slate-200); border-left: 4px solid var(--slate-400); background: var(--slate-50); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 12px; font-size: 12.5px; color: var(--slate-700);">
-        <strong style="display:block; margin-bottom: 4px; color: var(--slate-900);">Qual a diferença entre Classificação e Banda?</strong>
-        <strong>Classificação</strong> é o nível da média deste domínio (Baixo/Moderado/Elevado) —
-        só descreve a resposta média, não decide nada sozinha.
-        <strong>Banda</strong> é o que decide se precisa de ação e em quanto tempo: vem do
-        percentual de respondentes cuja resposta individual caiu na faixa elevada (a mesma
-        prevalência do "Semáforo de riscos") —
-        <span class="badge alto" style="display:inline;">Alto</span> quando a maioria está
-        exposta (100% inclusive), <span class="badge moderado" style="display:inline;">Moderado</span>
-        quando é uma minoria significativa, <span class="badge aceitavel" style="display:inline;">Aceitável</span>
-        quando são poucos. A Banda <span class="badge critico" style="display:inline;">Crítico</span>
-        não vem do percentual — só um relato confirmado de evento grave (violência, ameaça,
-        assédio moral ou discriminação) eleva automaticamente pra Crítico, mesmo que a
-        prevalência esteja baixa.
-    </div>
-    <table>
-        <thead><tr><th>Domínio</th><th>Escore</th><th>Média nacional*</th><th>Classificação</th><th>Banda</th><th>N</th></tr></thead>
-        <tbody>
-        {% for escore in escores %}
-            <tr>
-                <td>{{ escore.dominio.codigo }} — {{ escore.dominio.nome }}</td>
-                {% if escore.suprimido_por_confidencialidade %}
-                    <td colspan="4">Suprimido por confidencialidade — mínimo de {{ n_minimo }} respostas</td>
-                {% else %}
-                    <td>{{ escore.escore }}</td>
-                    <td>{{ escore.media_nacional|default:"—" }}</td>
-                    <td>{{ escore.classificacao }}</td>
-                    <td><span class="badge {{ escore.classificacao_risco.banda|slugify }}">{{ escore.classificacao_risco.banda }}</span></td>
-                {% endif %}
-                <td>{{ escore.n_respondentes }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    <p style="font-size: 11.5px; color: #888; margin-top: 8px;">
-        * Média nacional (referência): valor publicado no manual COPSOQ Portugal 2013
-        (N=4.162 trabalhadores portugueses), normalizado pra mesma escala 0-100 e mesma
-        direção do Escore (maior = mais risco). Só existe pra domínios do COPSOQ Oficial
-        com valor publicado e polaridade única — aparece "—" nos demais.
-    </p>
-    {% else %}
-    <p>Nenhum resultado calculado ainda — aparece automaticamente conforme os respondentes forem terminando.</p>
-    {% endif %}
-</div>
+{% include "painel/_partials/resultados_dominio_card.html" %}
+
+{% if aplicacao.status == "em_andamento" %}
+<script>
+(function () {
+    var url = "{% url 'painel_avaliacoes:aplicacao_live' aplicacao.pk %}";
+    var intervalId = null;
+
+    function atualizar() {
+        fetch(url, {headers: {"X-Requested-With": "XMLHttpRequest"}})
+            .then(function (resp) { return resp.ok ? resp.json() : null; })
+            .then(function (dados) {
+                if (!dados) return;
+                document.getElementById("card-respondentes").outerHTML = dados.respondentes_html;
+                document.getElementById("card-resultados-dominio").outerHTML = dados.resultados_html;
+            })
+            .catch(function () { /* falha de rede pontual: tenta de novo no próximo ciclo */ });
+    }
+
+    function iniciar() {
+        if (intervalId === null) {
+            atualizar();
+            intervalId = setInterval(atualizar, 10000);
+        }
+    }
+
+    function pausar() {
+        if (intervalId !== null) {
+            clearInterval(intervalId);
+            intervalId = null;
+        }
+    }
+
+    document.addEventListener("visibilitychange", function () {
+        if (document.visibilityState === "visible") {
+            iniciar();
+        } else {
+            pausar();
+        }
+    });
+
+    if (document.visibilityState === "visible") {
+        iniciar();
+    }
+})();
+</script>
+{% endif %}
 
 {% if eh_admin %}
 <div class="cartao">

@@ -13,6 +13,10 @@
         "labels": { "1": "Nunca", "2": "Raramente", "3": "Às vezes", "4": "Frequentemente", "5": "Sempre" }
       },
       "thresholds": { "baixo_max": 32.25, "moderado_max": 67.25 },
+            "leitura_favoravel": "a equipe relata poucos problemas na organização das tarefas, no ritmo ou nas condições físicas de trabalho.",
+      "leitura_muito_favoravel": "a equipe quase não relata problemas na organização das tarefas, no ritmo ou nas condições físicas de trabalho.",
+      "leitura_pede_acao_moderado": "parte da equipe relata problemas relevantes na organização, ritmo ou condições físicas do trabalho.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata problemas relevantes na organização, ritmo ou condições físicas do trabalho.",
       "items": [
         { "id": "EACT.01", "text": "O ritmo de trabalho é excessivo", "polarity": "RISCO" },
         { "id": "EACT.02", "text": "As tarefas são cumpridas com pressão de prazos", "polarity": "RISCO" },
@@ -52,6 +56,10 @@
         "labels": { "1": "Nunca", "2": "Raramente", "3": "Às vezes", "4": "Frequentemente", "5": "Sempre" }
       },
       "thresholds": { "baixo_max": 32.25, "moderado_max": 67.25 },
+            "leitura_favoravel": "o esforço físico, cognitivo e emocional exigido no dia a dia é avaliado como administrável pela equipe.",
+      "leitura_muito_favoravel": "o esforço físico, cognitivo e emocional exigido no dia a dia é avaliado como baixo pela equipe.",
+      "leitura_pede_acao_moderado": "parte da equipe avalia o esforço físico, cognitivo ou emocional exigido como elevado.",
+      "leitura_pede_acao_alto": "a maioria da equipe avalia o esforço físico, cognitivo ou emocional exigido como elevado.",
       "items": [
         { "id": "ECHT.01", "text": "Usar força física", "polarity": "RISCO" },
         { "id": "ECHT.02", "text": "Usar os braços de forma contínua", "polarity": "RISCO" },
@@ -93,6 +101,10 @@
         "labels": { "1": "Nunca", "2": "Raramente", "3": "Às vezes", "4": "Frequentemente", "5": "Sempre" }
       },
       "thresholds": { "baixo_max": 24.75, "moderado_max": 47.5 },
+            "leitura_favoravel": "há poucos relatos de dores físicas ou sintomas emocionais associados ao trabalho.",
+      "leitura_muito_favoravel": "quase não há relato de dores físicas ou sintomas emocionais associados ao trabalho.",
+      "leitura_pede_acao_moderado": "parte da equipe relata dores físicas ou sintomas emocionais associados ao trabalho.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata dores físicas ou sintomas emocionais associados ao trabalho.",
       "items": [
         { "id": "EADRT.01", "text": "Dores no corpo", "polarity": "RISCO" },
         { "id": "EADRT.02", "text": "Dores nos braços", "polarity": "RISCO" },
@@ -134,6 +146,10 @@
         "labels": { "1": "Nunca", "2": "Raramente", "3": "Às vezes", "4": "Frequentemente", "5": "Sempre" }
       },
       "thresholds": { "baixo_max": 32.25, "moderado_max": 67.25 },
+            "leitura_favoravel": "colaboradores relatam satisfação, reconhecimento e liberdade para se expressar no dia a dia.",
+      "leitura_muito_favoravel": "colaboradores relatam satisfação, reconhecimento e liberdade para se expressar de forma consistente no dia a dia.",
+      "leitura_pede_acao_moderado": "parte da equipe relata pouca satisfação, reconhecimento ou liberdade de expressão no trabalho.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata pouca satisfação, reconhecimento ou liberdade de expressão no trabalho.",
       "items": [
         { "id": "EIPSTP.01", "text": "Satisfação", "polarity": "PROTETIVO" },
         { "id": "EIPSTP.02", "text": "Motivação", "polarity": "PROTETIVO" },
@@ -162,6 +178,10 @@
         "labels": { "1": "Nunca", "2": "Raramente", "3": "Às vezes", "4": "Frequentemente", "5": "Sempre" }
       },
       "thresholds": { "baixo_max": 32.25, "moderado_max": 67.25 },
+            "leitura_favoravel": "a equipe relata níveis baixos de esgotamento, frustração ou insegurança no dia a dia de trabalho.",
+      "leitura_muito_favoravel": "a equipe praticamente não relata esgotamento, frustração ou insegurança no dia a dia de trabalho.",
+      "leitura_pede_acao_moderado": "parte da equipe relata esgotamento, frustração ou insegurança no dia a dia de trabalho.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata esgotamento, frustração ou insegurança no dia a dia de trabalho.",
       "items": [
         { "id": "EIPSTN.01", "text": "Esgotamento emocional", "polarity": "RISCO" },
         { "id": "EIPSTN.02", "text": "Estresse", "polarity": "RISCO" },

@@ -30,7 +30,7 @@ CAMPOS_OBRIGATORIOS_PARECER = {
 class RelatorioForm(forms.ModelForm):
     class Meta:
         model = Relatorio
-        fields = ["tipo", "criterio_versao", "aplicacoes", "periodo_inicio", "periodo_fim"]
+        fields = ["criterio_versao", "aplicacoes", "periodo_inicio", "periodo_fim"]
         widgets = {
             "aplicacoes": forms.CheckboxSelectMultiple,
             "periodo_inicio": forms.DateInput(attrs={"type": "date"}),

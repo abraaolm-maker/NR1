@@ -150,6 +150,17 @@ def test_indice_geral_e_media_dos_dominios_ja_respondidos(aplicacao_copsoq):
     calcular_dominio(aplicacao_copsoq, dominio_d1)
 
     respondente.refresh_from_db()
+    # Ainda sem concluido_em (item 9 de SOLICITACOES_PENDENTES.md, 2026-08-06): resposta de
+    # quem não terminou o questionário inteiro nunca conta em nada, nem no índice geral.
+    assert respondente.indice_geral is None
+
+    # Simula a conclusão do questionário (na vida real isso acontece via _proximo_passo,
+    # avaliacoes/views.py, quando todos os domínios já foram respondidos).
+    respondente.concluido_em = timezone.now()
+    respondente.save(update_fields=["concluido_em"])
+    calcular_dominio(aplicacao_copsoq, dominio_d1)
+
+    respondente.refresh_from_db()
     assert respondente.indice_geral == Decimal("100.00")
 
     dominio_d3 = Dominio.objects.get(instrumento=aplicacao_copsoq.instrumento, codigo="D3")

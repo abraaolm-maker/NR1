@@ -112,7 +112,16 @@ por_banda, já somados pelo backend). PROIBIDO recalcular ou estimar essas conta
 cabeça na síntese executiva — cite exatamente os números de "resumo_contagens", inclusive \
 o total de domínios avaliados e quantos estão em cada banda. Nunca escreva uma contagem no \
 texto que não bata com esses valores; se precisar mencionar quais domínios estão em cada \
-banda, liste os nomes, mas o NÚMERO sempre vem literal de "resumo_contagens"."""
+banda, liste os nomes, mas o NÚMERO sempre vem literal de "resumo_contagens".
+
+12. Os campos "parecer" (em pareceres_por_dominio) e "justificativa" (em \
+riscos_prioritarios) devem ter NO MÁXIMO 1 frase curta cada — linguagem simples, direta e \
+conclusiva, sem repetir os números que já aparecem em outros campos do JSON (escore, \
+percentual, banda já são exibidos separadamente no PDF; não os repita em texto). PROIBIDO \
+incluir qualquer sugestão de ação, medida ou recomendação nesses dois campos especificamente \
+— eles descrevem só o que foi encontrado e por que é prioritário, nunca o que fazer. A \
+recomendação (medida a tomar) só pode aparecer no campo "medida_preventiva" (em \
+recomendacoes), nunca vazada pra dentro de "parecer" ou "justificativa"."""
 
 PARECER_TOOL = {
     "name": "gerar_parecer_tecnico",

@@ -14,10 +14,8 @@
         <div style="font-size: 14px; color: var(--slate-700); font-weight: 600;">
             {% if not etapa_parecer %}
                 Gere o parecer técnico via IA.
-            {% elif exige_planos_refinados and not etapa_planos_refinados %}
-                Refine os planos de ação via IA.
             {% elif not etapa_pdf %}
-                Gere o PDF.
+                Gere o PDF (escolha o formato abaixo).
             {% elif not tem_perfil %}
                 Cadastre seu perfil profissional pra poder assinar.
             {% else %}
@@ -26,7 +24,7 @@
         </div>
     </div>
     <a class="botao"
-        href="{% if not etapa_parecer %}#secao-parecer{% elif exige_planos_refinados and not etapa_planos_refinados %}#secao-planos{% elif not etapa_pdf %}#secao-pdf{% elif not tem_perfil %}{% url 'painel_relatorios:meu_perfil' %}{% else %}#secao-pdf{% endif %}">
+        href="{% if not etapa_parecer %}#secao-parecer{% elif not etapa_pdf %}#secao-pdf{% elif not tem_perfil %}{% url 'painel_relatorios:meu_perfil' %}{% else %}#secao-pdf{% endif %}">
         Ir para lá &darr;
     </a>
 </div>
@@ -34,15 +32,12 @@
 
 <div class="cartao" id="secao-tipo">
     <p>
-        Tipo deste relatório: <strong>{{ relatorio.get_tipo_display }}</strong>
+        Formato atual do PDF: <strong>{{ relatorio.get_tipo_display }}</strong>
         <span style="font-size: 12px; color: var(--slate-500);">
-            (fixo — não muda depois de criado.
-            {% if exige_planos_refinados %}
-                Este PDF inclui a Seção de Plano de Ação.
-            {% else %}
-                Este PDF NÃO inclui Plano de Ação — só o diagnóstico.
-            {% endif %}
-            Pra gerar o outro tipo, <a href="{% url 'painel_relatorios:relatorio_create' relatorio.unidade.pk %}">crie um novo relatório</a>.)
+            ({% if relatorio.pdf_path %}reflete o último PDF gerado.{% else %}nenhum PDF gerado ainda.{% endif %}
+            Este relatório pode ser gerado nos dois formatos, a qualquer momento, a partir da
+            seção "PDF" abaixo — gerar de novo num formato diferente substitui o arquivo atual,
+            não cria um segundo relatório.)
         </span>
     </p>
     <p>
@@ -191,9 +186,14 @@
     </p>
 </div>
 
-{% if exige_planos_refinados %}
 <div class="cartao" id="secao-planos">
     <h2>Planos de ação ({{ planos_de_acao|length }})</h2>
+    <p style="font-size: 12.5px; color: #777;">
+        Os planos abaixo existem independente do formato de PDF escolhido — só entram no
+        documento final se você gerar o PDF no formato "Diagnóstico + Plano de Ação"
+        (seção PDF, abaixo). Refinar com IA é opcional, mas obrigatório antes de gerar esse
+        formato especificamente.
+    </p>
     {% if planos_de_acao %}
     <table>
         <thead><tr><th>Código</th><th>GHE</th><th>Domínio</th><th>Banda</th><th>Medida</th></tr></thead>
@@ -202,7 +202,7 @@
             <tr>
                 <td>{{ plano.codigo|default:"—" }}</td>
                 <td>{{ plano.classificacao_risco.escore_dominio.aplicacao.ghe.nome }}</td>
-                <td>{{ plano.classificacao_risco.escore_dominio.dominio.codigo }}</td>
+                <td>{{ plano.classificacao_risco.escore_dominio.dominio.nome }}</td>
                 <td><span class="badge {{ plano.classificacao_risco.banda|slugify }}">{{ plano.classificacao_risco.banda }}</span></td>
                 <td>{{ plano.medida|truncatechars:100 }}</td>
             </tr>
@@ -226,16 +226,6 @@
     <p>Nenhum plano de ação gerado ainda para as aplicações deste relatório.</p>
     {% endif %}
 </div>
-{% else %}
-<div class="cartao" id="secao-planos">
-    <h2>Planos de ação</h2>
-    <p style="font-size: 12.5px; color: #777;">
-        Este relatório é do tipo <strong>Diagnóstico (sem Plano de Ação)</strong> — o PDF
-        gerado não inclui a Seção de Plano de Ação. Para entregar um documento com o
-        plano de ação, crie um novo relatório do tipo "Diagnóstico + Plano de Ação".
-    </p>
-</div>
-{% endif %}
 
 <div class="cartao" id="secao-pdf">
     <h2>PDF</h2>
@@ -255,18 +245,29 @@
     <p style="font-size: 12.5px; color: var(--amber-700); background: var(--amber-100); padding: 8px 12px; border-radius: 6px; margin-bottom: 10px;">
         Gere o parecer técnico via IA antes de gerar o PDF.
     </p>
-    {% elif exige_planos_refinados and not etapa_planos_refinados %}
-    <p style="font-size: 12.5px; color: var(--amber-700); background: var(--amber-100); padding: 8px 12px; border-radius: 6px; margin-bottom: 10px;">
-        Este relatório é Diagnóstico + Plano de Ação — refine os planos de ação via IA
-        (seção acima) antes de gerar o PDF.
-    </p>
     {% endif %}
+
     <form method="post" action="{% url 'painel_relatorios:relatorio_gerar_pdf' relatorio.pk %}" style="display:inline;" class="form-com-carregamento">
         {% csrf_token %}
-        <button type="submit" class="botao {% if not pode_gerar_pdf or etapa_pdf %}secundario{% endif %}" data-texto-carregando="Gerando PDF…" {% if not pode_gerar_pdf %}disabled{% endif %}>
-            {% if etapa_pdf %}Gerar PDF novamente{% else %}Gerar PDF{% endif %}
+        <input type="hidden" name="tipo" value="diagnostico">
+        <button type="submit" class="botao {% if not pode_gerar_pdf_diagnostico or etapa_pdf %}secundario{% endif %}" data-texto-carregando="Gerando PDF…" {% if not pode_gerar_pdf_diagnostico %}disabled{% endif %}>
+            Gerar PDF — Diagnóstico
         </button>
     </form>
+
+    <form method="post" action="{% url 'painel_relatorios:relatorio_gerar_pdf' relatorio.pk %}" style="display:inline;" class="form-com-carregamento">
+        {% csrf_token %}
+        <input type="hidden" name="tipo" value="diagnostico_plano_acao">
+        <button type="submit" class="botao {% if not pode_gerar_pdf_com_plano or etapa_pdf %}secundario{% endif %}" data-texto-carregando="Gerando PDF…" {% if not pode_gerar_pdf_com_plano %}disabled{% endif %}>
+            Gerar PDF — Diagnóstico + Plano de Ação
+        </button>
+    </form>
+    {% if etapa_parecer and not etapa_planos_refinados %}
+    <p style="font-size: 12.5px; color: var(--amber-700); margin-top: 8px;">
+        O botão "Diagnóstico + Plano de Ação" fica desabilitado até você refinar os planos de
+        ação via IA (seção "Planos de ação", acima).
+    </p>
+    {% endif %}
 
     {% if relatorio.status != "assinado" %}
         {% if not etapa_parecer %}
@@ -283,6 +284,10 @@
             (conselho + registro) antes de assinar.
         </p>
         {% else %}
+        <p style="font-size: 12.5px; color: var(--slate-500); margin-top: 12px;">
+            Assinar vai finalizar a versão atual do PDF: <strong>{{ relatorio.get_tipo_display }}</strong>.
+            Se quiser o outro formato, gere-o de novo (seção PDF, acima) antes de assinar.
+        </p>
         <form method="post" action="{% url 'painel_relatorios:relatorio_assinar' relatorio.pk %}" style="display:inline;" class="form-com-carregamento"
             onsubmit="return confirm('Assinar este relatório? Isso marca o documento como final (não é possível desfazer pelo painel).');">
             {% csrf_token %}

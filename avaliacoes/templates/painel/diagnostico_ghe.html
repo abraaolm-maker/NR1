@@ -55,7 +55,7 @@
                 <td>{{ linha.dominio }}</td>
                 <td>{{ linha.n }}</td>
                 <td>{{ linha.escore|default:"—"|floatformat:1 }}</td>
-                <td>{% if linha.percentual_elevados is not None %}{{ linha.percentual_elevados|floatformat:0 }}%{% else %}—{% endif %}</td>
+                <td>{% if linha.percentual_elevados is not None %}{% widthratio linha.percentual_elevados 1 100 %}%{% else %}—{% endif %}</td>
                 <td>{{ linha.classificacao }}</td>
                 <td>
                     {% if linha.prioridade == "P1" %}

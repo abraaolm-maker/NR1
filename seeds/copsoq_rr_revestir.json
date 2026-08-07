@@ -19,6 +19,10 @@
     {
       "code": "D1",
       "name": "Exigências do trabalho",
+            "leitura_favoravel": "o ritmo e o volume de tarefas relatados estão dentro de um nível administrável.",
+      "leitura_muito_favoravel": "quase ninguém relata ritmo acelerado, prazos apertados ou interrupções constantes.",
+      "leitura_pede_acao_moderado": "parte da equipe relata ritmo acelerado ou prazos apertados com frequência.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata ritmo acelerado, prazos apertados e interrupções constantes.",
       "items": [
         { "id": "D1.1", "text": "Preciso manter um ritmo de trabalho muito acelerado em relação ao tempo que tenho disponível.", "polarity": "RISCO" },
         { "id": "D1.2", "text": "Sinto pressão por prazos para concluir minhas atividades do dia a dia.", "polarity": "RISCO" },
@@ -30,6 +34,10 @@
     {
       "code": "D2",
       "name": "Exigências emocionais",
+            "leitura_favoravel": "a equipe relata baixo desgaste emocional no contato com clientes, fornecedores ou colegas.",
+      "leitura_muito_favoravel": "a equipe praticamente não relata lidar com tensão, conflito ou desgaste emocional no dia a dia.",
+      "leitura_pede_acao_moderado": "parte da equipe relata desgaste emocional recorrente no contato com clientes ou colegas.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata desgaste emocional recorrente e situações de tensão frequentes.",
       "items": [
         { "id": "D2.1", "text": "Preciso lidar com clientes, fornecedores ou colegas em situações de tensão, cobrança ou conflito.", "polarity": "RISCO" },
         { "id": "D2.2", "text": "Preciso controlar minhas emoções para manter um bom atendimento mesmo quando estou sob pressão.", "polarity": "RISCO" },
@@ -40,6 +48,10 @@
     {
       "code": "D3",
       "name": "Autonomia e controle",
+            "leitura_favoravel": "colaboradores relatam ter liberdade para organizar suas tarefas e fazer pausas básicas sem prejuízo ao trabalho.",
+      "leitura_muito_favoravel": "colaboradores relatam autonomia consistente para organizar tarefas, prioridades e pausas.",
+      "leitura_pede_acao_moderado": "parte da equipe relata pouca liberdade para organizar o próprio trabalho.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata pouca liberdade para organizar o próprio trabalho e fazer pausas.",
       "items": [
         { "id": "D3.1", "text": "Tenho autonomia para organizar a ordem das minhas atividades e definir prioridades.", "polarity": "PROTETIVO" },
         { "id": "D3.2", "text": "Consigo fazer pausas básicas (banheiro, água, descanso curto) sem prejuízo pro meu trabalho.", "polarity": "PROTETIVO" },
@@ -50,6 +62,10 @@
     {
       "code": "D4",
       "name": "Sentido e significado do trabalho",
+            "leitura_favoravel": "colaboradores relatam entender bem seu papel e ver sentido no que fazem.",
+      "leitura_muito_favoravel": "a equipe relata clareza forte sobre seu papel e sente que o trabalho tem propósito real.",
+      "leitura_pede_acao_moderado": "parte da equipe relata pouca clareza sobre o próprio papel ou sentido no trabalho.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata falta de clareza sobre o próprio papel ou sentido no trabalho.",
       "items": [
         { "id": "D4.1", "text": "Sinto que o meu trabalho contribui pro funcionamento seguro e organizado da empresa.", "polarity": "PROTETIVO" },
         { "id": "D4.2", "text": "As atividades que realizo no dia a dia são coerentes com as responsabilidades da minha função.", "polarity": "PROTETIVO" },
@@ -59,6 +75,10 @@
     {
       "code": "D5",
       "name": "Reconhecimento e recompensa",
+            "leitura_favoravel": "colaboradores relatam reconhecimento e recursos compatíveis com o que é exigido deles.",
+      "leitura_muito_favoravel": "colaboradores relatam reconhecimento consistente pelo esforço, com recursos adequados para entregar o que é pedido.",
+      "leitura_pede_acao_moderado": "parte da equipe relata pouco reconhecimento ou recursos insuficientes para o que é exigido.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata pouco reconhecimento e recursos insuficientes para o que é exigido.",
       "items": [
         { "id": "D5.1", "text": "Recebo reconhecimento proporcional às responsabilidades que assumo no dia a dia.", "polarity": "PROTETIVO" },
         { "id": "D5.2", "text": "O feedback que recebo sobre meu desempenho é claro, respeitoso e ajuda a melhorar meu trabalho.", "polarity": "PROTETIVO" },
@@ -69,6 +89,10 @@
     {
       "code": "D6",
       "name": "Relações sociais e liderança",
+            "leitura_favoravel": "a equipe relata suporte da liderança e boas relações no dia a dia.",
+      "leitura_muito_favoravel": "a equipe relata suporte forte da liderança e um ambiente cooperativo, sem conflitos mal resolvidos.",
+      "leitura_pede_acao_moderado": "parte da equipe relata pouco suporte da liderança ou relações difíceis no dia a dia.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata pouco suporte da liderança e relações difíceis no dia a dia.",
       "items": [
         { "id": "D6.1", "text": "Minha liderança me dá suporte quando estou sobrecarregado ou com dificuldades operacionais.", "polarity": "PROTETIVO" },
         { "id": "D6.2", "text": "Consigo me comunicar facilmente com minha liderança para resolver problemas do dia a dia.", "polarity": "PROTETIVO" },
@@ -79,6 +103,10 @@
     {
       "code": "D7",
       "name": "Segurança psicológica",
+            "leitura_favoravel": "colaboradores relatam segurança para relatar erros e discordar de decisões quando necessário.",
+      "leitura_muito_favoravel": "colaboradores relatam total liberdade para relatar erros e discordar sem medo de represália.",
+      "leitura_pede_acao_moderado": "parte da equipe relata receio de relatar erros ou discordar de decisões.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata receio de relatar erros ou discordar de decisões.",
       "items": [
         { "id": "D7.1", "text": "Posso relatar erros, quase-erros ou dificuldades sem medo de ser punido injustamente.", "polarity": "PROTETIVO" },
         { "id": "D7.2", "text": "Posso discordar de uma orientação quando percebo risco de erro, acidente ou problema, sem medo de represália.", "polarity": "PROTETIVO" },
@@ -88,6 +116,10 @@
     {
       "code": "D8",
       "name": "Justiça organizacional",
+            "leitura_favoravel": "colaboradores relatam critérios razoavelmente claros e justos na distribuição de tarefas e mudanças.",
+      "leitura_muito_favoravel": "colaboradores relatam critérios claros e igualdade de tratamento em escalas, metas e mudanças.",
+      "leitura_pede_acao_moderado": "parte da equipe relata critérios pouco claros ou desiguais em escalas e metas.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata critérios pouco claros ou desiguais em escalas e metas.",
       "items": [
         { "id": "D8.1", "text": "As escalas, folgas e a distribuição de tarefas seguem critérios claros e equilibrados.", "polarity": "PROTETIVO" },
         { "id": "D8.2", "text": "As regras e cobranças são aplicadas igualmente pra todo mundo, sem favorecimento.", "polarity": "PROTETIVO" },
@@ -98,6 +130,10 @@
       "code": "D9",
       "name": "Violência, assédio e discriminação",
       "note": "Domínio de polaridade mista - D9.1/D9.2 são RISCO, D9.3/D9.4 são PROTETIVO. Inverter item a item, nunca no agregado.",
+            "leitura_favoravel": "não há relato relevante de violência, assédio ou discriminação neste ciclo.",
+      "leitura_muito_favoravel": "não há relato de violência, assédio ou discriminação, e a equipe confia no canal de denúncia disponível.",
+      "leitura_pede_acao_moderado": "há relato de situação de violência, assédio ou discriminação que exige atenção.",
+      "leitura_pede_acao_alto": "há relatos frequentes de violência, assédio ou discriminação que exigem atenção.",
       "items": [
         { "id": "D9.1", "text": "Já sofri agressão verbal, ameaça ou intimidação de cliente, fornecedor, terceiro ou colega durante o trabalho.", "polarity": "RISCO", "evento_grave": true },
         { "id": "D9.2", "text": "Já presenciei ou sofri assédio moral, humilhação, exposição pública ou cobrança vexatória no trabalho.", "polarity": "RISCO", "evento_grave": true },

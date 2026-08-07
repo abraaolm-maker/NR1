@@ -1,0 +1,30 @@
+<div class="cartao" id="card-respondentes">
+    <h2>Respondentes ({{ respondentes|length }})</h2>
+    {% if respondentes %}
+    <table>
+        <thead><tr><th>Alias</th><th>Tempo na organização</th><th>Modalidade</th><th>Status</th></tr></thead>
+        <tbody>
+        {% for respondente in respondentes %}
+            <tr>
+                <td>{{ respondente.alias_anonimo }}</td>
+                <td>{{ respondente.get_tempo_na_organizacao_display|default:"—" }}</td>
+                <td>{{ respondente.get_modalidade_trabalho_display|default:"—" }}</td>
+                <td>
+                    {% if respondente.concluido_em %}
+                        <span class="badge aceitavel">Respondeu</span>
+                    {% else %}
+                        <span class="badge" style="background:#ddd; color:#555;">Pendente</span>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <p style="font-size: 11.5px; color: #888; margin-top: 8px;">
+        Por privacidade, não mostramos o horário exato de resposta — combinado com a ordem em que
+        as pessoas foram convidadas, isso poderia permitir identificar quem respondeu o quê.
+    </p>
+    {% else %}
+    <p>Ninguém respondeu ainda. Distribua o link acima.</p>
+    {% endif %}
+</div>

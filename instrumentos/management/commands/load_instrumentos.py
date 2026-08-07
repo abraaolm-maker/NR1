@@ -89,6 +89,13 @@ class Command(BaseCommand):
                     "referencia_media_nacional": _decimal(referencia["media"]) if referencia else None,
                     "referencia_desvio_padrao": _decimal(referencia["dp"]) if referencia else None,
                     "ordem": ordem_dominio,
+                    # Textos fixos do Panorama/glossário (itens 14/15/18 de
+                    # SOLICITACOES_PENDENTES.md) — opcionais no seed, nunca gerados por IA.
+                    "descricao_medicao": dominio_entry.get("descricao_medicao", ""),
+                    "leitura_favoravel": dominio_entry.get("leitura_favoravel", ""),
+                    "leitura_muito_favoravel": dominio_entry.get("leitura_muito_favoravel", ""),
+                    "leitura_pede_acao_moderado": dominio_entry.get("leitura_pede_acao_moderado", ""),
+                    "leitura_pede_acao_alto": dominio_entry.get("leitura_pede_acao_alto", ""),
                 },
             )
             total_dominios += 1

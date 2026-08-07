@@ -3,6 +3,7 @@
 import pytest
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
+from django.utils import timezone
 
 from avaliacoes.models import (
     GHE,
@@ -75,7 +76,15 @@ def responder_dominio():
     def _responder(aplicacao, dominio_codigo, valores_por_item, n_respondentes):
         dominio = Dominio.objects.get(instrumento=aplicacao.instrumento, codigo=dominio_codigo)
         for i in range(n_respondentes):
-            respondente = Respondente.objects.create(aplicacao=aplicacao, alias_anonimo=f"Respondente {i}")
+            # `concluido_em` precisa estar preenchido pra contar em calcular_dominio()
+            # desde 2026-08-06 (item 9 de SOLICITACOES_PENDENTES.md — respostas de
+            # quem não terminou o questionário inteiro nunca entram em nenhum
+            # cálculo). Este helper simula "respondeu e terminou", não uma resposta
+            # parcial — testes que precisam simular abandono devem criar o
+            # Respondente manualmente, sem concluido_em.
+            respondente = Respondente.objects.create(
+                aplicacao=aplicacao, alias_anonimo=f"Respondente {i}", concluido_em=timezone.now()
+            )
             for item in dominio.itens.all():
                 Resposta.objects.create(
                     respondente=respondente, item=item, valor_bruto=valores_por_item[item.item_id]

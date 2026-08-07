@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Dominio, Instrumento, Item
+from .models import Dominio, Instrumento, Item, ReferenciaTeorica
 
 
 class ItemInline(admin.TabularInline):
@@ -27,3 +27,9 @@ class ItemAdmin(admin.ModelAdmin):
     list_display = ("item_id", "dominio", "polaridade", "evento_grave")
     list_filter = ("dominio__instrumento", "polaridade", "evento_grave")
     search_fields = ("item_id", "texto")
+
+
+@admin.register(ReferenciaTeorica)
+class ReferenciaTeoricaAdmin(admin.ModelAdmin):
+    list_display = ("titulo", "ordem")
+    ordering = ("ordem", "titulo")

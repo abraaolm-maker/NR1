@@ -27,11 +27,13 @@ reescrita de template foi necessária pra migrar."""
 
 from __future__ import annotations
 
+import base64
 import hashlib
 import json
 import re
 from pathlib import Path
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from django.template.loader import render_to_string
@@ -41,6 +43,7 @@ from playwright.sync_api import sync_playwright
 from avaliacoes.models import ConformidadeChecklist, RespostaChecklistTriangulacao
 from avaliacoes.services.calculo_risco import BANDA_ORDEM, criterio_classificacao_linhas, media_nacional_comparavel
 from avaliacoes.services.semaforo import calcular_semaforo, leitura_resumida
+from instrumentos.models import Dominio, ReferenciaTeorica
 from relatorios.models import Relatorio, StatusRelatorio, TipoRelatorio
 
 PAGEDJS_PATH = Path(__file__).resolve().parent.parent / "vendor" / "paged.polyfill.js"
@@ -153,8 +156,13 @@ def _parecer_para_exibicao(parecer_ia: dict | None, ghes: list[dict]) -> dict | 
     nomes = _mapa_nomes_dominio(ghes)
 
     def _rotulo(codigo: str) -> str:
-        nome = nomes.get(codigo)
-        return f"{nome} ({codigo})" if nome else codigo
+        return nomes.get(codigo, codigo)
+
+    # (ghe.nome, dominio.codigo) -> dado do EscoreDominio/ClassificacaoRisco, pra anexar
+    # números reais (determinísticos) a cada achado, sem depender da IA pra isso.
+    dados_por_chave = {
+        (item["ghe"].nome, d["escore_dominio"].dominio.codigo): d for item in ghes for d in item["dominios"]
+    }
 
     ghes_distintos = {p.get("ghe") for p in parecer_ia.get("pareceres_por_dominio", [])}
     mostrar_ghe = len(ghes_distintos) > 1
@@ -173,17 +181,28 @@ def _parecer_para_exibicao(parecer_ia: dict | None, ghes: list[dict]) -> dict | 
         if banda == "Aceitável":
             continue
         risco = riscos_por_chave.get(chave, {})
-        recomendacao = recomendacoes_por_chave.get(chave, {})
+        dado_dominio = dados_por_chave.get(chave)
         achados.append(
             {
                 "ghe": chave[0],
                 "dominio_rotulo": _rotulo(chave[1] or ""),
-                "banda": banda or risco.get("banda") or recomendacao.get("banda", ""),
+                "banda": banda or risco.get("banda", ""),
                 "o_que_foi_encontrado": parecer.get("parecer", ""),
-                "por_que_e_prioritario": risco.get("justificativa", ""),
-                "o_que_fazer": recomendacao.get("medida_preventiva", ""),
+                "escore": dado_dominio["escore_dominio"].escore if dado_dominio else None,
+                "percentual_elevados": dado_dominio["escore_dominio"].percentual_elevados if dado_dominio else None,
+                "prazo_dias": (
+                    dado_dominio["classificacao_risco"].prazo_dias_plano_de_acao
+                    if dado_dominio and dado_dominio["classificacao_risco"]
+                    else None
+                ),
             }
         )
+
+    # Do mais grave pro menos grave (pedido do usuário) — BANDA_ORDEM já é usado com essa
+    # mesma finalidade em outros pontos (ex. ordenação do Plano de Ação). Substitui o
+    # antigo `dictsortreversed:"banda"` do template, que ordenava alfabeticamente, não
+    # por gravidade (bug real: dava "Moderado, Crítico, Alto").
+    achados.sort(key=lambda a: BANDA_ORDEM.get(a["banda"], 0), reverse=True)
 
     return {
         "sintese_executiva": parecer_ia.get("sintese_executiva", ""),
@@ -267,6 +286,7 @@ def _montar_panorama(ghes: list[dict]) -> dict:
     dominios_ja_contados_n = set()
 
     for item in ghes:
+        limite_baixo = float(item["aplicacao"].criterio_versao.limite_baixo)
         for d in item["dominios"]:
             escore_dominio = d["escore_dominio"]
             chave_n = (item["aplicacao"].pk,)
@@ -287,10 +307,37 @@ def _montar_panorama(ghes: list[dict]) -> dict:
                 "dominio_nome": escore_dominio.dominio.nome,
                 "banda": banda,
                 "banda_css": d["banda_css"],
+                "prazo_dias": cr.prazo_dias_plano_de_acao if cr else None,
             }
-            if banda == "Aceitável":
+            # Item 14 (SOLICITACOES_PENDENTES.md): só entra em "protegendo" se Banda
+            # Aceitável E Classificação Baixo — Banda e Classificação são cálculos
+            # independentes e podem divergir em casos raros (itens 9/10 desta fila);
+            # nunca mostrar "favorável"/"muito positivo" ao lado de um resultado
+            # tecnicamente Moderado. Dentro de "Aceitável+Baixo", 2 níveis de leitura
+            # pelo escore: <= metade do limite_baixo do critério = "muito positivo",
+            # senão "favorável".
+            if banda == "Aceitável" and escore_dominio.classificacao == "Baixo":
+                dominio = escore_dominio.dominio
+                if float(escore_dominio.escore) <= limite_baixo / 2:
+                    entrada["leitura"] = dominio.leitura_muito_favoravel or dominio.leitura_favoravel
+                else:
+                    entrada["leitura"] = dominio.leitura_favoravel
                 protegendo.append(entrada)
             else:
+                # Item 15 (SOLICITACOES_PENDENTES.md): leitura fixa por banda — Crítico
+                # nunca vem de prevalência (só evento grave confirmado), então não tem
+                # frase por domínio, reaproveita uma frase genérica sobre o evento.
+                dominio = escore_dominio.dominio
+                if banda == "Crítico":
+                    entrada["leitura"] = (
+                        "relato confirmado de evento grave (violência, ameaça, assédio "
+                        "moral ou discriminação) exige resposta imediata, independente "
+                        "da prevalência."
+                    )
+                elif banda == "Alto":
+                    entrada["leitura"] = dominio.leitura_pede_acao_alto
+                elif banda == "Moderado":
+                    entrada["leitura"] = dominio.leitura_pede_acao_moderado
                 frentes_atencao.append(entrada)
                 pede_acao.append(entrada)
 
@@ -310,8 +357,25 @@ def _montar_panorama(ghes: list[dict]) -> dict:
             contagem_bandas[NIVEL_GERAL_POR_BANDA.get(entrada["banda"], "Baixo")] += 1
         nivel_geral_risco = max(contagem_bandas, key=lambda k: (contagem_bandas[k], ORDEM_BANDA_GERAL[k]))
 
+    # Item 16 (SOLICITACOES_PENDENTES.md): card "Frentes de atenção" passa a citar os
+    # domínios de verdade (as 3 mais graves, ordenadas por BANDA_ORDEM — Crítico > Alto >
+    # Moderado) em vez de um texto genérico, e calcula um prazo real a partir dos prazos
+    # já computados por domínio (nunca um número inventado).
+    frentes_ordenadas = sorted(frentes_atencao, key=lambda f: BANDA_ORDEM.get(f["banda"], 0), reverse=True)
+    frentes_destaque = frentes_ordenadas[:3]
+    frentes_resto = max(0, len(frentes_ordenadas) - 3)
+    tem_frente_critica = any(f["banda"] == "Crítico" for f in frentes_atencao)
+    prazos = [f["prazo_dias"] for f in frentes_atencao if f["prazo_dias"] is not None]
+    prazo_min = min(prazos) if prazos else None
+    prazo_max = max(prazos) if prazos else None
+
     return {
         "indice_consolidado": indice_consolidado,
+        "frentes_destaque": frentes_destaque,
+        "frentes_resto": frentes_resto,
+        "tem_frente_critica": tem_frente_critica,
+        "prazo_min": prazo_min,
+        "prazo_max": prazo_max,
         "nivel_geral_risco": nivel_geral_risco,
         "nivel_geral_risco_css": NIVEL_GERAL_CSS.get(nivel_geral_risco, ""),
         "n_participantes": n_respondentes_total,
@@ -408,9 +472,40 @@ def _contexto_relatorio(relatorio: Relatorio, minuta: bool) -> dict:
     if relatorio.assinado_por is not None:
         perfil_assinante = getattr(relatorio.assinado_por, "perfil_profissional", None)
 
+    # Imagem da assinatura embutida como data URI (2026-08-06) — o PDF é gerado via
+    # `page.set_content(html)` (mais abaixo), sem URL base nenhuma, então uma
+    # `<img src="/media/...">` comum não teria como ser resolvida pelo Chromium
+    # headless. Embutindo os bytes como base64 direto no HTML, a imagem funciona sem
+    # depender do Django servir `/media/` pro próprio processo que gera o PDF.
+    assinatura_imagem_data_uri = None
+    if perfil_assinante is not None and perfil_assinante.assinatura_imagem:
+        with perfil_assinante.assinatura_imagem.open("rb") as arquivo:
+            assinatura_imagem_data_uri = f"data:image/png;base64,{base64.b64encode(arquivo.read()).decode()}"
+
     linhas_semaforo = calcular_semaforo(list(relatorio.aplicacoes.select_related("criterio_versao").all()))
     resumo_semaforo = leitura_resumida(linhas_semaforo)
     n_total_semaforo = max((linha["n_respondentes"] for linha in linhas_semaforo), default=0)
+
+    # Seções 07/08 (Triangulação) só valem a pena imprimir se pelo menos um GHE tiver
+    # dado — sem isso, a seção só mostrava "Nenhuma evidência complementar registrada"
+    # pra cada GHE, ocupando espaço sem informação nenhuma (pedido do usuário,
+    # 2026-08-06). Numeração da fita (eyebrow) não é recalculada dinamicamente quando
+    # uma seção some — decisão deliberada, ver CLAUDE.md.
+    tem_evidencias_complementares = any(item["indicadores"] for item in ghes)
+    tem_checklist_triangulacao = any(item["checklist_triangulacao"] for item in ghes)
+
+    panorama = _montar_panorama(ghes)
+
+    # Glossário de domínios (item 18 de SOLICITACOES_PENDENTES.md): lista única, sem
+    # repetir entre GHEs, dos domínios realmente usados neste relatório.
+    dominios_avaliados = list(
+        {
+            d["escore_dominio"].dominio_id: d["escore_dominio"].dominio
+            for item in ghes
+            for d in item["dominios"]
+        }.values()
+    )
+    dominios_avaliados.sort(key=lambda dom: dom.ordem)
 
     return {
         "relatorio": relatorio,
@@ -419,6 +514,7 @@ def _contexto_relatorio(relatorio: Relatorio, minuta: bool) -> dict:
         "ghes": ghes,
         "minuta": minuta,
         "perfil_assinante": perfil_assinante,
+        "assinatura_imagem_data_uri": assinatura_imagem_data_uri,
         "criterio_classificacao_linhas": _criterio_classificacao_linhas(relatorio.criterio_versao),
         "planos_ordenados": _planos_ordenados(ghes),
         "dominios_criticos_evento_grave": _dominios_criticos_por_evento_grave(ghes),
@@ -426,10 +522,18 @@ def _contexto_relatorio(relatorio: Relatorio, minuta: bool) -> dict:
         "linhas_semaforo": linhas_semaforo,
         "resumo_semaforo": resumo_semaforo,
         "n_total_semaforo": n_total_semaforo,
-        "panorama": _montar_panorama(ghes),
+        "panorama": panorama,
         "contador_supressao": _contador_supressao(ghes),
         "hash_integridade": _hash_integridade(relatorio, ghes),
         "gerado_em": timezone.now(),
+        "tem_evidencias_complementares": tem_evidencias_complementares,
+        "tem_checklist_triangulacao": tem_checklist_triangulacao,
+        # Capa (item 13 de SOLICITACOES_PENDENTES.md): identidade da empresa prestadora vem de
+        # settings, nunca hardcoded no template — o nome "CRARP" é provisório e vai mudar.
+        "nome_empresa_prestadora": settings.NOME_EMPRESA_PRESTADORA,
+        "servicos_empresa_prestadora": settings.SERVICOS_EMPRESA_PRESTADORA,
+        "referencias_teoricas": ReferenciaTeorica.objects.order_by("ordem"),
+        "dominios_avaliados": dominios_avaliados,
     }
 
 

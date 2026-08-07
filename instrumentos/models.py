@@ -69,6 +69,33 @@ class Dominio(models.Model):
         help_text="Desvio-padrão da média nacional publicada, mesma fonte/ressalva.",
     )
     ordem = models.PositiveSmallIntegerField(default=0)
+    descricao_medicao = models.TextField(
+        blank=True,
+        help_text="Frase curta e neutra explicando o que este domínio mede — sempre a "
+        "mesma, independente do resultado do ciclo. Usada no glossário de domínios "
+        "(Seção 02, Base técnica, do relatório em PDF).",
+    )
+    leitura_favoravel = models.TextField(
+        blank=True,
+        help_text="Frase curta pra quando o domínio está na faixa Aceitável mas mais "
+        "perto do limite (Panorama, 'O que está protegendo').",
+    )
+    leitura_muito_favoravel = models.TextField(
+        blank=True,
+        help_text="Frase curta pra quando o domínio está bem dentro da faixa Aceitável "
+        "(a maioria das respostas muito baixa/muito protetiva) — mesma seção, tom mais "
+        "forte que leitura_favoravel.",
+    )
+    leitura_pede_acao_moderado = models.TextField(
+        blank=True,
+        help_text="Frase curta pra quando este domínio está em Banda Moderado "
+        "(Panorama, 'O que pede ação').",
+    )
+    leitura_pede_acao_alto = models.TextField(
+        blank=True,
+        help_text="Frase curta pra quando este domínio está em Banda Alto (Panorama, "
+        "'O que pede ação').",
+    )
 
     class Meta:
         constraints = [
@@ -127,3 +154,19 @@ class Item(models.Model):
 
     def __str__(self) -> str:
         return f"{self.item_id} ({self.dominio})"
+
+
+class ReferenciaTeorica(models.Model):
+    """Referências teóricas citadas na Base técnica (Seção 02) do relatório em PDF —
+    cadastrável via Admin pra permitir adicionar outras com o tempo (pedido do usuário,
+    item 17 de SOLICITACOES_PENDENTES.md), em vez de ficar hardcoded no template."""
+
+    titulo = models.CharField(max_length=200, help_text='Ex.: "Modelo Demanda-Controle-Suporte (Karasek & Theorell)".')
+    descricao = models.TextField(help_text='Ex.: "Equilíbrio entre exigências do trabalho e recursos disponíveis ao trabalhador."')
+    ordem = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ["ordem", "titulo"]
+
+    def __str__(self) -> str:
+        return self.titulo

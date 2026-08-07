@@ -2146,6 +2146,12 @@ acompanha). Suíte completa reexecutada após a mudança.
 
 ## 6.18 Separação de tipos de Relatório: Diagnóstico vs. Diagnóstico + Plano de Ação (2026-08-05)
 
+> **Superado em 2026-08-06, ver Seção 6.26, item 11**: a escolha de tipo deixou de ser fixa na
+> criação ("não é editável depois... crie um novo Relatorio", texto original abaixo) — agora os
+> dois formatos ficam disponíveis a qualquer momento na tela do Relatório. O modelo (`TipoRelatorio`,
+> Seções do PDF condicionais ao tipo) continua o mesmo, só a trava de imutabilidade foi removida.
+> Texto original mantido como registro histórico de por que a separação em si foi criada.
+
 > Pedido do usuário em 2026-08-04, a partir de um print de proposta comercial: a empresa cobra
 > Aplicação, Diagnóstico e Plano de Ação como 3 serviços separados, mas o sistema só gerava um
 > único PDF com tudo junto — não havia como entregar só o diagnóstico. Implementado depois de o
@@ -2553,6 +2559,213 @@ agrupamento só aparece quando há mais de 1 GHE no relatório.
 Validação end-to-end repetida com o mesmo documento real de 13 páginas,
 confirmando visualmente (não só por teste automatizado) que os dois bugs
 críticos foram corrigidos e os 5 ajustes visuais renderizam corretamente.
+
+---
+
+## 6.26 Lote de 12 correções/ajustes registrados em `SOLICITACOES_PENDENTES.md` (2026-08-06)
+
+> O usuário pediu um novo fluxo de trabalho: acumular pedidos numa conversa longa num arquivo
+> `.md` de fila (`SOLICITACOES_PENDENTES.md`, na raiz do projeto), cada um já traduzido em
+> especificação executável, e só implementar quando mandado. Depois de 12 itens acumulados, pediu
+> a execução em 3 etapas — (1) priorizar ordem respeitando dependências, (2) executar os ajustes,
+> (3) rodar testes depois, separadamente. Esta seção documenta a Etapa 2 (implementação); a Etapa
+> 3 (suíte de testes) fica registrada como pendência explícita no próprio `SOLICITACOES_PENDENTES.md`.
+> Detalhamento completo de cada item (diagnóstico, relação com decisões anteriores, especificação
+> linha a linha) está no `.md` — aqui vai só o resumo do que mudou e onde.
+
+**Ordem de execução** (2 dependências reais: item 5 antes do 8, item 9 antes do 10):
+
+1. **Fuso horário**: `crarp/settings.py::TIME_ZONE` de `'UTC'` pra `'America/Sao_Paulo'` — só
+   afetava exibição (`USE_TZ=True` continua gravando tudo em UTC no banco).
+2. **Bug: Classificação do COPSOQ Oficial sempre "Elevado"**: `seeds/copsoq_oficial.json` tinha os
+   35 subescalas com `baixo_max`/`moderado_max` na escala antiga 1–5 (2,33/3,66, tercis do manual)
+   sendo comparados contra um escore sempre 0–100 — corrigido pra 33,25/66,5
+   (`(valor-1)/4*100`). Como `CriterioVersao` é imutável (Seção 7.8), a correção só vale pra uma
+   versão nova: `entrypoint.sh` ganhou um segundo `criar_criterio_versao --codigo v1.1` (idempotente
+   via `|| true`), criada localmente também. Aplicações já calculadas sob v1.0 continuam v1.0 de
+   propósito — rastreabilidade.
+3. **`Respondente.concluido_em` deixa de exigir a etapa de perguntas abertas + respostas parciais
+   nunca contam em nenhum cálculo**: achado investigando um caso real (Aplicacao #3: 11
+   respondentes, painel mostrava 9 concluídos, relatório mostrava até 11 por domínio) — um
+   respondente que respondeu tudo (76/76) nunca era marcado concluído só por não ter passado pela
+   telinha opcional final. `avaliacoes/views.py::_proximo_passo` agora grava `concluido_em` assim
+   que todos os domínios são respondidos (as 3 guardas `if respondente.concluido_em:` em
+   `responder_perfil`/`responder_pergunta`/`responder_perguntas_abertas` passaram a exigir também
+   `perguntas_abertas_respondidas_em`, senão a pessoa pularia a etapa final). Pedido adicional do
+   usuário: quem parou no meio (resposta parcial) nunca deve contar em nada — `calcular_dominio`
+   (`avaliacoes/services/calculo_risco.py`) agora filtra `respondente__concluido_em__isnull=False`;
+   se ninguém do domínio terminou ainda, a função não levanta mais erro (estado normal durante a
+   coleta), só não persiste nada ainda. Duas lacunas fechadas: `_recalcular_dominios_do_respondente`
+   recalcula os domínios do próprio respondente no instante em que ele termina (senão a última
+   resposta dele ficaria de fora do domínio que acabou de responder); `encerrar_coleta`
+   (`avaliacoes/services/aplicacao_status.py`) recalcula tudo de novo no fechamento da coleta,
+   garantindo que o relatório final nunca herde um estado intermediário.
+4. **Bug: coluna "% elevados" do Diagnóstico GHE sempre 0% ou 1%**: `diagnostico_ghe.html`
+   aplicava `floatformat:0` direto numa fração 0–1 sem multiplicar por 100 — trocado por
+   `{% widthratio valor 1 100 %}%`, mesmo padrão já usado no PDF.
+5. **Privacidade: alias deixa de ser sequencial + timestamps exatos escondidos**: alias virou um
+   número aleatório de 4 dígitos (`avaliacoes/views.py::_gerar_alias_anonimo`, com checagem de
+   colisão), em vez de `count()+1` (que era literalmente a ordem de chegada de quem começou a
+   responder primeiro). `pontuacao_anonima` (`avaliacoes/painel_views.py`) parou de ordenar por
+   `criado_em` (agora por `alias_anonimo`) e a tela (`pontuacao_anonima.html`) parou de mostrar a
+   data de cadastro ao lado do mapa de calor individual. `aplicacao_detail.html` trocou as colunas
+   "Consentiu"/"Concluiu" (timestamp exato) por um badge "Respondeu"/"Pendente" sem hora.
+6. **Tempo real em "Respondentes" e "Resultados por domínio"**: sem infraestrutura de WebSocket no
+   projeto (WSGI síncrono, sem Channels/Redis), implementado como polling JS puro — os dois cards
+   viraram parciais reutilizáveis (`templates/painel/_partials/respondentes_card.html` e
+   `resultados_dominio_card.html`), servidos também por um novo endpoint JSON
+   (`avaliacoes:aplicacao_live`, `avaliacoes/painel_views.py::aplicacao_live`) chamado a cada 10s
+   via `fetch()` enquanto a Aplicacao está `em_andamento` e a aba está em foco
+   (`document.visibilitychange`).
+7. **Coluna "Média nacional" removida do painel** (`aplicacao_detail.html`) — já tinha sido
+   removida do PDF na Seção 6.25; a comparação com a média de Portugal não fazia sentido pra
+   realidade brasileira. `media_nacional_comparavel()` continua existindo (usada só no contexto do
+   PDF, que já não a exibe) e seus 4 testes dedicados não foram tocados.
+8. **Siglas de domínio removidas do PDF, sempre nome completo**: 10 pontos em `inventario.html`
+   (Panorama, Metodologia, Seção 5, gráfico semáforo, evidências complementares, Plano de ação)
+   trocaram `{{ dominio.codigo }} — {{ dominio.nome }}` por só `{{ dominio.nome }}`. `plano.codigo`
+   (o ID do próprio Plano de Ação, tipo "A01") não foi tocado — não é sigla de domínio. `.label-dominio`
+   (rótulo do gráfico semáforo) precisou de mais espaço (`width: 212px` → `250px`, `font-size` menor)
+   pra caber nomes completos do COPSOQ Oficial.
+9. **Texto do PDF justificado**: `text-align: justify` + `text-align-last: left` no `body` do
+   `inventario.html` — as regras mais específicas já existentes (capa, escala do gráfico, rótulo de
+   domínio, assinatura) continuam com o alinhamento próprio delas por especificidade de CSS.
+10. **Seções 07/08 "Triangulação" ocultas quando vazias**: `_contexto_relatorio`
+    (`relatorios/services/pdf.py`) calcula `tem_evidencias_complementares`/`tem_checklist_triangulacao`
+    (`any()` sobre as listas já montadas por GHE); o template envolve cada seção inteira num
+    `{% if %}`. Decisão tomada sem resposta do usuário sobre a numeração da fita: optou-se pela
+    opção mais simples (aceitar um possível "buraco" no número do eyebrow quando só uma das duas
+    seções aparece, sem renumeração dinâmica).
+11. **Escolha de tipo de relatório movida da criação pra tela do Relatório** — reverte a decisão da
+    Seção 6.18 ("escolhido na criação e não muda depois... crie um novo Relatorio"), por pedido
+    explícito do usuário depois de usar o próprio fluxo. `RelatorioForm` perdeu o campo `tipo`;
+    `relatorio_detail.html` ganhou dois botões de "Gerar PDF" (Diagnóstico / Diagnóstico + Plano de
+    Ação), cada um postando seu próprio `tipo` pra `relatorio_gerar_pdf`
+    (`relatorios/painel_views.py`), que agora grava `Relatorio.tipo` a partir do POST antes de
+    chamar `gerar_pdf_relatorio` — a validação de pré-requisitos
+    (`relatorios/services/pdf.py::validar_pre_requisitos_pdf`) não precisou mudar, já lia
+    `relatorio.tipo` dinamicamente. `Relatorio.tipo` passa a significar "último formato de PDF
+    gerado", não mais uma escolha fixa; a seção "Planos de ação" deixou de ser condicional ao tipo
+    (sempre visível, já que os planos existem independente de qual formato de PDF for gerado
+    depois). Assinar finaliza sempre o último formato gerado — a tela agora mostra isso
+    explicitamente antes do clique.
+12. **Upload de assinatura (PNG) no Django Admin**: `PerfilProfissional.assinatura_imagem`
+    (`ImageField`, `validators=[FileExtensionValidator(["png"])]`) — novo campo, migration
+    `relatorios/migrations/0009_...`. Aparece tanto no cadastro próprio de `PerfilProfissional`
+    quanto **inline na tela do `User`** no Admin (`relatorios/admin.py`: novo
+    `PerfilProfissionalInline` + `admin.site.unregister(User)` / `register(User, CustomUserAdmin)`),
+    que era o pedido literal ("ir no usuário"). Achado técnico: o PDF é gerado via
+    `page.set_content(html)` (Chromium, sem URL base nenhuma) — uma `<img src="/media/...">`
+    comum não resolveria. Resolvido embutindo a imagem como data URI base64, calculado em
+    `relatorios/services/pdf.py::_contexto_relatorio` (nunca no template) e passado pro contexto
+    como `assinatura_imagem_data_uri`. Tamanho sempre consistente via CSS
+    (`.assinatura-imagem { max-width: 220px; max-height: 70px; object-fit: contain; }`), independente
+    da resolução do PNG enviado.
+
+**Cobertura de teste**: Etapa 3 (suíte completa, pytest) rodada em 2026-08-07, junto com os
+testes do lote da Seção 6.27 — ver detalhamento lá (fixture `responder_dominio` precisou de
+ajuste pra refletir a mudança de `concluido_em` desta seção).
+
+---
+
+## 6.27 Reprodução visual da referência Solute RH (capa, base técnica, resultados, achados) (2026-08-07)
+
+> Segundo lote de correções/ajustes, acumulado em `SOLICITACOES_PENDENTES.md` (itens 13 a 20)
+> seguindo o mesmo fluxo de fila da Seção 6.26 — usuário foi acumulando pedidos ao longo de uma
+> conversa longa, cada um recebendo diagnóstico + especificação executável antes de ser
+> implementado. Pedido explícito: reproduzir o design da referência (`Diagnostico_Psicossocial_
+> Modelo_Solute.pdf`) o mais fielmente possível — extraído com `pdfplumber` (cor, fonte, tamanho e
+> posição exatos, não estimativa visual) pra capa e Base técnica, mesmo rigor das rodadas
+> anteriores de auditoria visual.
+
+**Ordem de execução** (itens que reestruturam seções primeiro, pra não renumerar duas vezes):
+13 (capa) → 17 (Base técnica) → 18 (remove Seção 03) → 20 (remove Seção 5) → 19 (Achados) → 14
+(Panorama protegendo) → 15 (Panorama pede ação) → 16 (card Frentes de atenção).
+
+1. **Capa (item 13)**: layout inteiro trocado de centralizado pra alinhado à esquerda, extraído
+   caractere a caractere da referência. Barra lateral de 1cm pra 1,8cm (51pt exato). Masthead novo
+   (marca + nome + serviços) no canto superior esquerdo, com **identidade configurável**
+   (`settings.NOME_EMPRESA_PRESTADORA`/`SERVICOS_EMPRESA_PRESTADORA`, nunca hardcoded no
+   template — "CRARP" é provisório, o nome real da empresa prestadora ainda vai mudar). Letra da
+   marca calculada automaticamente (`nome_empresa_prestadora|first|upper`). `<h1>` vira o assunto
+   do relatório ("Fatores Psicossociais no Trabalho."), nome do cliente desce pra "Preparado
+   para". Metadados viram 3 linhas empilhadas "Rótulo · valor". Selo "CONFIDENCIAL" com moldura
+   (não preenchido), canto inferior direito.
+2. **Base técnica (item 17)**: manchete corrigida (acento em "protocolo de leitura", 3 palavras —
+   mesma inconsistência de outros títulos corrigida em rodadas anteriores, tinha passado
+   despercebida nesta seção). 3 cards de processo (Coleta/Mensuração/Classificação) — o card de
+   Classificação descreve a lógica REAL do sistema (Banda por prevalência, Seção 6.14), não a
+   grade Probabilidade×Severidade da referência, que o sistema já abandonou. Novo model
+   `instrumentos.ReferenciaTeorica` (título/descrição/ordem, cadastrável via Admin — "permitir
+   adicionar outras com o tempo", seed inicial com Karasek&Theorell/Siegrist/Justiça
+   organizacional, já citados no catálogo de ações da Seção 6.13). Tabela "Faixas de
+   interpretação" com os percentuais reais do critério (`prevalencia_p1`/`p2`), não os números da
+   referência (outra metodologia). Caixa de confidencialidade nova (cinza, distinta da
+   `.caixa-explicativa` navy).
+3. **Seção 03 removida + glossário (item 18)**: "A coleta, passo a passo" (tabela técnica sem
+   leitura nenhuma) removida — o conceito já é coberto pelos 3 cards do item 17. Nova frase
+   "descricao_medicao" por domínio (neutra, sempre igual, não muda com o resultado do ciclo —
+   diferente das leituras favorável/desfavorável) vira um **glossário único** na Base técnica, em
+   vez de repetir a definição em cada seção onde o domínio aparece.
+4. **Seção 5 removida, fundida com o Semáforo (item 20)**: "Cada fator, uma leitura" (lista
+   completa, favorável e não-favorável) ficou redundante depois dos itens 14/19 — o favorável já
+   aparece detalhado no Panorama, o não-favorável já aparece detalhado nos Achados. A caixa "Como
+   ler o selo de Banda" + tabela "Critério de classificação da Banda" migraram pro Semáforo (que o
+   usuário confirmou ter prioridade — é a forma obrigatória de mostrar resultado por domínio
+   neste projeto). Nova tabela compacta por GHE (Domínio/Escore/N/%/Banda/Prazo) logo depois das
+   barras — preserva o dado bruto de rastreabilidade técnica **por GHE** (não confundir com as
+   barras do Semáforo, que continuam agregadas por Unidade inteira, granularidade diferente e
+   deliberada desde a Seção 6.9 Prompt 11).
+5. **Achados redesenhado (item 19)**: `.ficha-acao` (tabela de 3 linhas, incluindo "O que fazer" —
+   mistura de diagnóstico com plano de ação) virou card no mesmo estilo `.linha-dominio` da Seção
+   5 antiga — só achado + número + badge, sem recomendação nenhuma. **Dois bugs achados e
+   corrigidos na mesma rodada**: `_rotulo()` ainda montava "Nome (SIGLA)" (item 6 não tinha
+   coberto essa função em `pdf.py`); `dictsortreversed:"banda"` ordenava alfabeticamente, não por
+   gravidade (dava "Moderado, Crítico, Alto" — corrigido com `BANDA_ORDEM`, calculado em Python).
+   `SYSTEM_PROMPT` (`analise_ia.py`) ganhou regra nova: campos `parecer`/`justificativa` no máximo
+   1 frase, proibido conter recomendação (isso fica só em `recomendacoes`) — decisão de manter IA
+   aqui (não texto fixo como os itens 14/15) porque a Seção de Achados já tem proteção contra
+   incompletude (`_validar_cobertura_parecer`, Seção 6.17) que os itens 14/15 não tinham.
+6. **Panorama "O que está protegendo" (item 14)**: 2 novos campos em `Dominio`
+   (`leitura_favoravel`/`leitura_muito_favoravel`) — 2 níveis de leitura fixa (banco de dados, sem
+   IA) conforme o escore esteja bem dentro da faixa Aceitável ("muito positivo", corte em metade
+   do `limite_baixo` do critério) ou só razoavelmente dentro ("favorável"). Trava nova: só entra
+   em "protegendo" se Banda Aceitável **E** Classificação Baixo — Banda e Classificação são
+   cálculos independentes que podem divergir (itens 9/10 da Seção 6.26), e um domínio Moderado
+   nunca deve aparecer com mensagem "favorável".
+7. **Panorama "O que pede ação" (item 15)**: mesmo mecanismo, 2 campos novos
+   (`leitura_pede_acao_moderado`/`leitura_pede_acao_alto`) — Crítico não tem frase por domínio (só
+   vem de evento grave confirmado, nunca de prevalência), reaproveita uma frase fixa genérica
+   sobre o evento. Badge de banda mantido junto da frase, como já era.
+8. **Card "Frentes de atenção" (item 16)**: trocado o texto genérico ("domínio(s) fora da faixa
+   Aceitável... conforme o prazo indicado na Seção 5") por citação real das até 3 frentes mais
+   graves (ordenadas por `BANDA_ORDEM`), com prazo calculado a partir dos prazos reais por
+   domínio (nunca um número inventado) — número + rótulo vertical "FRENTES DE ATENÇÃO" viram um
+   bloco visual à esquerda, como na referência.
+
+**Autoria de conteúdo**: itens 14 e 15 juntos exigiram **196 frases curtas** (2 por domínio × 2
+tipos de leitura × 49 domínios entre os 3 instrumentos — COPSOQ adaptado 9, COPSOQ Oficial 35,
+ITRA 5), escritas com critério de voz "simples, objetivo, fácil de ler" (reforçado pelo usuário)
+e injetadas nos 3 seeds via script (não editadas manualmente item a item). Item 18 acrescentou
+mais 1 frase neutra por domínio (glossário).
+
+**Cobertura de teste** (2026-08-07): suíte completa (143 testes) rodada depois da implementação
+dos itens 1-20. 3 correções necessárias, todas por mudança de comportamento já esperada (não bugs
+introduzidos nesta rodada):
+- Fixture compartilhada `responder_dominio` (`conftest.py`) não gravava `concluido_em` no
+  `Respondente` criado — desde a Seção 6.26 (item 9), `calcular_dominio` só conta respondentes
+  concluídos, então essa fixture parava de "contar" em qualquer teste que a usasse. Corrigida pra
+  gravar `concluido_em=timezone.now()` (ela sempre simulou "respondeu e terminou", nunca resposta
+  parcial).
+- `test_indice_geral_e_media_dos_dominios_ja_respondidos` (`avaliacoes/tests.py`) testava
+  literalmente o comportamento antigo (índice geral atualizando com respondente ainda sem
+  `concluido_em`) — reescrito pra confirmar a exclusão (índice fica `None` até `concluido_em` ser
+  gravado) e só depois validar a média entre domínios já respondidos.
+- Duas asserções de número de seção em `relatorios/tests.py`
+  (`test_pdf_diagnostico_nao_inclui_secao_plano_de_acao`,
+  `test_pdf_diagnostico_plano_acao_inclui_secao_plano_de_acao`) citavam os eyebrows antigos ("9 ·
+  Encerramento", "09 · O que fazer", "10 · Encerramento") — atualizadas pra "07 ·"/"08 ·" depois
+  da renumeração dos itens 18/20.
 
 ---
 

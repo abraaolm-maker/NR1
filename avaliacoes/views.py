@@ -14,6 +14,8 @@ em relação a mostrar um domínio inteiro por página) -> perguntas abertas (op
 -> conclusão. `_proximo_passo` decide sempre a próxima etapa a partir do estado do
 Respondente, num único lugar."""
 
+import random
+
 from django import forms
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -31,7 +33,7 @@ from avaliacoes.models import (
 from avaliacoes.services.aplicacao_status import atualizar_status_aplicacao
 from avaliacoes.services.calculo_risco import calcular_dominio
 from avaliacoes.services.questionario import itens_em_ordem, posicao_item, proximo_item_pendente
-from instrumentos.models import Item
+from instrumentos.models import Dominio, Item
 
 
 def _get_aplicacao_ou_404(aplicacao_token) -> Aplicacao:
@@ -49,6 +51,21 @@ def _get_respondente_da_sessao(request, aplicacao: Aplicacao) -> Respondente | N
     return Respondente.objects.filter(pk=respondente_id, aplicacao=aplicacao).first()
 
 
+def _gerar_alias_anonimo(aplicacao: Aplicacao) -> str:
+    """Sorteia um número não sequencial pro alias (2026-08-06) — antes era
+    `count()+1`, ou seja, literalmente a ordem de chegada de quem começou a
+    responder primeiro. Combinado com contexto de campo ("vi fulano pegando o
+    celular assim que mandei o link"), isso permitia reidentificar quem respondeu o
+    quê. Sorteando um número aleatório sem relação com a ordem de chegada, essa
+    pista deixa de existir. Confere colisão dentro da mesma Aplicacao (baixa chance
+    com 9000 valores possíveis, mas o link fica aberto indefinidamente)."""
+    existentes = set(aplicacao.respondentes.values_list("alias_anonimo", flat=True))
+    while True:
+        candidato = f"Respondente {random.randint(1000, 9999)}"
+        if candidato not in existentes:
+            return candidato
+
+
 def _coleta_encerrada(aplicacao: Aplicacao, respondente: Respondente | None) -> bool:
     if respondente and respondente.concluido_em:
         return False
@@ -63,23 +80,46 @@ def _perfil_preenchido(respondente: Respondente) -> bool:
     return True
 
 
+def _recalcular_dominios_do_respondente(respondente: Respondente) -> None:
+    """Chamado assim que `concluido_em` é gravado pela primeira vez (ver
+    `_proximo_passo` abaixo). Os domínios que este respondente respondeu já tinham
+    sido calculados um instante antes (`calcular_dominio` roda a cada resposta, em
+    `responder_pergunta`) — nesse instante `concluido_em` ainda era `None`, e
+    `calcular_dominio` só conta respondentes já concluídos (2026-08-06). Sem isso, a
+    própria contribuição de quem acabou de terminar ficaria de fora do(s) domínio(s)
+    que ele respondeu por último, até algo mais recalculá-los."""
+    dominios = Dominio.objects.filter(itens__respostas__respondente=respondente).distinct()
+    for dominio in dominios:
+        calcular_dominio(respondente.aplicacao, dominio)
+
+
 def _proximo_passo(respondente: Respondente):
     aplicacao = respondente.aplicacao
     atualizar_status_aplicacao(aplicacao.pk)
 
-    if respondente.concluido_em:
-        return redirect("avaliacoes:responder_concluido", aplicacao_token=aplicacao.token)
     if not _perfil_preenchido(respondente):
         return redirect("avaliacoes:responder_perfil", aplicacao_token=aplicacao.token)
 
     proximo_item = proximo_item_pendente(respondente)
     if proximo_item:
         return redirect("avaliacoes:responder_pergunta", aplicacao_token=aplicacao.token, item_pk=proximo_item.pk)
+
+    # A partir daqui, todos os itens de todos os domínios já foram respondidos.
+    # `concluido_em` passa a ser gravado aqui — não depende mais de visitar a etapa
+    # de perguntas abertas (que continua opcional em conteúdo E agora também em
+    # visita: quem termina os domínios e fecha a aba já conta como concluído, mesmo
+    # sem ter passado por essa tela). Achado de 2026-08-06: um respondente que
+    # respondeu 76 de 76 itens nunca aparecia como "concluído" no painel só porque
+    # não tinha visitado a última tela — confundia contagem de N entre o painel e o
+    # relatório (que já contava esse domínio de qualquer forma).
+    if not respondente.concluido_em:
+        respondente.concluido_em = timezone.now()
+        respondente.save(update_fields=["concluido_em"])
+        _recalcular_dominios_do_respondente(respondente)
+
     if not respondente.perguntas_abertas_respondidas_em:
         return redirect("avaliacoes:responder_perguntas_abertas", aplicacao_token=aplicacao.token)
 
-    respondente.concluido_em = timezone.now()
-    respondente.save(update_fields=["concluido_em"])
     return redirect("avaliacoes:responder_concluido", aplicacao_token=aplicacao.token)
 
 
@@ -156,10 +196,9 @@ def responder_consentimento(request, aplicacao_token):
     if request.method == "POST":
         form = ConsentimentoForm(request.POST)
         if form.is_valid():
-            numero = aplicacao.respondentes.count() + 1
             respondente = Respondente.objects.create(
                 aplicacao=aplicacao,
-                alias_anonimo=f"Respondente {numero}",
+                alias_anonimo=_gerar_alias_anonimo(aplicacao),
                 consentimento_aceito_em=timezone.now(),
             )
             request.session[_chave_sessao(aplicacao)] = respondente.pk
@@ -177,7 +216,10 @@ def responder_perfil(request, aplicacao_token):
         return redirect("avaliacoes:responder_consentimento", aplicacao_token=aplicacao_token)
     if _coleta_encerrada(aplicacao, respondente):
         return render(request, "avaliacoes/questionario_encerrado.html", {"aplicacao": aplicacao})
-    if respondente.concluido_em:
+    # `concluido_em` sozinho não significa mais "terminou tudo" (2026-08-06) — agora é
+    # gravado assim que os domínios acabam, antes até de perguntas abertas (opcional).
+    # Só bloqueia esta tela quando as duas etapas já foram concluídas de verdade.
+    if respondente.concluido_em and respondente.perguntas_abertas_respondidas_em:
         return redirect("avaliacoes:responder_concluido", aplicacao_token=aplicacao_token)
 
     pedir_nome = aplicacao.tipo == TipoAplicacao.IDENTIFICADA
@@ -226,7 +268,10 @@ def responder_pergunta(request, aplicacao_token, item_pk):
         return render(request, "avaliacoes/questionario_encerrado.html", {"aplicacao": aplicacao})
     if not _perfil_preenchido(respondente):
         return redirect("avaliacoes:responder_perfil", aplicacao_token=aplicacao_token)
-    if respondente.concluido_em:
+    # `concluido_em` sozinho não significa mais "terminou tudo" (2026-08-06) — agora é
+    # gravado assim que os domínios acabam, antes até de perguntas abertas (opcional).
+    # Só bloqueia esta tela quando as duas etapas já foram concluídas de verdade.
+    if respondente.concluido_em and respondente.perguntas_abertas_respondidas_em:
         return redirect("avaliacoes:responder_concluido", aplicacao_token=aplicacao_token)
 
     todos_itens = itens_em_ordem(aplicacao)
@@ -287,7 +332,10 @@ def responder_perguntas_abertas(request, aplicacao_token):
         return redirect("avaliacoes:responder_consentimento", aplicacao_token=aplicacao_token)
     if _coleta_encerrada(aplicacao, respondente):
         return render(request, "avaliacoes/questionario_encerrado.html", {"aplicacao": aplicacao})
-    if respondente.concluido_em:
+    # `concluido_em` sozinho não significa mais "terminou tudo" (2026-08-06) — agora é
+    # gravado assim que os domínios acabam, antes até de perguntas abertas (opcional).
+    # Só bloqueia esta tela quando as duas etapas já foram concluídas de verdade.
+    if respondente.concluido_em and respondente.perguntas_abertas_respondidas_em:
         return redirect("avaliacoes:responder_concluido", aplicacao_token=aplicacao_token)
 
     if request.method == "POST":

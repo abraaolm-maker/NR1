@@ -14,7 +14,9 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models as django_models
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 
@@ -55,7 +57,6 @@ from .services.calculo_risco import (
     criterio_classificacao_linhas,
     diagnostico_ghe,
     dominios_da_aplicacao,
-    media_nacional_comparavel,
 )
 from .services.semaforo import calcular_semaforo, leitura_resumida
 from .services.tenancy import empresa_do_usuario, empresas_visiveis
@@ -364,13 +365,39 @@ def aplicacao_update(request, pk):
     return render(request, "painel/aplicacao_form.html", {"form": form, "ghe": aplicacao.ghe, "aplicacao": aplicacao})
 
 
+def _contexto_respondentes_resultados(aplicacao: Aplicacao) -> dict:
+    """Dados dos cards "Respondentes" e "Resultados por domínio" — fatorado
+    (2026-08-06) porque tanto `aplicacao_detail` (render completo) quanto
+    `aplicacao_live` (endpoint de atualização em tempo real, chamado via polling
+    JS) precisam montar exatamente os mesmos dados."""
+    respondentes = aplicacao.respondentes.order_by("alias_anonimo")
+    escores_lista = list(
+        aplicacao.escores_dominio.select_related("dominio", "classificacao_risco").order_by("dominio__ordem")
+    )
+    n_minimo = aplicacao.criterio_versao.n_minimo_respondentes
+    n_concluidos = sum(1 for r in respondentes if r.concluido_em)
+    todos_suprimidos = bool(escores_lista) and all(
+        e.suprimido_por_confidencialidade for e in escores_lista
+    )
+    dominios_em_risco = sum(
+        1
+        for e in escores_lista
+        if not e.suprimido_por_confidencialidade and e.classificacao == "Elevado"
+    )
+    return {
+        "respondentes": respondentes,
+        "escores": escores_lista,
+        "n_minimo": n_minimo,
+        "n_concluidos": n_concluidos,
+        "todos_suprimidos": todos_suprimidos,
+        "dominios_em_risco": dominios_em_risco,
+    }
+
+
 @gestor_required
 def aplicacao_detail(request, pk):
     aplicacao = _aplicacao_ou_404(request, pk)
-    respondentes = aplicacao.respondentes.order_by("alias_anonimo")
-    escores = aplicacao.escores_dominio.select_related("dominio", "classificacao_risco").order_by(
-        "dominio__ordem"
-    )
+    dados = _contexto_respondentes_resultados(aplicacao)
     link_respondente = request.build_absolute_uri(
         reverse("avaliacoes:responder_consentimento", args=[aplicacao.token])
     )
@@ -387,36 +414,38 @@ def aplicacao_detail(request, pk):
     pronta_para_relatorio = (
         aplicacao.status == StatusAplicacao.CONCLUIDA and not aplicacao.relatorios.exists()
     )
-    n_minimo = aplicacao.criterio_versao.n_minimo_respondentes
-    n_concluidos = sum(1 for r in respondentes if r.concluido_em)
-    escores_lista = list(escores)
-    for escore in escores_lista:
-        escore.media_nacional = media_nacional_comparavel(escore.dominio)
-    todos_suprimidos = bool(escores_lista) and all(
-        e.suprimido_por_confidencialidade for e in escores_lista
-    )
-    dominios_em_risco = sum(
-        1
-        for e in escores_lista
-        if not e.suprimido_por_confidencialidade and e.classificacao == "Elevado"
-    )
     return render(
         request,
         "painel/aplicacao_detail.html",
         {
             "aplicacao": aplicacao,
-            "respondentes": respondentes,
-            "escores": escores_lista,
             "link_respondente": link_respondente,
             "alertas_d9": alertas_d9,
             "planos_de_acao": planos_de_acao,
             "pronta_para_relatorio": pronta_para_relatorio,
-            "n_minimo": n_minimo,
-            "n_concluidos": n_concluidos,
-            "todos_suprimidos": todos_suprimidos,
-            "dominios_em_risco": dominios_em_risco,
+            **dados,
         },
     )
+
+
+@gestor_required
+def aplicacao_live(request, pk):
+    """Endpoint chamado por polling JS (`aplicacao_detail.html`, a cada 10s enquanto
+    a coleta está em andamento e a aba está em foco) pra atualizar os cards
+    "Respondentes" e "Resultados por domínio" sem recarregar a página inteira."""
+    aplicacao = _aplicacao_ou_404(request, pk)
+    dados = _contexto_respondentes_resultados(aplicacao)
+    respondentes_html = render_to_string(
+        "painel/_partials/respondentes_card.html",
+        {"respondentes": dados["respondentes"]},
+        request=request,
+    )
+    resultados_html = render_to_string(
+        "painel/_partials/resultados_dominio_card.html",
+        {"escores": dados["escores"], "n_minimo": dados["n_minimo"]},
+        request=request,
+    )
+    return JsonResponse({"respondentes_html": respondentes_html, "resultados_html": resultados_html})
 
 
 @admin_required
@@ -428,7 +457,17 @@ def pontuacao_anonima(request, pk):
     mesma lógica por expor granularidade por respondente)."""
     aplicacao = _aplicacao_ou_404(request, pk)
     dominios = dominios_da_aplicacao(aplicacao)
-    respondentes = aplicacao.respondentes.prefetch_related("escores").order_by("criado_em")
+    # `concluido_em__isnull=False` (2026-08-06): quem não terminou o questionário
+    # inteiro não conta em nenhum cálculo (avaliacoes/services/calculo_risco.py) — essa
+    # tela não deve mostrar a linha de alguém incompleto, mesmo que o EscoreRespondente
+    # dele ainda não tenha sido limpo/recalculado. Ordenar por `alias_anonimo` (não por
+    # `criado_em`/ordem de chegada) evita vazar a ordem cronológica de quem respondeu
+    # primeiro ao lado dos escores individuais de cada um.
+    respondentes = (
+        aplicacao.respondentes.filter(concluido_em__isnull=False)
+        .prefetch_related("escores")
+        .order_by("alias_anonimo")
+    )
 
     linhas = []
     for respondente in respondentes:

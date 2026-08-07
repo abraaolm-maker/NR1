@@ -2,7 +2,7 @@
   "instrument_code": "COPSOQ_OFICIAL",
   "instrument_name": "COPSOQ Oficial",
   "instrument_description": "Transcrição do Copenhagen Psychosocial Questionnaire (COPSOQ II), versão portuguesa (Silva, C. et al., 2011/2013) — 35 subescalas, com 3 profundidades selecionáveis por Aplicação: Curta (41 itens/23 subescalas), Média (76 itens/29 subescalas) e Longa (119 itens/35 subescalas). Use quando quiser fidelidade estrita ao instrumento validado internacionalmente, escolhendo o nível de detalhe conforme o tempo disponível dos respondentes.",
-  "source_note": "Copenhagen Psychosocial Questionnaire (COPSOQ II) — Versão Portuguesa, adaptado por Carlos Fernandes da Silva (Universidade de Aveiro) a partir da versão original de Kristensen, T. et al. (2000), manual 'COPSOQ Manual Portugal 2013' (FCT / Análise Exacta). Itens transcritos das versões curta/média/longa publicadas no manual. Pontos de corte: tercis genéricos do manual (2,33 e 3,66 na escala 1-5), não específicos por subescala (o manual não publica cortes numéricos por subescala, só o método de tercis). Cada item traz 'profundidade' (curta/media/longa) = nível mais raso do documento em que ele aparece, definido por correspondência de CONTEÚDO entre as três listas publicadas, não por posição numérica. Onde a versão longa reformula o texto de um item já existente na média (mesmo conceito, redação diferente), foi mantida a redação da média/curta para esse item e a diferença de fraseado não foi modelada — ver CLAUDE.md. Algumas contagens de itens por subescala divergem em 1-2 itens da Tabela 1 do manual (aparentam ser artefatos de OCR/edição do PDF de origem); a lista de itens efetivamente publicada em cada versão foi tratada como fonte de verdade, não o resumo da tabela.",
+  "source_note": "Copenhagen Psychosocial Questionnaire (COPSOQ II) — Versão Portuguesa, adaptado por Carlos Fernandes da Silva (Universidade de Aveiro) a partir da versão original de Kristensen, T. et al. (2000), manual 'COPSOQ Manual Portugal 2013' (FCT / Análise Exacta). Itens transcritos das versões curta/média/longa publicadas no manual. Pontos de corte: tercis genéricos do manual (2,33 e 3,66 na escala 1-5), convertidos pra escala 0-100 usada pelo motor de cálculo do sistema (baixo_max=33.25, moderado_max=66.5, fórmula (valor-1)/4*100 — correção de 2026-08-06, ver CLAUDE.md; antes desta correção os thresholds ficavam gravados em 1-5 e eram comparados contra um escore 0-100, fazendo quase todo domínio cair em 'Elevado'), não específicos por subescala (o manual não publica cortes numéricos por subescala, só o método de tercis). Cada item traz 'profundidade' (curta/media/longa) = nível mais raso do documento em que ele aparece, definido por correspondência de CONTEÚDO entre as três listas publicadas, não por posição numérica. Onde a versão longa reformula o texto de um item já existente na média (mesmo conceito, redação diferente), foi mantida a redação da média/curta para esse item e a diferença de fraseado não foi modelada — ver CLAUDE.md. Algumas contagens de itens por subescala divergem em 1-2 itens da Tabela 1 do manual (aparentam ser artefatos de OCR/edição do PDF de origem); a lista de itens efetivamente publicada em cada versão foi tratada como fonte de verdade, não o resumo da tabela.",
   "scales": [
     {
       "scale_code": "EQ",
@@ -19,9 +19,13 @@
         }
       },
       "thresholds": {
-        "baixo_max": 2.33,
-        "moderado_max": 3.66
+        "baixo_max": 33.25,
+        "moderado_max": 66.5
       },
+            "leitura_favoravel": "poucos relatam acúmulo de tarefas por má distribuição do trabalho.",
+      "leitura_muito_favoravel": "quase ninguém relata acúmulo de tarefas por má distribuição do trabalho.",
+      "leitura_pede_acao_moderado": "parte da equipe relata acúmulo de tarefas por má distribuição do trabalho.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata acúmulo de tarefas por má distribuição do trabalho.",
       "items": [
         {
           "id": "EQ.1",
@@ -62,9 +66,13 @@
         }
       },
       "thresholds": {
-        "baixo_max": 2.33,
-        "moderado_max": 3.66
+        "baixo_max": 33.25,
+        "moderado_max": 66.5
       },
+            "leitura_favoravel": "o ritmo de trabalho é avaliado como administrável pela maioria da equipe.",
+      "leitura_muito_favoravel": "o ritmo de trabalho é avaliado como tranquilo pela quase totalidade da equipe.",
+      "leitura_pede_acao_moderado": "parte da equipe avalia o ritmo de trabalho como intenso.",
+      "leitura_pede_acao_alto": "a maioria da equipe avalia o ritmo de trabalho como intenso.",
       "items": [
         {
           "id": "RT.1",
@@ -93,9 +101,13 @@
         }
       },
       "thresholds": {
-        "baixo_max": 2.33,
-        "moderado_max": 3.66
+        "baixo_max": 33.25,
+        "moderado_max": 66.5
       },
+            "leitura_favoravel": "poucos relatam exigência forte de atenção simultânea ou memorização no dia a dia.",
+      "leitura_muito_favoravel": "quase ninguém relata exigência forte de atenção simultânea ou memorização no dia a dia.",
+      "leitura_pede_acao_moderado": "parte da equipe relata exigência forte de atenção simultânea ou memorização.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata exigência forte de atenção simultânea ou memorização.",
       "items": [
         {
           "id": "EC.1",
@@ -136,9 +148,13 @@
         }
       },
       "thresholds": {
-        "baixo_max": 2.33,
-        "moderado_max": 3.66
+        "baixo_max": 33.25,
+        "moderado_max": 66.5
       },
+            "leitura_favoravel": "a equipe relata poucas situações emocionalmente desgastantes no trabalho.",
+      "leitura_muito_favoravel": "a equipe quase não relata situações emocionalmente desgastantes no trabalho.",
+      "leitura_pede_acao_moderado": "parte da equipe relata situações emocionalmente desgastantes com frequência.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata situações emocionalmente desgastantes com frequência.",
       "items": [
         {
           "id": "EE.1",
@@ -179,9 +195,13 @@
         }
       },
       "thresholds": {
-        "baixo_max": 2.33,
-        "moderado_max": 3.66
+        "baixo_max": 33.25,
+        "moderado_max": 66.5
       },
+            "leitura_favoravel": "poucos relatam precisar esconder o que sente para atender exigências do trabalho.",
+      "leitura_muito_favoravel": "quase ninguém relata precisar esconder o que sente para atender exigências do trabalho.",
+      "leitura_pede_acao_moderado": "parte da equipe relata precisar esconder o que sente para atender exigências do trabalho.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata precisar esconder o que sente para atender exigências do trabalho.",
       "items": [
         {
           "id": "EEE.1",
@@ -224,9 +244,13 @@
         }
       },
       "thresholds": {
-        "baixo_max": 2.33,
-        "moderado_max": 3.66
+        "baixo_max": 33.25,
+        "moderado_max": 66.5
       },
+            "leitura_favoravel": "colaboradores relatam alguma influência sobre como e quando o próprio trabalho é realizado.",
+      "leitura_muito_favoravel": "colaboradores relatam influência consistente sobre como, quando e o que fazem no trabalho.",
+      "leitura_pede_acao_moderado": "parte da equipe relata pouca influência sobre como e quando o próprio trabalho é realizado.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata pouca influência sobre como e quando o próprio trabalho é realizado.",
       "items": [
         {
           "id": "IT.1",
@@ -273,9 +297,13 @@
         }
       },
       "thresholds": {
-        "baixo_max": 2.33,
-        "moderado_max": 3.66
+        "baixo_max": 33.25,
+        "moderado_max": 66.5
       },
+            "leitura_favoravel": "colaboradores relatam alguma oportunidade de aprender coisas novas e aplicar suas habilidades.",
+      "leitura_muito_favoravel": "colaboradores relatam oportunidades claras de aprender coisas novas e aplicar suas habilidades.",
+      "leitura_pede_acao_moderado": "parte da equipe relata poucas oportunidades de desenvolvimento no trabalho.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata poucas oportunidades de desenvolvimento no trabalho.",
       "items": [
         {
           "id": "PD.1",
@@ -316,9 +344,13 @@
         }
       },
       "thresholds": {
-        "baixo_max": 2.33,
-        "moderado_max": 3.66
+        "baixo_max": 33.25,
+        "moderado_max": 66.5
       },
+            "leitura_favoravel": "a equipe relata alguma variação nas tarefas do dia a dia.",
+      "leitura_muito_favoravel": "a equipe relata rotina variada, sem sinal de trabalho repetitivo ou monótono.",
+      "leitura_pede_acao_moderado": "parte da equipe relata rotina repetitiva ou monótona.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata rotina repetitiva ou monótona.",
       "items": [
         {
           "id": "VT.1",
@@ -343,9 +375,13 @@
         }
       },
       "thresholds": {
-        "baixo_max": 2.33,
-        "moderado_max": 3.66
+        "baixo_max": 33.25,
+        "moderado_max": 66.5
       },
+            "leitura_favoravel": "colaboradores relatam receber com alguma antecedência as informações de que precisam para o trabalho.",
+      "leitura_muito_favoravel": "colaboradores relatam receber com boa antecedência as informações de que precisam para o trabalho.",
+      "leitura_pede_acao_moderado": "parte da equipe relata receber informações importantes em cima da hora.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata receber informações importantes em cima da hora.",
       "items": [
         {
           "id": "PREV.1",
@@ -380,9 +416,13 @@
         }
       },
       "thresholds": {
-        "baixo_max": 2.33,
-        "moderado_max": 3.66
+        "baixo_max": 33.25,
+        "moderado_max": 66.5
       },
+            "leitura_favoravel": "colaboradores relatam clareza razoável sobre suas tarefas e o que se espera da função.",
+      "leitura_muito_favoravel": "colaboradores relatam clareza forte sobre suas tarefas, prioridades e expectativas da função.",
+      "leitura_pede_acao_moderado": "parte da equipe relata falta de clareza sobre tarefas, prioridades ou expectativas da função.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata falta de clareza sobre tarefas, prioridades ou expectativas da função.",
       "items": [
         {
           "id": "TPL.1",
@@ -423,9 +463,13 @@
         }
       },
       "thresholds": {
-        "baixo_max": 2.33,
-        "moderado_max": 3.66
+        "baixo_max": 33.25,
+        "moderado_max": 66.5
       },
+            "leitura_favoravel": "colaboradores relatam algum reconhecimento pelo esforço entregue.",
+      "leitura_muito_favoravel": "colaboradores relatam reconhecimento consistente da chefia e da organização pelo esforço entregue.",
+      "leitura_pede_acao_moderado": "parte da equipe relata pouco reconhecimento pelo esforço entregue.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata pouco reconhecimento pelo esforço entregue.",
       "items": [
         {
           "id": "REC.1",
@@ -472,9 +516,13 @@
         }
       },
       "thresholds": {
-        "baixo_max": 2.33,
-        "moderado_max": 3.66
+        "baixo_max": 33.25,
+        "moderado_max": 66.5
       },
+            "leitura_favoravel": "poucos relatam receber exigências contraditórias ou conflitantes no trabalho.",
+      "leitura_muito_favoravel": "quase ninguém relata receber exigências contraditórias ou conflitantes no trabalho.",
+      "leitura_pede_acao_moderado": "parte da equipe relata receber exigências contraditórias ou conflitantes.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata receber exigências contraditórias ou conflitantes.",
       "items": [
         {
           "id": "CONFL.1",
@@ -521,9 +569,13 @@
         }
       },
       "thresholds": {
-        "baixo_max": 2.33,
-        "moderado_max": 3.66
+        "baixo_max": 33.25,
+        "moderado_max": 66.5
       },
+            "leitura_favoravel": "colaboradores relatam contar com apoio dos colegas quando precisam.",
+      "leitura_muito_favoravel": "colaboradores relatam apoio forte e consistente dos colegas no dia a dia.",
+      "leitura_pede_acao_moderado": "parte da equipe relata pouco apoio dos colegas no dia a dia.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata pouco apoio dos colegas no dia a dia.",
       "items": [
         {
           "id": "ASC.1",
@@ -564,9 +616,13 @@
         }
       },
       "thresholds": {
-        "baixo_max": 2.33,
-        "moderado_max": 3.66
+        "baixo_max": 33.25,
+        "moderado_max": 66.5
       },
+            "leitura_favoravel": "a equipe relata contar com algum suporte da liderança direta.",
+      "leitura_muito_favoravel": "a equipe relata suporte forte e disponível da liderança direta.",
+      "leitura_pede_acao_moderado": "parte da equipe relata pouco suporte da liderança direta.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata pouco suporte da liderança direta.",
       "items": [
         {
           "id": "ASS.1",
@@ -607,9 +663,13 @@
         }
       },
       "thresholds": {
-        "baixo_max": 2.33,
-        "moderado_max": 3.66
+        "baixo_max": 33.25,
+        "moderado_max": 66.5
       },
+            "leitura_favoravel": "o ambiente é descrito como razoavelmente cooperativo pela equipe.",
+      "leitura_muito_favoravel": "o ambiente é descrito como acolhedor e cooperativo pela quase totalidade da equipe.",
+      "leitura_pede_acao_moderado": "parte da equipe descreve o ambiente como pouco cooperativo.",
+      "leitura_pede_acao_alto": "a maioria da equipe descreve o ambiente como pouco cooperativo.",
       "items": [
         {
           "id": "CST.1",
@@ -650,9 +710,13 @@
         }
       },
       "thresholds": {
-        "baixo_max": 2.33,
-        "moderado_max": 3.66
+        "baixo_max": 33.25,
+        "moderado_max": 66.5
       },
+            "leitura_favoravel": "a liderança é avaliada de forma razoavelmente positiva pela equipe.",
+      "leitura_muito_favoravel": "a liderança é avaliada como clara, presente e bem preparada para gerir a equipe.",
+      "leitura_pede_acao_moderado": "parte da equipe avalia a liderança de forma negativa.",
+      "leitura_pede_acao_alto": "a maioria da equipe avalia a liderança de forma negativa.",
       "items": [
         {
           "id": "QL.1",
@@ -699,9 +763,13 @@
         }
       },
       "thresholds": {
-        "baixo_max": 2.33,
-        "moderado_max": 3.66
+        "baixo_max": 33.25,
+        "moderado_max": 66.5
       },
+            "leitura_favoravel": "colaboradores relatam algum nível de confiança entre colegas.",
+      "leitura_muito_favoravel": "colaboradores relatam confiança forte entre colegas, sem retenção de informação ou desconfiança.",
+      "leitura_pede_acao_moderado": "parte da equipe relata pouca confiança entre colegas.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata pouca confiança entre colegas.",
       "items": [
         {
           "id": "CH.1",
@@ -742,9 +810,13 @@
         }
       },
       "thresholds": {
-        "baixo_max": 2.33,
-        "moderado_max": 3.66
+        "baixo_max": 33.25,
+        "moderado_max": 66.5
       },
+            "leitura_favoravel": "colaboradores relatam algum nível de confiança na liderança e nas decisões da direção.",
+      "leitura_muito_favoravel": "colaboradores relatam confiança forte na liderança e nas decisões da direção.",
+      "leitura_pede_acao_moderado": "parte da equipe relata pouca confiança na liderança ou nas decisões da direção.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata pouca confiança na liderança ou nas decisões da direção.",
       "items": [
         {
           "id": "CV.1",
@@ -785,9 +857,13 @@
         }
       },
       "thresholds": {
-        "baixo_max": 2.33,
-        "moderado_max": 3.66
+        "baixo_max": 33.25,
+        "moderado_max": 66.5
       },
+            "leitura_favoravel": "colaboradores relatam tratamento razoavelmente justo e respeitoso.",
+      "leitura_muito_favoravel": "colaboradores relatam tratamento justo e respeitoso de forma consistente.",
+      "leitura_pede_acao_moderado": "parte da equipe relata tratamento pouco justo ou respeitoso.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata tratamento pouco justo ou respeitoso.",
       "items": [
         {
           "id": "JR.1",
@@ -834,9 +910,13 @@
         }
       },
       "thresholds": {
-        "baixo_max": 2.33,
-        "moderado_max": 3.66
+        "baixo_max": 33.25,
+        "moderado_max": 66.5
       },
+            "leitura_favoravel": "a organização é vista de forma razoavelmente positiva quanto à responsabilidade social.",
+      "leitura_muito_favoravel": "a organização é vista como socialmente responsável pela quase totalidade da equipe.",
+      "leitura_pede_acao_moderado": "parte da equipe avalia a responsabilidade social da organização de forma negativa.",
+      "leitura_pede_acao_alto": "a maioria da equipe avalia a responsabilidade social da organização de forma negativa.",
       "items": [
         {
           "id": "RS.1",
@@ -879,9 +959,13 @@
         }
       },
       "thresholds": {
-        "baixo_max": 2.33,
-        "moderado_max": 3.66
+        "baixo_max": 33.25,
+        "moderado_max": 66.5
       },
+            "leitura_favoravel": "colaboradores relatam confiança razoável na própria capacidade de resolver problemas do trabalho.",
+      "leitura_muito_favoravel": "colaboradores relatam confiança forte na própria capacidade de resolver problemas do trabalho.",
+      "leitura_pede_acao_moderado": "parte da equipe relata pouca confiança na própria capacidade de resolver problemas do trabalho.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata pouca confiança na própria capacidade de resolver problemas do trabalho.",
       "items": [
         {
           "id": "AE.1",
@@ -940,9 +1024,13 @@
         }
       },
       "thresholds": {
-        "baixo_max": 2.33,
-        "moderado_max": 3.66
+        "baixo_max": 33.25,
+        "moderado_max": 66.5
       },
+            "leitura_favoravel": "colaboradores relatam algum sentido no que fazem no trabalho.",
+      "leitura_muito_favoravel": "colaboradores relatam sentido forte no que fazem, além de ser só uma fonte de renda.",
+      "leitura_pede_acao_moderado": "parte da equipe relata pouco sentido no que faz no trabalho.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata pouco sentido no que faz no trabalho.",
       "items": [
         {
           "id": "ST.1",
@@ -983,9 +1071,13 @@
         }
       },
       "thresholds": {
-        "baixo_max": 2.33,
-        "moderado_max": 3.66
+        "baixo_max": 33.25,
+        "moderado_max": 66.5
       },
+            "leitura_favoravel": "colaboradores relatam algum vínculo com a organização.",
+      "leitura_muito_favoravel": "colaboradores relatam vínculo forte e orgulho de fazer parte da organização.",
+      "leitura_pede_acao_moderado": "parte da equipe relata pouco vínculo com a organização.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata pouco vínculo com a organização.",
       "items": [
         {
           "id": "CLT.1",
@@ -1026,9 +1118,13 @@
         }
       },
       "thresholds": {
-        "baixo_max": 2.33,
-        "moderado_max": 3.66
+        "baixo_max": 33.25,
+        "moderado_max": 66.5
       },
+            "leitura_favoravel": "colaboradores relatam satisfação razoável com as perspectivas e condições de trabalho.",
+      "leitura_muito_favoravel": "colaboradores relatam satisfação consistente com as perspectivas e condições de trabalho.",
+      "leitura_pede_acao_moderado": "parte da equipe relata pouca satisfação com as perspectivas e condições de trabalho.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata pouca satisfação com as perspectivas e condições de trabalho.",
       "items": [
         {
           "id": "SAT.1",
@@ -1075,9 +1171,13 @@
         }
       },
       "thresholds": {
-        "baixo_max": 2.33,
-        "moderado_max": 3.66
+        "baixo_max": 33.25,
+        "moderado_max": 66.5
       },
+            "leitura_favoravel": "a equipe não relata preocupação relevante com perda do emprego ou mudanças abruptas na função.",
+      "leitura_muito_favoravel": "praticamente ninguém relata preocupação com perda do emprego ou mudanças abruptas na função.",
+      "leitura_pede_acao_moderado": "parte da equipe relata preocupação com perda do emprego ou mudança abrupta de função.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata preocupação com perda do emprego ou mudança abrupta de função.",
       "items": [
         {
           "id": "IL.1",
@@ -1124,9 +1224,13 @@
         }
       },
       "thresholds": {
-        "baixo_max": 2.33,
-        "moderado_max": 3.66
+        "baixo_max": 33.25,
+        "moderado_max": 66.5
       },
+            "leitura_favoravel": "a equipe avalia a própria saúde geral de forma razoavelmente positiva.",
+      "leitura_muito_favoravel": "a equipe avalia a própria saúde geral como muito boa ou excelente.",
+      "leitura_pede_acao_moderado": "parte da equipe avalia a própria saúde geral como razoável ou ruim.",
+      "leitura_pede_acao_alto": "a maioria da equipe avalia a própria saúde geral como razoável ou ruim.",
       "items": [
         {
           "id": "SG.1",
@@ -1155,9 +1259,13 @@
         }
       },
       "thresholds": {
-        "baixo_max": 2.33,
-        "moderado_max": 3.66
+        "baixo_max": 33.25,
+        "moderado_max": 66.5
       },
+            "leitura_favoravel": "poucos relatam o trabalho atrapalhando a vida familiar.",
+      "leitura_muito_favoravel": "quase ninguém relata o trabalho atrapalhando a vida familiar.",
+      "leitura_pede_acao_moderado": "parte da equipe relata o trabalho atrapalhando a vida familiar.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata o trabalho atrapalhando a vida familiar.",
       "items": [
         {
           "id": "CTF.1",
@@ -1198,9 +1306,13 @@
         }
       },
       "thresholds": {
-        "baixo_max": 2.33,
-        "moderado_max": 3.66
+        "baixo_max": 33.25,
+        "moderado_max": 66.5
       },
+            "leitura_favoravel": "poucos relatam a vida familiar atrapalhando o trabalho.",
+      "leitura_muito_favoravel": "quase ninguém relata a vida familiar atrapalhando o trabalho.",
+      "leitura_pede_acao_moderado": "parte da equipe relata a vida familiar atrapalhando o trabalho.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata a vida familiar atrapalhando o trabalho.",
       "items": [
         {
           "id": "CFT.1",
@@ -1231,9 +1343,13 @@
         }
       },
       "thresholds": {
-        "baixo_max": 2.33,
-        "moderado_max": 3.66
+        "baixo_max": 33.25,
+        "moderado_max": 66.5
       },
+            "leitura_favoravel": "a equipe relata pouca dificuldade para dormir associada ao trabalho.",
+      "leitura_muito_favoravel": "a equipe praticamente não relata dificuldade para dormir associada ao trabalho.",
+      "leitura_pede_acao_moderado": "parte da equipe relata dificuldade para dormir associada ao trabalho.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata dificuldade para dormir associada ao trabalho.",
       "items": [
         {
           "id": "PSONO.1",
@@ -1280,9 +1396,13 @@
         }
       },
       "thresholds": {
-        "baixo_max": 2.33,
-        "moderado_max": 3.66
+        "baixo_max": 33.25,
+        "moderado_max": 66.5
       },
+            "leitura_favoravel": "poucos relatam sinais de exaustão física ou emocional associados ao trabalho.",
+      "leitura_muito_favoravel": "quase ninguém relata sinais de exaustão física ou emocional associados ao trabalho.",
+      "leitura_pede_acao_moderado": "parte da equipe relata sinais de exaustão física ou emocional associados ao trabalho.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata sinais de exaustão física ou emocional associados ao trabalho.",
       "items": [
         {
           "id": "BURN.1",
@@ -1329,9 +1449,13 @@
         }
       },
       "thresholds": {
-        "baixo_max": 2.33,
-        "moderado_max": 3.66
+        "baixo_max": 33.25,
+        "moderado_max": 66.5
       },
+            "leitura_favoravel": "a equipe relata poucos sinais de estresse no dia a dia de trabalho.",
+      "leitura_muito_favoravel": "a equipe praticamente não relata sinais de estresse no dia a dia de trabalho.",
+      "leitura_pede_acao_moderado": "parte da equipe relata sinais de estresse no dia a dia de trabalho.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata sinais de estresse no dia a dia de trabalho.",
       "items": [
         {
           "id": "STR.1",
@@ -1378,9 +1502,13 @@
         }
       },
       "thresholds": {
-        "baixo_max": 2.33,
-        "moderado_max": 3.66
+        "baixo_max": 33.25,
+        "moderado_max": 66.5
       },
+            "leitura_favoravel": "poucos relatam sintomas como tristeza ou falta de interesse associados ao trabalho.",
+      "leitura_muito_favoravel": "quase ninguém relata sintomas como tristeza ou falta de interesse associados ao trabalho.",
+      "leitura_pede_acao_moderado": "parte da equipe relata sintomas como tristeza ou falta de interesse associados ao trabalho.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata sintomas como tristeza ou falta de interesse associados ao trabalho.",
       "items": [
         {
           "id": "SDEP.1",
@@ -1427,9 +1555,13 @@
         }
       },
       "thresholds": {
-        "baixo_max": 2.33,
-        "moderado_max": 3.66
+        "baixo_max": 33.25,
+        "moderado_max": 66.5
       },
+            "leitura_favoravel": "a equipe relata poucos sintomas físicos de estresse.",
+      "leitura_muito_favoravel": "a equipe praticamente não relata sintomas físicos de estresse, como dor ou tensão.",
+      "leitura_pede_acao_moderado": "parte da equipe relata sintomas físicos de estresse, como dor ou tensão.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata sintomas físicos de estresse, como dor ou tensão.",
       "items": [
         {
           "id": "SSOM.1",
@@ -1478,9 +1610,13 @@
         }
       },
       "thresholds": {
-        "baixo_max": 2.33,
-        "moderado_max": 3.66
+        "baixo_max": 33.25,
+        "moderado_max": 66.5
       },
+            "leitura_favoravel": "poucos relatam dificuldade de concentração ou memória associada ao estresse.",
+      "leitura_muito_favoravel": "quase ninguém relata dificuldade de concentração ou memória associada ao estresse.",
+      "leitura_pede_acao_moderado": "parte da equipe relata dificuldade de concentração ou memória associada ao estresse.",
+      "leitura_pede_acao_alto": "a maioria da equipe relata dificuldade de concentração ou memória associada ao estresse.",
       "items": [
         {
           "id": "SCOG.1",
@@ -1523,9 +1659,13 @@
         }
       },
       "thresholds": {
-        "baixo_max": 2.33,
-        "moderado_max": 3.66
+        "baixo_max": 33.25,
+        "moderado_max": 66.5
       },
+            "leitura_favoravel": "não há relato relevante de conflito, insulto, assédio ou violência neste ciclo.",
+      "leitura_muito_favoravel": "não há nenhum relato de conflito, insulto, assédio ou violência neste ciclo.",
+      "leitura_pede_acao_moderado": "há relato de conflito, insulto, assédio ou situação ofensiva que exige atenção.",
+      "leitura_pede_acao_alto": "há relatos frequentes de conflito, insulto, assédio ou situação ofensiva.",
       "items": [
         {
           "id": "CO.1",

@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
@@ -22,6 +23,15 @@ class PerfilProfissional(models.Model):
     )
     conselho = models.CharField(max_length=50, help_text='Ex.: "CRP", "CREA".')
     numero_registro = models.CharField(max_length=50, help_text='Ex.: "06/123456".')
+    assinatura_imagem = models.ImageField(
+        upload_to="assinaturas/",
+        null=True,
+        blank=True,
+        validators=[FileExtensionValidator(["png"])],
+        help_text="PNG da assinatura manuscrita (fundo transparente recomendado). "
+        "Aparece no bloco de assinatura do PDF, redimensionada automaticamente — "
+        "não precisa se preocupar com o tamanho do arquivo original.",
+    )
     criado_em = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
@@ -94,9 +104,11 @@ class Relatorio(models.Model):
         choices=TipoRelatorio.choices,
         default=TipoRelatorio.DIAGNOSTICO_PLANO_ACAO,
         verbose_name="Tipo de relatório",
-        help_text="Escolhido na criação e não muda depois — gerar o PDF com Plano de "
-        "Ação exige ter rodado \"Gerar parecer via IA\" e \"Refinar planos de ação "
-        "com IA\" antes.",
+        help_text="Reflete o último formato de PDF gerado (2026-08-06) — não é mais "
+        "escolhido na criação. A tela do Relatório tem um botão \"Gerar PDF\" pra "
+        "cada formato (Diagnóstico / Diagnóstico + Plano de Ação); gerar o formato "
+        "com Plano de Ação exige ter rodado \"Gerar parecer via IA\" e \"Refinar "
+        "planos de ação com IA\" antes.",
     )
     unidade = models.ForeignKey(Unidade, on_delete=models.PROTECT, related_name="relatorios")
     aplicacoes = models.ManyToManyField(Aplicacao, related_name="relatorios", verbose_name="Aplicações")

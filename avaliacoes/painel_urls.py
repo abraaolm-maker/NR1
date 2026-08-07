@@ -28,6 +28,7 @@ urlpatterns = [
     ),
     path("ghes/<int:ghe_id>/aplicacoes/nova/", painel_views.aplicacao_create, name="aplicacao_create"),
     path("aplicacoes/<int:pk>/", painel_views.aplicacao_detail, name="aplicacao_detail"),
+    path("aplicacoes/<int:pk>/live/", painel_views.aplicacao_live, name="aplicacao_live"),
     path("aplicacoes/<int:pk>/editar/", painel_views.aplicacao_update, name="aplicacao_update"),
     path(
         "aplicacoes/<int:pk>/encerrar-coleta/",

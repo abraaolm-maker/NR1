@@ -141,12 +141,17 @@ def relatorio_detail(request, pk):
     pdf_desatualizado = pdf_existe and not etapa_parecer
     etapa_assinatura = relatorio.status == StatusRelatorio.ASSINADO
 
-    # Pedido do usuário em 2026-08-04: só liberar "Gerar PDF" pro tipo Diagnóstico +
-    # Plano de Ação depois de rodar OBRIGATORIAMENTE os dois botões de IA — sem isso o
-    # documento sairia com parecer vazio e/ou medida genérica do catálogo sem avisar.
+    # Pedido do usuário em 2026-08-06: a escolha de formato do PDF deixou de ser fixa
+    # na criação do Relatorio — agora os dois botões de "Gerar PDF" (Diagnóstico /
+    # Diagnóstico + Plano de Ação) ficam sempre disponíveis na mesma tela, cada um com
+    # seu próprio pré-requisito. O botão "+ Plano de Ação" continua exigindo
+    # OBRIGATORIAMENTE os dois botões de IA rodados antes (pedido de 2026-08-04) — sem
+    # isso o documento sairia com parecer vazio e/ou medida genérica do catálogo sem
+    # avisar. "Refinar planos de ação" deixa de ser uma etapa condicional: é sempre
+    # visível, mas nunca bloqueia sozinha o botão "Diagnóstico" (sem plano).
     etapa_planos_refinados = bool(relatorio.planos_refinados_em)
-    exige_planos_refinados = relatorio.tipo == TipoRelatorio.DIAGNOSTICO_PLANO_ACAO
-    pode_gerar_pdf = etapa_parecer and (etapa_planos_refinados or not exige_planos_refinados)
+    pode_gerar_pdf_diagnostico = etapa_parecer
+    pode_gerar_pdf_com_plano = etapa_parecer and etapa_planos_refinados
 
     etapas = [
         {"nome": "Diagnósticos", "concluida": True, "atual": False, "ancora": "#secao-tipo"},
@@ -156,27 +161,25 @@ def relatorio_detail(request, pk):
             "atual": not etapa_parecer,
             "ancora": "#secao-parecer",
         },
-    ]
-    if exige_planos_refinados:
-        etapas.append(
-            {
-                "nome": "Refinar planos de ação",
-                "concluida": etapa_planos_refinados,
-                "atual": etapa_parecer and not etapa_planos_refinados,
-                "ancora": "#secao-planos",
-            }
-        )
-    etapas.append(
-        {"nome": "PDF", "concluida": etapa_pdf, "atual": pode_gerar_pdf and not etapa_pdf, "ancora": "#secao-pdf"}
-    )
-    etapas.append(
+        {
+            "nome": "Refinar planos de ação (opcional)",
+            "concluida": etapa_planos_refinados,
+            "atual": etapa_parecer and not etapa_planos_refinados,
+            "ancora": "#secao-planos",
+        },
+        {
+            "nome": "PDF",
+            "concluida": etapa_pdf,
+            "atual": pode_gerar_pdf_diagnostico and not etapa_pdf,
+            "ancora": "#secao-pdf",
+        },
         {
             "nome": "Assinatura",
             "concluida": etapa_assinatura,
             "atual": etapa_pdf and not etapa_assinatura,
             "ancora": "#secao-pdf",
-        }
-    )
+        },
+    ]
 
     # Planos de ação de todas as Aplicações deste relatório, do mais urgente pro
     # menos urgente — mesma ordenação usada no PDF (relatorios/services/pdf.py::
@@ -200,8 +203,8 @@ def relatorio_detail(request, pk):
             "etapa_parecer": etapa_parecer,
             "etapa_pdf": etapa_pdf,
             "etapa_planos_refinados": etapa_planos_refinados,
-            "exige_planos_refinados": exige_planos_refinados,
-            "pode_gerar_pdf": pode_gerar_pdf,
+            "pode_gerar_pdf_diagnostico": pode_gerar_pdf_diagnostico,
+            "pode_gerar_pdf_com_plano": pode_gerar_pdf_com_plano,
             "pdf_desatualizado": pdf_desatualizado,
             "planos_de_acao": planos_de_acao,
         },
@@ -277,9 +280,21 @@ def relatorio_refinar_planos_ia(request, pk):
 
 @admin_required
 def relatorio_gerar_pdf(request, pk):
+    """A escolha de formato (Diagnóstico / Diagnóstico + Plano de Ação) deixou de ser
+    fixa na criação do Relatorio (2026-08-06) — cada um dos dois botões da tela do
+    Relatório envia seu próprio `tipo`, gravado aqui antes de gerar o PDF. Regenerar
+    sobrescreve o mesmo `pdf_path` de sempre (Seção 8.4 do CLAUDE.md) — não existem
+    dois arquivos coexistindo, sempre o último formato gerado."""
     if request.method != "POST":
         return redirect("painel_relatorios:relatorio_detail", pk=pk)
+    tipo = request.POST.get("tipo")
+    if tipo not in TipoRelatorio.values:
+        messages.error(request, "Formato de PDF inválido.")
+        return redirect("painel_relatorios:relatorio_detail", pk=pk)
     try:
+        relatorio = Relatorio.objects.get(pk=pk)
+        relatorio.tipo = tipo
+        relatorio.save(update_fields=["tipo"])
         gerar_pdf_relatorio(pk)
         messages.success(request, "PDF gerado/atualizado.")
     except ValueError as exc:

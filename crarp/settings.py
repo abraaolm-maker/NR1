@@ -147,7 +147,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'pt-br'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Sao_Paulo'
 
 USE_I18N = True
 
@@ -175,3 +175,11 @@ MEDIA_ROOT = os.environ.get('DJANGO_MEDIA_ROOT', BASE_DIR / 'media')
 LOGIN_URL = 'painel_login'
 LOGIN_REDIRECT_URL = 'painel_relatorios:home'
 LOGOUT_REDIRECT_URL = 'painel_login'
+
+# Identidade da empresa prestadora do serviço, usada na capa do PDF (masthead + selo da marca).
+# "CRARP" é provisório — o nome real da empresa que presta o serviço ainda vai mudar, por isso
+# fica como configuração (nunca hardcoded no template) pra trocar depois numa linha só.
+NOME_EMPRESA_PRESTADORA = os.environ.get('NOME_EMPRESA_PRESTADORA', 'CRARP')
+SERVICOS_EMPRESA_PRESTADORA = os.environ.get(
+    'SERVICOS_EMPRESA_PRESTADORA', 'GESTÃO DE RISCOS PSICOSSOCIAIS'
+)

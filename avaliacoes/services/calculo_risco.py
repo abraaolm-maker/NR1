@@ -160,15 +160,34 @@ def calcular_dominio(aplicacao: Aplicacao, dominio: Dominio) -> EscoreDominio:
 
     evidencias_convergentes = contar_evidencias_convergentes(aplicacao, dominio)
 
+    # `concluido_em__isnull=False` (2026-08-06): só entram no cálculo respondentes que
+    # terminaram TODOS os domínios da Aplicacao (Respondente.concluido_em, ver
+    # avaliacoes/views.py::_proximo_passo) — quem parou no meio nunca conta em
+    # nenhum escore/N/prevalência, mesmo nos domínios que chegou a responder. Pedido
+    # explícito do usuário: "não conte no relatório final, para que não tenha meia
+    # resposta". Como esta função recalcula do zero a cada chamada (nunca soma
+    # incrementalmente), um domínio se autocorrige na próxima vez que rodar — ver
+    # `encerrar_coleta` (avaliacoes/services/aplicacao_status.py) pro recálculo
+    # garantido no fechamento da coleta.
     respostas_qs = Resposta.objects.filter(
-        respondente__aplicacao=aplicacao, item__dominio=dominio
+        respondente__aplicacao=aplicacao, item__dominio=dominio, respondente__concluido_em__isnull=False
     ).select_related("item", "respondente")
 
     respostas = [
         risk_engine.RespostaItem(item_id=r.item.item_id, valor_bruto=r.valor_bruto) for r in respostas_qs
     ]
     if not respostas:
-        raise ValueError(f'Nenhuma Resposta encontrada para "{dominio}" na Aplicacao #{aplicacao.pk}.')
+        existe_resposta_de_alguem = Resposta.objects.filter(
+            respondente__aplicacao=aplicacao, item__dominio=dominio
+        ).exists()
+        if not existe_resposta_de_alguem:
+            raise ValueError(f'Nenhuma Resposta encontrada para "{dominio}" na Aplicacao #{aplicacao.pk}.')
+        # Existem respostas pra este domínio, só que só de gente que ainda não
+        # terminou o questionário inteiro — estado normal durante a coleta, antes da
+        # primeira conclusão total (ninguém contou ainda, ver filtro acima). Não é
+        # erro de chamada, então não levanta ValueError; só não há nada calculável
+        # ainda. A próxima chamada (quando alguém terminar) resolve isso sozinha.
+        return EscoreDominio.objects.filter(aplicacao=aplicacao, dominio=dominio).first()
 
     n_respondentes = respostas_qs.values("respondente_id").distinct().count()
 

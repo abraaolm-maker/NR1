@@ -11,6 +11,7 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 from avaliacoes.models import Aplicacao, Resposta, StatusAplicacao
+from avaliacoes.services.calculo_risco import calcular_dominio, dominios_da_aplicacao
 
 
 def atualizar_status_aplicacao(aplicacao_id: int) -> Aplicacao:
@@ -34,4 +35,17 @@ def encerrar_coleta(aplicacao_id: int) -> Aplicacao:
     aplicacao.status = StatusAplicacao.CONCLUIDA
     aplicacao.concluida_em = timezone.now()
     aplicacao.save(update_fields=["status", "concluida_em"])
+
+    # Recálculo completo de todos os domínios no fechamento da coleta (2026-08-06):
+    # `calcular_dominio` só conta respondentes com `concluido_em` preenchido (quem
+    # respondeu tudo), mas ela roda incrementalmente a cada resposta durante a coleta
+    # — se a última pessoa a terminar respondeu um domínio que ninguém mais tocou
+    # depois, esse domínio específico pode ter ficado sem recalcular desde que ela
+    # terminou. "Encerrar coleta" é o ponto garantido em que os números usados no
+    # relatório final precisam estar 100% corretos, então recalcula tudo de novo aqui,
+    # independente do histórico de eventos que levou até este momento.
+    for dominio in dominios_da_aplicacao(aplicacao):
+        if Resposta.objects.filter(respondente__aplicacao=aplicacao, item__dominio=dominio).exists():
+            calcular_dominio(aplicacao, dominio)
+
     return aplicacao
